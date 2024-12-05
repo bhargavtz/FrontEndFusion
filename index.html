@@ -4,61 +4,77 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Accessibility Best Practices</title>
-  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <header>
-    <h1>Accessibility Best Practices</h1>
-    <nav>
-      <ul>
-        <li><a href="#intro">Introduction</a></li>
-        <li><a href="#practices">Key Practices</a></li>
-        <li><a href="#checklist">Checklist</a></li>
-        <li><a href="#resources">Resources</a></li>
-      </ul>
-    </nav>
+<body class="bg-gray-100 text-gray-800 font-sans leading-relaxed">
+
+  <!-- Header -->
+  <header class="bg-blue-600 text-white">
+    <div class="container mx-auto px-4 py-6">
+      <h1 class="text-3xl font-bold">Accessibility Best Practices</h1>
+      <nav class="mt-4">
+        <ul class="flex space-x-4">
+          <li><a href="#intro" class="hover:text-blue-300">Introduction</a></li>
+          <li><a href="#practices" class="hover:text-blue-300">Key Practices</a></li>
+          <li><a href="#checklist" class="hover:text-blue-300">Checklist</a></li>
+          <li><a href="#resources" class="hover:text-blue-300">Resources</a></li>
+        </ul>
+      </nav>
+    </div>
   </header>
 
-  <main>
-    <section id="intro">
-      <h2>🦐 Introduction</h2>
-      <p>
+  <!-- Main Content -->
+  <main class="container mx-auto px-4 py-8">
+    <!-- Introduction Section -->
+    <section id="intro" class="mb-8">
+      <h2 class="text-2xl font-semibold text-blue-600 mb-4">🦐 Introduction</h2>
+      <p class="text-lg">
         Web accessibility ensures that everyone, including individuals with disabilities, can perceive, understand, navigate, and interact with your website. By following best practices, you can create inclusive designs that comply with accessibility standards like WCAG.
       </p>
     </section>
 
-    <section id="practices">
-      <h2>🌐 Key Accessibility Practices</h2>
-      <article>
-        <h3>1. Use Semantic HTML</h3>
-        <p>Semantic HTML improves accessibility by providing meaning to content. Use appropriate tags like <code>&lt;header&gt;</code>, <code>&lt;main&gt;</code>, <code>&lt;footer&gt;</code>, etc.</p>
+    <!-- Key Practices Section -->
+    <section id="practices" class="mb-8">
+      <h2 class="text-2xl font-semibold text-blue-600 mb-4">🌐 Key Accessibility Practices</h2>
+      <article class="mb-6">
+        <h3 class="text-xl font-medium mb-2">1. Use Semantic HTML</h3>
+        <p class="text-lg">
+          Semantic HTML improves accessibility by providing meaning to content. Use appropriate tags like 
+          <code class="bg-gray-200 px-1 rounded">&lt;header&gt;</code>, <code class="bg-gray-200 px-1 rounded">&lt;main&gt;</code>, and <code class="bg-gray-200 px-1 rounded">&lt;footer&gt;</code>.
+        </p>
       </article>
-      <!-- Add more articles for other key practices -->
+      <!-- Add additional articles for other practices as needed -->
     </section>
 
-    <section id="checklist">
-      <h2>🗑️ Checklist for Accessible Websites</h2>
-      <ul>
+    <!-- Checklist Section -->
+    <section id="checklist" class="mb-8">
+      <h2 class="text-2xl font-semibold text-blue-600 mb-4">🗑️ Checklist for Accessible Websites</h2>
+      <ul class="list-disc pl-6 space-y-2 text-lg">
         <li>Use semantic HTML.</li>
         <li>Add alt text for all images.</li>
         <li>Ensure sufficient color contrast.</li>
-        <!-- Add the rest of the checklist -->
+        <!-- Add more checklist items here -->
       </ul>
     </section>
 
-    <section id="resources">
-      <h2>🖋️ Resources</h2>
-      <ul>
-        <li><a href="https://webaim.org/" target="_blank">WebAIM – Web Accessibility In Mind</a></li>
-        <li><a href="https://www.w3.org/WAI/" target="_blank">W3C Web Accessibility Initiative</a></li>
-        <li><a href="https://accessible-colors.com/" target="_blank">Accessible Colors</a></li>
-        <li><a href="https://developers.google.com/web/tools/lighthouse/" target="_blank">Google Lighthouse</a></li>
+    <!-- Resources Section -->
+    <section id="resources" class="mb-8">
+      <h2 class="text-2xl font-semibold text-blue-600 mb-4">🖋️ Resources</h2>
+      <ul class="list-disc pl-6 space-y-2 text-lg">
+        <li><a href="https://webaim.org/" target="_blank" class="text-blue-600 hover:underline">WebAIM – Web Accessibility In Mind</a></li>
+        <li><a href="https://www.w3.org/WAI/" target="_blank" class="text-blue-600 hover:underline">W3C Web Accessibility Initiative</a></li>
+        <li><a href="https://accessible-colors.com/" target="_blank" class="text-blue-600 hover:underline">Accessible Colors</a></li>
+        <li><a href="https://developers.google.com/web/tools/lighthouse/" target="_blank" class="text-blue-600 hover:underline">Google Lighthouse</a></li>
       </ul>
     </section>
   </main>
 
-  <footer>
-    <p>&copy; 2024 Accessibility Best Practices. All Rights Reserved.</p>
+  <!-- Footer -->
+  <footer class="bg-blue-600 text-white py-4">
+    <div class="container mx-auto text-center">
+      <p>&copy; 2024 Accessibility Best Practices. All Rights Reserved.</p>
+    </div>
   </footer>
+  
 </body>
 </html>
