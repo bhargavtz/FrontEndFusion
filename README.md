@@ -118,9 +118,11 @@ Designed to help you build responsive, accessible, and visually stunning website
 
 ## 🖥️ Demo Projects  
 
-- **Landing Page**  
-- **Portfolio Website**  
-- **E-commerce Template**  
+| Project No. | Project Name       | Folder Link                  | Live Review Link          |
+|-------------|--------------------|-----------------------------|---------------------------|
+| 1           | Responsive Navbar       | [Folder](./projects/Responsive%20Navbar/)                 | [Live Demo](./projects/Responsive%20Navbar/index.html)            |
+| 2           | Landing page  | [Folder](./projects/landing-page/)                 | [Live Demo](./projects/landing-page/index.html)            |
+| 3           | E-commerce Template| [Folder](#)                 | [Live Demo](#)            |
 
 Check out live demos of the sample projects included in this repository.  
 
@@ -151,12 +153,34 @@ Contributions are welcome!
 5. Create a pull request.  
 
 
-## 🧰 Resources  
+## 🧰 Best Resources for Web Developers  
 
-- [MDN Web Docs](https://developer.mozilla.org/)  
-- [CSS Tricks](https://css-tricks.com/)  
-- [Can I Use](https://caniuse.com/)  
-- [A11Y Project](https://www.a11yproject.com/)  
+| No. | Resource Name                  | Website Link                                   |
+|-----|--------------------------------|-----------------------------------------------|
+| 1   | CSS Gradient                  | [cssgradient.io](https://cssgradient.io/)     |
+| 2   | Colorhunt                     | [colorhunt.co](https://colorhunt.co/)         |
+| 3   | CSS Tricks                    | [css-tricks.com](https://css-tricks.com/)     |
+| 4   | Generators by Haikei          | [haikei.app](https://www.haikei.app/)         |
+| 5   | FFFuel                       | [fffuel.co](https://fffuel.co/)               |
+| 6   | SVG Backgrounds              | [svgbackgrounds.com](https://www.svgbackgrounds.com/) |
+| 7   | Animated Backgrounds         | [animatedbackgrounds.me](https://animatedbackgrounds.me/) |
+| 8   | Flowbite                     | [flowbite.com](https://flowbite.com/)         |
+| 9   | DaisyUI                      | [daisyui.com](https://daisyui.com/)           |
+| 10  | HTML Templates by Quackit    | [quackit.com](https://www.quackit.com/html/templates/) |
+| 11  | Devicon                      | [devicon.dev](https://devicon.dev/)           |
+| 12  | Flaticon                     | [flaticon.com](https://www.flaticon.com/)     |
+| 13  | Framer                       | [framer.com](https://www.framer.com/)         |
+| 14  | Bubble                       | [bubble.io](https://bubble.io/)               |
+| 15  | Adalo                        | [adalo.com](https://www.adalo.com/)           |
+| 16  | CDN JS                       | [cdnjs.com](https://cdnjs.com/)               |
+| 17  | Unsplash                     | [unsplash.com](https://unsplash.com/)         |
+| 18  | DALLE-3 (Bing AI Generator)  | [bing.com](https://www.bing.com/images/create)|
+| 19  | Mockup World                 | [mockupworld.co](https://www.mockupworld.co/) |
+| 20  | Free Mockup World            | [freemockupworld.com](https://freemockupworld.com/) |
+| 21  | UI Design Daily              | [uidesigndaily.com](https://www.uidesigndaily.com/) |
+| 22  | ShadCN                      | [shadcn.com](https://shadcn.com/)             |
+| 23  | Clickvote                   | [clickvote.dev](https://clickvote.dev/)       |
+| 24  | Spartan NG                  | [spartan-ng.shadcn.com](https://spartan-ng.shadcn.com/) |
 
 
 ## 🛡️ License  
