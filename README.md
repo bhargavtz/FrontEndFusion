@@ -1,4 +1,5 @@
 # FrontEndFusion  
+![GitHub repo size](https://img.shields.io/github/repo-size/bhargavtz/FrontEndFusion)  
 
 **A Comprehensive Resource for Learning and Mastering HTML and CSS**
 
