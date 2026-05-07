@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Grid Showcase</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --primary: #0ea5e9;
+      --secondary: #06b6d4;
+      --cell-bg: #e0f2fe;
+      --cell-text: #0369a1;
+    }
+
+    .cell {
+      background: var(--cell-bg);
+      color: var(--cell-text);
+      font-weight: 600;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      padding: 12px;
+      min-height: 56px;
+      transition: background 0.2s;
+    }
+    .cell:hover { background: #bae6fd; }
+
+    .demo-grid {
+      background: #f0f9ff;
+      border: 2px dashed #bae6fd;
+      border-radius: 12px;
+      padding: 12px;
+      gap: 8px;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .prop-badge {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      font-size: 0.7rem;
+      font-family: monospace;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 6px;
+    }
+
+    /* Magazine layout */
+    .magazine-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: 200px 150px 180px;
+      gap: 12px;
+    }
+    .mag-hero    { grid-column: 1 / 3; grid-row: 1 / 3; }
+    .mag-side1   { grid-column: 3 / 5; grid-row: 1; }
+    .mag-side2   { grid-column: 3; grid-row: 2; }
+    .mag-side3   { grid-column: 4; grid-row: 2; }
+    .mag-bottom1 { grid-column: 1; grid-row: 3; }
+    .mag-bottom2 { grid-column: 2; grid-row: 3; }
+    .mag-bottom3 { grid-column: 3 / 5; grid-row: 3; }
+
+    @media (max-width: 640px) {
+      .magazine-grid {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto;
+      }
+      .mag-hero    { grid-column: 1 / 3; grid-row: auto; }
+      .mag-side1   { grid-column: 1 / 3; grid-row: auto; }
+      .mag-side2, .mag-side3, .mag-bottom1, .mag-bottom2 { grid-column: auto; grid-row: auto; }
+      .mag-bottom3 { grid-column: 1 / 3; grid-row: auto; }
+    }
+
+    /* Dashboard layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-areas:
+        "header header header"
+        "sidebar main    main"
+        "sidebar widget1 widget2"
+        "footer  footer  footer";
+      grid-template-columns: 180px 1fr 1fr;
+      grid-template-rows: 60px 140px 100px 50px;
+      gap: 10px;
+    }
+    @media (max-width: 640px) {
+      .dashboard-grid {
+        grid-template-areas:
+          "header"
+          "main"
+          "widget1"
+          "widget2"
+          "sidebar"
+          "footer";
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+      }
+    }
+    .dash-header  { grid-area: header; }
+    .dash-sidebar { grid-area: sidebar; }
+    .dash-main    { grid-area: main; }
+    .dash-w1      { grid-area: widget1; }
+    .dash-w2      { grid-area: widget2; }
+    .dash-footer  { grid-area: footer; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans">
+
+  <!-- Header -->
+  <header class="bg-sky-600 text-white py-10 px-6 text-center">
+    <h1 class="text-3xl font-bold mb-2">CSS Grid Showcase</h1>
+    <p class="text-sky-200 max-w-xl mx-auto text-sm">
+      Visual demos of CSS Grid — from basics to magazine layouts and named template areas.
+    </p>
+    <a href="../../index.html" class="inline-block mt-4 text-sky-300 hover:text-white text-sm underline">← Back to Hub</a>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-6 py-10 space-y-14">
+
+    <!-- ── Basic grid ── -->
+    <section>
+      <h2 class="section-title mb-1">grid-template-columns</h2>
+      <p class="text-gray-500 text-sm mb-6">Define the number and size of columns.</p>
+      <div class="space-y-5">
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">3 equal columns: <span class="prop-badge">repeat(3, 1fr)</span></p>
+          <div class="demo-grid" style="display:grid; grid-template-columns: repeat(3,1fr)">
+            <div class="cell">1</div><div class="cell">2</div><div class="cell">3</div>
+            <div class="cell">4</div><div class="cell">5</div><div class="cell">6</div>
+          </div>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">Fixed + fluid: <span class="prop-badge">200px 1fr 1fr</span></p>
+          <div class="demo-grid" style="display:grid; grid-template-columns: 200px 1fr 1fr">
+            <div class="cell">200px</div><div class="cell">1fr</div><div class="cell">1fr</div>
+          </div>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">Auto-fill responsive: <span class="prop-badge">repeat(auto-fill, minmax(130px, 1fr))</span></p>
+          <div class="demo-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(130px,1fr))">
+            <div class="cell">A</div><div class="cell">B</div><div class="cell">C</div>
+            <div class="cell">D</div><div class="cell">E</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── gap ── -->
+    <section>
+      <h2 class="section-title mb-1">gap</h2>
+      <p class="text-gray-500 text-sm mb-6">Spacing between rows and columns. <code class="bg-gray-100 px-1 rounded text-xs">gap: row col</code> or a single value for both.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">gap: <span class="prop-badge">4px</span></p>
+          <div class="demo-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:4px">
+            <div class="cell">1</div><div class="cell">2</div><div class="cell">3</div>
+            <div class="cell">4</div><div class="cell">5</div><div class="cell">6</div>
+          </div>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">gap: <span class="prop-badge">24px 8px</span> (row col)</p>
+          <div class="demo-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:24px 8px">
+            <div class="cell">1</div><div class="cell">2</div><div class="cell">3</div>
+            <div class="cell">4</div><div class="cell">5</div><div class="cell">6</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── spanning ── -->
+    <section>
+      <h2 class="section-title mb-1">grid-column & grid-row span</h2>
+      <p class="text-gray-500 text-sm mb-6">Make items span multiple columns or rows.</p>
+      <div class="demo-grid" style="display:grid; grid-template-columns:repeat(4,1fr)">
+        <div class="cell" style="grid-column: span 2; background:#bfdbfe; color:#1e40af">span 2 cols</div>
+        <div class="cell">3</div>
+        <div class="cell">4</div>
+        <div class="cell">5</div>
+        <div class="cell" style="grid-column: span 3; background:#bbf7d0; color:#166534">span 3 cols</div>
+        <div class="cell" style="grid-column: 1; grid-row: span 2; background:#fde68a; color:#92400e">row span 2</div>
+        <div class="cell">B</div><div class="cell">C</div><div class="cell">D</div>
+        <div class="cell">E</div><div class="cell">F</div><div class="cell">G</div>
+      </div>
+    </section>
+
+    <!-- ── named template areas ── -->
+    <section>
+      <h2 class="section-title mb-1">Named Template Areas — Dashboard</h2>
+      <p class="text-gray-500 text-sm mb-2">
+        <code class="bg-gray-100 px-1 rounded text-xs">grid-template-areas</code> lets you draw your layout visually in CSS.
+      </p>
+      <pre class="bg-gray-900 text-green-400 text-xs rounded-xl p-4 mb-5 overflow-x-auto"><code>grid-template-areas:
+  "header  header  header"
+  "sidebar main    main"
+  "sidebar widget1 widget2"
+  "footer  footer  footer";</code></pre>
+      <div class="dashboard-grid">
+        <div class="cell dash-header  " style="background:#dbeafe; color:#1e40af">Header</div>
+        <div class="cell dash-sidebar" style="background:#f3e8ff; color:#7e22ce; writing-mode:vertical-lr; text-align:center">Sidebar</div>
+        <div class="cell dash-main   " style="background:#dcfce7; color:#166534">Main Content</div>
+        <div class="cell dash-w1     " style="background:#fef9c3; color:#854d0e">Widget 1</div>
+        <div class="cell dash-w2     " style="background:#ffe4e6; color:#9f1239">Widget 2</div>
+        <div class="cell dash-footer " style="background:#f1f5f9; color:#475569">Footer</div>
+      </div>
+    </section>
+
+    <!-- ── magazine layout ── -->
+    <section>
+      <h2 class="section-title mb-1">Magazine Layout</h2>
+      <p class="text-gray-500 text-sm mb-5">A classic editorial grid using explicit line placement.</p>
+      <div class="magazine-grid">
+        <div class="cell mag-hero   text-lg" style="background:#dbeafe; color:#1d4ed8; font-size:1rem">Hero Story<br><span class="text-xs font-normal opacity-60">col 1–2 · row 1–2</span></div>
+        <div class="cell mag-side1 " style="background:#fce7f3; color:#9d174d">Feature A</div>
+        <div class="cell mag-side2 " style="background:#dcfce7; color:#166534">Feature B</div>
+        <div class="cell mag-side3 " style="background:#fef9c3; color:#854d0e">Feature C</div>
+        <div class="cell mag-bottom1" style="background:#ede9fe; color:#5b21b6">Article 1</div>
+        <div class="cell mag-bottom2" style="background:#ffedd5; color:#9a3412">Article 2</div>
+        <div class="cell mag-bottom3 text-sm" style="background:#e0f2fe; color:#0369a1">Wide Article — col 3–4</div>
+      </div>
+    </section>
+
+    <!-- ── align & justify ── -->
+    <section>
+      <h2 class="section-title mb-1">Alignment in Grid</h2>
+      <p class="text-gray-500 text-sm mb-6">Control how items sit inside their grid cells.</p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">justify-items: <span class="prop-badge">start</span></p>
+          <div class="demo-grid" style="display:grid; grid-template-columns:1fr 1fr; justify-items:start; height:100px">
+            <div class="cell" style="width:60px">A</div><div class="cell" style="width:60px">B</div>
+          </div>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">justify-items: <span class="prop-badge">center</span></p>
+          <div class="demo-grid" style="display:grid; grid-template-columns:1fr 1fr; justify-items:center; height:100px">
+            <div class="cell" style="width:60px">A</div><div class="cell" style="width:60px">B</div>
+          </div>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">justify-items: <span class="prop-badge">stretch</span></p>
+          <div class="demo-grid" style="display:grid; grid-template-columns:1fr 1fr; justify-items:stretch; height:100px">
+            <div class="cell">A</div><div class="cell">B</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="text-center py-6 text-sm text-gray-400 border-t border-gray-200 mt-10">
+    FrontEndFusion — CSS Grid Showcase
+  </footer>
+</body>
+</html>

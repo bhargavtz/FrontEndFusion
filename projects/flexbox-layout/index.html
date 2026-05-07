@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Flexbox Showcase</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --secondary: #7c3aed;
+      --box-bg: #e0e7ff;
+      --box-text: #3730a3;
+    }
+
+    /* Demo boxes shared styles */
+    .box {
+      background: var(--box-bg);
+      color: var(--box-text);
+      font-weight: 600;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      padding: 12px;
+      min-width: 48px;
+      min-height: 48px;
+    }
+    .box.tall  { min-height: 80px; }
+    .box.short { min-height: 36px; }
+
+    .demo-container {
+      background: #f1f5f9;
+      border-radius: 12px;
+      padding: 16px;
+      border: 2px dashed #cbd5e1;
+      min-height: 80px;
+    }
+
+    /* Highlight the active property value */
+    .prop-badge {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      font-size: 0.7rem;
+      font-family: monospace;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 6px;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Interactive demo highlight */
+    .demo-container .box:hover {
+      background: #c7d2fe;
+      transform: scale(1.05);
+      transition: all 0.2s;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans">
+
+  <!-- Header -->
+  <header class="bg-indigo-700 text-white py-10 px-6 text-center">
+    <h1 class="text-3xl font-bold mb-2">CSS Flexbox Showcase</h1>
+    <p class="text-indigo-200 max-w-xl mx-auto text-sm">
+      Interactive visual reference for every major Flexbox property — container and item level.
+    </p>
+    <a href="../../index.html" class="inline-block mt-4 text-indigo-300 hover:text-white text-sm underline">← Back to Hub</a>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-6 py-10 space-y-14">
+
+    <!-- ── flex-direction ── -->
+    <section>
+      <h2 class="section-title mb-1">flex-direction</h2>
+      <p class="text-gray-500 text-sm mb-6">Controls the main axis direction of flex items.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- row -->
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">flex-direction: <span class="prop-badge">row</span></p>
+          <div class="demo-container flex flex-row gap-2">
+            <div class="box">1</div><div class="box">2</div><div class="box">3</div>
+          </div>
+        </div>
+        <!-- row-reverse -->
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">flex-direction: <span class="prop-badge">row-reverse</span></p>
+          <div class="demo-container flex flex-row-reverse gap-2">
+            <div class="box">1</div><div class="box">2</div><div class="box">3</div>
+          </div>
+        </div>
+        <!-- column -->
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">flex-direction: <span class="prop-badge">column</span></p>
+          <div class="demo-container flex flex-col gap-2">
+            <div class="box">1</div><div class="box">2</div><div class="box">3</div>
+          </div>
+        </div>
+        <!-- column-reverse -->
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">flex-direction: <span class="prop-badge">column-reverse</span></p>
+          <div class="demo-container flex flex-col-reverse gap-2">
+            <div class="box">1</div><div class="box">2</div><div class="box">3</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── justify-content ── -->
+    <section>
+      <h2 class="section-title mb-1">justify-content</h2>
+      <p class="text-gray-500 text-sm mb-6">Aligns items along the <em>main axis</em> (horizontal for row).</p>
+      <div class="space-y-4">
+        <div v-for="val in ['flex-start','center','flex-end','space-between','space-around','space-evenly']">
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">justify-content: <span class="prop-badge">flex-start</span></p>
+          <div class="demo-container flex justify-start gap-2">
+            <div class="box">A</div><div class="box">B</div><div class="box">C</div>
+          </div>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">justify-content: <span class="prop-badge">center</span></p>
+          <div class="demo-container flex justify-center gap-2">
+            <div class="box">A</div><div class="box">B</div><div class="box">C</div>
+          </div>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">justify-content: <span class="prop-badge">flex-end</span></p>
+          <div class="demo-container flex justify-end gap-2">
+            <div class="box">A</div><div class="box">B</div><div class="box">C</div>
+          </div>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">justify-content: <span class="prop-badge">space-between</span></p>
+          <div class="demo-container flex justify-between">
+            <div class="box">A</div><div class="box">B</div><div class="box">C</div>
+          </div>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">justify-content: <span class="prop-badge">space-around</span></p>
+          <div class="demo-container flex justify-around">
+            <div class="box">A</div><div class="box">B</div><div class="box">C</div>
+          </div>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">justify-content: <span class="prop-badge">space-evenly</span></p>
+          <div class="demo-container flex justify-evenly">
+            <div class="box">A</div><div class="box">B</div><div class="box">C</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── align-items ── -->
+    <section>
+      <h2 class="section-title mb-1">align-items</h2>
+      <p class="text-gray-500 text-sm mb-6">Aligns items along the <em>cross axis</em> (vertical for row). Items have different heights to show the effect.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">align-items: <span class="prop-badge">flex-start</span></p>
+          <div class="demo-container flex items-start gap-2" style="height:120px">
+            <div class="box">A</div><div class="box tall">B</div><div class="box short">C</div>
+          </div>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">align-items: <span class="prop-badge">center</span></p>
+          <div class="demo-container flex items-center gap-2" style="height:120px">
+            <div class="box">A</div><div class="box tall">B</div><div class="box short">C</div>
+          </div>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">align-items: <span class="prop-badge">flex-end</span></p>
+          <div class="demo-container flex items-end gap-2" style="height:120px">
+            <div class="box">A</div><div class="box tall">B</div><div class="box short">C</div>
+          </div>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">align-items: <span class="prop-badge">stretch</span></p>
+          <div class="demo-container flex items-stretch gap-2" style="height:120px">
+            <div class="box" style="min-height:0">A</div>
+            <div class="box" style="min-height:0">B</div>
+            <div class="box" style="min-height:0">C</div>
+          </div>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">align-items: <span class="prop-badge">baseline</span></p>
+          <div class="demo-container flex items-baseline gap-2" style="height:120px">
+            <div class="box text-2xl">A</div>
+            <div class="box text-sm">B</div>
+            <div class="box text-xs">C</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── flex-wrap ── -->
+    <section>
+      <h2 class="section-title mb-1">flex-wrap</h2>
+      <p class="text-gray-500 text-sm mb-6">Controls whether items wrap onto multiple lines.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">flex-wrap: <span class="prop-badge">nowrap</span></p>
+          <div class="demo-container flex flex-nowrap gap-2 overflow-hidden">
+            <div class="box" style="min-width:60px">1</div>
+            <div class="box" style="min-width:60px">2</div>
+            <div class="box" style="min-width:60px">3</div>
+            <div class="box" style="min-width:60px">4</div>
+            <div class="box" style="min-width:60px">5</div>
+          </div>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">flex-wrap: <span class="prop-badge">wrap</span></p>
+          <div class="demo-container flex flex-wrap gap-2">
+            <div class="box" style="min-width:60px">1</div>
+            <div class="box" style="min-width:60px">2</div>
+            <div class="box" style="min-width:60px">3</div>
+            <div class="box" style="min-width:60px">4</div>
+            <div class="box" style="min-width:60px">5</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── flex-grow / flex-shrink / flex-basis ── -->
+    <section>
+      <h2 class="section-title mb-1">flex-grow · flex-shrink · flex-basis</h2>
+      <p class="text-gray-500 text-sm mb-6">Item-level properties controlling how items grow, shrink, and what their starting size is.</p>
+      <div class="space-y-5">
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">flex-grow: <span class="prop-badge">0</span> (default — items keep natural width)</p>
+          <div class="demo-container flex gap-2">
+            <div class="box" style="flex-grow:0">grow:0</div>
+            <div class="box" style="flex-grow:0">grow:0</div>
+            <div class="box" style="flex-grow:0">grow:0</div>
+          </div>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">flex-grow: <span class="prop-badge">1</span> on all — equal sharing of free space</p>
+          <div class="demo-container flex gap-2">
+            <div class="box" style="flex-grow:1">grow:1</div>
+            <div class="box" style="flex-grow:1">grow:1</div>
+            <div class="box" style="flex-grow:1">grow:1</div>
+          </div>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">Mixed grow: <span class="prop-badge">1 · 2 · 1</span></p>
+          <div class="demo-container flex gap-2">
+            <div class="box" style="flex-grow:1">1</div>
+            <div class="box" style="flex-grow:2">2 (gets 2×)</div>
+            <div class="box" style="flex-grow:1">1</div>
+          </div>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-2">flex-basis: <span class="prop-badge">200px</span> — sets starting width before growing</p>
+          <div class="demo-container flex flex-wrap gap-2">
+            <div class="box" style="flex-basis:200px;flex-grow:1">basis:200px</div>
+            <div class="box" style="flex-basis:200px;flex-grow:1">basis:200px</div>
+            <div class="box" style="flex-basis:200px;flex-grow:1">basis:200px</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── align-self ── -->
+    <section>
+      <h2 class="section-title mb-1">align-self</h2>
+      <p class="text-gray-500 text-sm mb-6">Overrides <code class="bg-gray-100 px-1 rounded text-xs">align-items</code> for a single item.</p>
+      <div class="demo-container flex items-start gap-2" style="height:120px">
+        <div class="box">default</div>
+        <div class="box" style="align-self:center">center</div>
+        <div class="box" style="align-self:flex-end">end</div>
+        <div class="box" style="align-self:stretch; min-height:0">stretch</div>
+      </div>
+    </section>
+
+    <!-- ── Real-world example ── -->
+    <section>
+      <h2 class="section-title mb-1">Real-World Example — Card Layout</h2>
+      <p class="text-gray-500 text-sm mb-6">A typical responsive card grid using Flexbox.</p>
+      <div class="flex flex-wrap gap-5">
+        <div class="bg-white rounded-xl shadow p-5 flex flex-col gap-3" style="flex:1 1 220px">
+          <div class="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center text-xl">🎨</div>
+          <h3 class="font-semibold text-gray-900">Design</h3>
+          <p class="text-sm text-gray-500 flex-1">Create stunning interfaces with modern CSS techniques.</p>
+          <a href="#" class="text-indigo-600 text-sm font-medium hover:underline self-start">Learn more →</a>
+        </div>
+        <div class="bg-white rounded-xl shadow p-5 flex flex-col gap-3" style="flex:1 1 220px">
+          <div class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center text-xl">⚡</div>
+          <h3 class="font-semibold text-gray-900">Performance</h3>
+          <p class="text-sm text-gray-500 flex-1">Optimize load times and runtime performance for fast UIs.</p>
+          <a href="#" class="text-indigo-600 text-sm font-medium hover:underline self-start">Learn more →</a>
+        </div>
+        <div class="bg-white rounded-xl shadow p-5 flex flex-col gap-3" style="flex:1 1 220px">
+          <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center text-xl">♿</div>
+          <h3 class="font-semibold text-gray-900">Accessibility</h3>
+          <p class="text-sm text-gray-500 flex-1">Build inclusive experiences for all users regardless of ability.</p>
+          <a href="#" class="text-indigo-600 text-sm font-medium hover:underline self-start">Learn more →</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="text-center py-6 text-sm text-gray-400 border-t border-gray-200 mt-10">
+    FrontEndFusion — CSS Flexbox Showcase
+  </footer>
+</body>
+</html>

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Animations Showcase</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --pink:   #ec4899;
+      --violet: #8b5cf6;
+      --cyan:   #06b6d4;
+      --green:  #10b981;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(to right, var(--pink), var(--violet));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* ── Transitions ── */
+    .card-lift {
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .card-lift:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 40px rgba(0,0,0,.12);
+    }
+
+    .btn-ripple {
+      position: relative;
+      overflow: hidden;
+      transition: background 0.2s;
+    }
+    .btn-ripple::after {
+      content: '';
+      position: absolute;
+      inset: 50%;
+      background: rgba(255,255,255,.35);
+      border-radius: 50%;
+      transform: scale(0);
+      transition: transform 0.5s ease, opacity 0.5s;
+      opacity: 0;
+    }
+    .btn-ripple:active::after {
+      inset: 0;
+      transform: scale(1);
+      opacity: 1;
+      transition: 0s;
+    }
+
+    /* ── Keyframe animations ── */
+    @keyframes fade-in-up {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse-ring {
+      0%   { transform: scale(1); opacity: 1; }
+      100% { transform: scale(2.4); opacity: 0; }
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); animation-timing-function: cubic-bezier(.8,0,1,1); }
+      50%       { transform: translateY(-28px); animation-timing-function: cubic-bezier(0,0,.2,1); }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes ping {
+      75%, 100% { transform: scale(2); opacity: 0; }
+    }
+
+    @keyframes shimmer {
+      from { background-position: -200% 0; }
+      to   { background-position:  200% 0; }
+    }
+
+    @keyframes typewriter {
+      from { width: 0; }
+      to   { width: 100%; }
+    }
+
+    @keyframes blink {
+      0%, 100% { border-color: transparent; }
+      50%       { border-color: var(--violet); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50%       { transform: translateY(-12px); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%       { transform: translateX(-8px); }
+      40%       { transform: translateX(8px); }
+      60%       { transform: translateX(-6px); }
+      80%       { transform: translateX(6px); }
+    }
+
+    @keyframes count-up {
+      from { transform: translateY(100%); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+
+    /* ── Applied styles ── */
+    .fade-in-up  { animation: fade-in-up 0.6s ease both; }
+    .bounce-demo { animation: bounce 1s infinite; }
+    .spin-demo   { animation: spin 1s linear infinite; }
+    .float-demo  { animation: float 3s ease-in-out infinite; }
+    .shake-demo  { animation: shake 0.5s ease; }
+
+    .pulse-dot {
+      position: relative;
+      width: 14px; height: 14px;
+      background: #22c55e;
+      border-radius: 50%;
+    }
+    .pulse-dot::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: #22c55e;
+      border-radius: 50%;
+      animation: pulse-ring 1.5s ease-out infinite;
+    }
+
+    .skeleton-line {
+      background: linear-gradient(90deg, #e2e8f0 25%, #f8fafc 50%, #e2e8f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 4px;
+    }
+
+    .typewriter-text {
+      display: inline-block;
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: 3px solid var(--violet);
+      width: 100%;
+      animation: typewriter 2.5s steps(30, end) both, blink 0.75s step-end infinite;
+    }
+
+    /* ── Hover-triggered underline ── */
+    .underline-hover {
+      position: relative;
+      display: inline-block;
+      text-decoration: none;
+      font-weight: 600;
+      color: var(--violet);
+    }
+    .underline-hover::after {
+      content: '';
+      position: absolute;
+      left: 0; bottom: -2px;
+      width: 100%; height: 2px;
+      background: var(--violet);
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 0.3s ease;
+    }
+    .underline-hover:hover::after {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+
+    /* ── Flip card ── */
+    .flip-card {
+      perspective: 800px;
+    }
+    .flip-card-inner {
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s;
+      height: 120px;
+    }
+    .flip-card:hover .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+    .flip-front, .flip-back {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+    .flip-back { transform: rotateY(180deg); }
+
+    /* ── Progress bar ── */
+    @keyframes fill-bar {
+      from { width: 0; }
+      to   { width: var(--target); }
+    }
+    .progress-bar {
+      animation: fill-bar 1.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+      animation-delay: 0.3s;
+    }
+
+    /* Stagger delays */
+    .stagger-1 { animation-delay: 0s; }
+    .stagger-2 { animation-delay: 0.1s; }
+    .stagger-3 { animation-delay: 0.2s; }
+    .stagger-4 { animation-delay: 0.3s; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans">
+
+  <!-- Header -->
+  <header class="py-10 px-6 text-center" style="background: linear-gradient(135deg, #8b5cf6, #ec4899);">
+    <h1 class="text-3xl font-bold text-white mb-2">CSS Animations Showcase</h1>
+    <p class="text-purple-100 max-w-xl mx-auto text-sm">
+      Transitions, keyframe animations, hover effects, and real-world UI patterns — all in pure CSS.
+    </p>
+    <a href="../../index.html" class="inline-block mt-4 text-purple-200 hover:text-white text-sm underline">← Back to Hub</a>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-6 py-10 space-y-14">
+
+    <!-- ── Transitions ── -->
+    <section>
+      <h2 class="section-title mb-1">CSS Transitions</h2>
+      <p class="text-gray-500 text-sm mb-6">Smooth property changes on hover or state change.</p>
+      <div class="flex flex-wrap gap-5 items-start">
+        <!-- Card lift -->
+        <div class="card-lift bg-white rounded-xl shadow p-5 w-44 text-center cursor-pointer">
+          <div class="text-2xl mb-2">🚀</div>
+          <p class="text-sm font-medium text-gray-700">Hover to lift</p>
+          <p class="text-xs text-gray-400 mt-1">transform + box-shadow</p>
+        </div>
+        <!-- Color transition -->
+        <div class="group bg-white rounded-xl shadow p-5 w-44 text-center cursor-pointer overflow-hidden relative"
+             style="transition: background 0.4s ease;">
+          <div class="absolute inset-0 bg-gradient-to-br from-violet-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-400"></div>
+          <div class="relative z-10">
+            <div class="text-2xl mb-2">🎨</div>
+            <p class="text-sm font-medium text-gray-700 group-hover:text-white transition-colors duration-300">Hover for color</p>
+            <p class="text-xs text-gray-400 group-hover:text-purple-100 mt-1 transition-colors duration-300">opacity transition</p>
+          </div>
+        </div>
+        <!-- Scale -->
+        <div class="bg-white rounded-xl shadow p-5 w-44 text-center cursor-pointer hover:scale-110 transition-transform duration-300">
+          <div class="text-2xl mb-2">🔍</div>
+          <p class="text-sm font-medium text-gray-700">Hover to scale</p>
+          <p class="text-xs text-gray-400 mt-1">scale(1.1)</p>
+        </div>
+        <!-- Ripple button -->
+        <button class="btn-ripple bg-violet-600 text-white font-semibold px-6 py-3 rounded-xl shadow hover:bg-violet-700 cursor-pointer">
+          Click me (ripple)
+        </button>
+      </div>
+    </section>
+
+    <!-- ── Loaders ── -->
+    <section>
+      <h2 class="section-title mb-1">Loading Indicators</h2>
+      <p class="text-gray-500 text-sm mb-6">Common loading UI patterns using CSS animations.</p>
+      <div class="flex flex-wrap gap-8 items-center">
+        <!-- Spinner -->
+        <div class="text-center">
+          <div class="spin-demo w-10 h-10 rounded-full border-4 border-violet-200 border-t-violet-600 mx-auto"></div>
+          <p class="text-xs text-gray-500 mt-3">Spinner</p>
+        </div>
+        <!-- Pulse dot -->
+        <div class="text-center">
+          <div class="flex items-center justify-center h-10">
+            <div class="pulse-dot"></div>
+          </div>
+          <p class="text-xs text-gray-500 mt-3">Pulse dot</p>
+        </div>
+        <!-- Bounce dots -->
+        <div class="text-center">
+          <div class="flex gap-1.5 items-end justify-center h-10">
+            <div class="w-2.5 h-2.5 bg-pink-500 rounded-full bounce-demo stagger-1"></div>
+            <div class="w-2.5 h-2.5 bg-violet-500 rounded-full bounce-demo stagger-2"></div>
+            <div class="w-2.5 h-2.5 bg-cyan-500 rounded-full bounce-demo stagger-3"></div>
+          </div>
+          <p class="text-xs text-gray-500 mt-3">Staggered bounce</p>
+        </div>
+        <!-- Skeleton -->
+        <div class="bg-white rounded-xl shadow p-4 w-48">
+          <div class="skeleton-line h-3 w-3/4 mb-2"></div>
+          <div class="skeleton-line h-3 w-full mb-2"></div>
+          <div class="skeleton-line h-3 w-5/6 mb-3"></div>
+          <div class="skeleton-line h-8 w-full rounded-lg"></div>
+          <p class="text-xs text-gray-500 mt-2 text-center">Skeleton shimmer</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Entrance animations ── -->
+    <section>
+      <h2 class="section-title mb-1">Entrance Animations</h2>
+      <p class="text-gray-500 text-sm mb-6">Staggered fade-in-up on page load.</p>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="fade-in-up stagger-1 bg-white rounded-xl shadow p-4 text-center">
+          <div class="text-xl mb-1">📐</div>
+          <p class="text-sm font-medium text-gray-700">HTML</p>
+        </div>
+        <div class="fade-in-up stagger-2 bg-white rounded-xl shadow p-4 text-center">
+          <div class="text-xl mb-1">🎨</div>
+          <p class="text-sm font-medium text-gray-700">CSS</p>
+        </div>
+        <div class="fade-in-up stagger-3 bg-white rounded-xl shadow p-4 text-center">
+          <div class="text-xl mb-1">⚡</div>
+          <p class="text-sm font-medium text-gray-700">JavaScript</p>
+        </div>
+        <div class="fade-in-up stagger-4 bg-white rounded-xl shadow p-4 text-center">
+          <div class="text-xl mb-1">♿</div>
+          <p class="text-sm font-medium text-gray-700">A11y</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Text effects ── -->
+    <section>
+      <h2 class="section-title mb-1">Text Effects</h2>
+      <div class="space-y-6">
+        <!-- Typewriter -->
+        <div class="bg-white rounded-xl shadow p-5">
+          <p class="text-xs text-gray-400 mb-2 font-mono">typewriter effect</p>
+          <p class="typewriter-text text-gray-800 font-mono font-medium text-lg">Building the web, one line at a time.</p>
+        </div>
+        <!-- Hover underline links -->
+        <div class="bg-white rounded-xl shadow p-5 flex flex-wrap gap-6">
+          <a href="#" class="underline-hover">Learn HTML</a>
+          <a href="#" class="underline-hover" style="color:var(--pink); --violet:var(--pink)">Master CSS</a>
+          <a href="#" class="underline-hover" style="color:var(--cyan); --violet:var(--cyan)">Explore JavaScript</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Flip card ── -->
+    <section>
+      <h2 class="section-title mb-1">3D Flip Card</h2>
+      <p class="text-gray-500 text-sm mb-6">Hover over the card to see a 3D perspective flip.</p>
+      <div class="flex flex-wrap gap-5">
+        <div class="flip-card w-44 cursor-pointer">
+          <div class="flip-card-inner">
+            <div class="flip-front bg-violet-600 text-white">
+              <div class="text-center"><div class="text-2xl">🃏</div><p class="text-sm mt-1">Hover me</p></div>
+            </div>
+            <div class="flip-back bg-pink-500 text-white">
+              <div class="text-center"><p class="text-sm font-medium px-3">CSS 3D transforms are awesome!</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="flip-card w-44 cursor-pointer">
+          <div class="flip-card-inner">
+            <div class="flip-front bg-cyan-500 text-white">
+              <div class="text-center"><div class="text-2xl">🌍</div><p class="text-sm mt-1">Front</p></div>
+            </div>
+            <div class="flip-back bg-green-500 text-white">
+              <div class="text-center"><p class="text-sm font-medium px-3">Back side reveals here!</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Float & Shake ── -->
+    <section>
+      <h2 class="section-title mb-1">More Keyframe Patterns</h2>
+      <div class="flex flex-wrap gap-8 items-center">
+        <div class="text-center">
+          <div class="float-demo text-4xl">🎈</div>
+          <p class="text-xs text-gray-500 mt-3">Float</p>
+        </div>
+        <div class="text-center">
+          <button
+            class="shake-demo bg-red-100 text-red-700 font-semibold px-4 py-2 rounded-lg text-sm hover:bg-red-200"
+            onclick="this.classList.remove('shake-demo'); void this.offsetWidth; this.classList.add('shake-demo')">
+            Click to shake
+          </button>
+          <p class="text-xs text-gray-500 mt-2">Re-triggers on click</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Progress bars ── -->
+    <section>
+      <h2 class="section-title mb-1">Animated Progress Bars</h2>
+      <p class="text-gray-500 text-sm mb-6">Bars animate to target width on page load.</p>
+      <div class="bg-white rounded-xl shadow p-6 space-y-4">
+        <div>
+          <div class="flex justify-between text-sm mb-1"><span class="text-gray-700 font-medium">HTML</span><span class="text-gray-400">90%</span></div>
+          <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div class="h-full bg-orange-400 rounded-full progress-bar" style="--target:90%"></div>
+          </div>
+        </div>
+        <div>
+          <div class="flex justify-between text-sm mb-1"><span class="text-gray-700 font-medium">CSS</span><span class="text-gray-400">85%</span></div>
+          <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div class="h-full bg-blue-500 rounded-full progress-bar" style="--target:85%; animation-delay:0.5s"></div>
+          </div>
+        </div>
+        <div>
+          <div class="flex justify-between text-sm mb-1"><span class="text-gray-700 font-medium">JavaScript</span><span class="text-gray-400">70%</span></div>
+          <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div class="h-full bg-yellow-400 rounded-full progress-bar" style="--target:70%; animation-delay:0.7s"></div>
+          </div>
+        </div>
+        <div>
+          <div class="flex justify-between text-sm mb-1"><span class="text-gray-700 font-medium">Accessibility</span><span class="text-gray-400">80%</span></div>
+          <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div class="h-full bg-green-500 rounded-full progress-bar" style="--target:80%; animation-delay:0.9s"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="text-center py-6 text-sm text-gray-400 border-t border-gray-200 mt-10">
+    FrontEndFusion — CSS Animations Showcase
+  </footer>
+</body>
+</html>
