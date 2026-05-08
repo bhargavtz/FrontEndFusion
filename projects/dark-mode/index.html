@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dark Mode Toggle Demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* ── Design tokens ── */
+    :root,
+    [data-theme="light"] {
+      --bg-page:       #f8fafc;
+      --bg-card:       #ffffff;
+      --bg-nav:        #ffffff;
+      --bg-subtle:     #f1f5f9;
+      --text-primary:  #0f172a;
+      --text-secondary:#475569;
+      --text-muted:    #94a3b8;
+      --border-color:  #e2e8f0;
+      --accent:        #4f46e5;
+      --accent-hover:  #4338ca;
+      --shadow:        0 4px 20px rgba(0,0,0,.08);
+      --toggle-bg:     #e2e8f0;
+      --toggle-thumb:  #ffffff;
+      --code-bg:       #f1f5f9;
+    }
+
+    [data-theme="dark"] {
+      --bg-page:       #0f172a;
+      --bg-card:       #1e293b;
+      --bg-nav:        #1e293b;
+      --bg-subtle:     #334155;
+      --text-primary:  #f1f5f9;
+      --text-secondary:#94a3b8;
+      --text-muted:    #64748b;
+      --border-color:  #334155;
+      --accent:        #818cf8;
+      --accent-hover:  #a5b4fc;
+      --shadow:        0 4px 20px rgba(0,0,0,.4);
+      --toggle-bg:     #4f46e5;
+      --toggle-thumb:  #f1f5f9;
+      --code-bg:       #0f172a;
+    }
+
+    /* ── Base styles using tokens ── */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      background: var(--bg-page);
+      color: var(--text-primary);
+      transition: background 0.3s ease, color 0.3s ease;
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+    }
+
+    nav {
+      background: var(--bg-nav);
+      border-bottom: 1px solid var(--border-color);
+      box-shadow: var(--shadow);
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow);
+      transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 36px rgba(0,0,0,.12);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s, border-color 0.3s;
+    }
+
+    .subtle { background: var(--bg-subtle); transition: background 0.3s; }
+
+    .text-primary-custom   { color: var(--text-primary); }
+    .text-secondary-custom { color: var(--text-secondary); }
+    .text-muted-custom     { color: var(--text-muted); }
+    .text-accent           { color: var(--accent); }
+
+    .border-custom { border-color: var(--border-color); transition: border-color 0.3s; }
+
+    a { color: var(--accent); transition: color 0.2s; }
+    a:hover { color: var(--accent-hover); }
+
+    code {
+      background: var(--code-bg);
+      color: var(--accent);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85em;
+      font-family: monospace;
+      transition: background 0.3s;
+    }
+
+    /* ── Toggle switch ── */
+    .toggle-track {
+      width: 48px; height: 26px;
+      background: var(--toggle-bg);
+      border-radius: 99px;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.3s;
+      flex-shrink: 0;
+    }
+    .toggle-thumb {
+      width: 20px; height: 20px;
+      background: var(--toggle-thumb);
+      border-radius: 50%;
+      position: absolute;
+      top: 3px; left: 3px;
+      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1), background 0.3s;
+      box-shadow: 0 1px 4px rgba(0,0,0,.2);
+    }
+    [data-theme="dark"] .toggle-thumb { transform: translateX(22px); }
+
+    /* ── Section heading ── */
+    .section-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      transition: color 0.3s;
+    }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 99px;
+      transition: background 0.3s, color 0.3s;
+    }
+    .badge-accent  { background: rgba(79,70,229,.15); color: var(--accent); }
+    [data-theme="dark"] .badge-accent { background: rgba(129,140,248,.15); }
+
+    /* ── Input ── */
+    .input-demo {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.875rem;
+      width: 100%;
+      transition: background 0.3s, border-color 0.3s, color 0.3s;
+    }
+    .input-demo:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(79,70,229,.2);
+    }
+
+    /* ── Table ── */
+    table { width: 100%; border-collapse: collapse; }
+    th, td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-color);
+      text-align: left;
+      font-size: 0.875rem;
+      transition: border-color 0.3s;
+    }
+    th { color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: .04em; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--bg-subtle); }
+
+    /* System preference badge */
+    #sys-pref { font-size: 0.7rem; }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+    <div class="flex items-center gap-3">
+      <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:var(--accent)">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+        </svg>
+      </div>
+      <span class="font-bold text-primary-custom" style="color:var(--text-primary)">FrontEndFusion</span>
+      <span class="badge badge-accent hidden sm:inline">Dark Mode Demo</span>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <!-- Sun icon -->
+      <svg id="sun-icon" class="w-4 h-4" style="color:var(--text-muted)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 3v1m0 16v1m8.66-9H21M3 12H2m15.07-7.07l-.71.71M6.64 17.36l-.71.71M17.36 17.36l.71.71M6.64 6.64l.71.71M12 5a7 7 0 100 14A7 7 0 0012 5z"/>
+      </svg>
+      <!-- Toggle -->
+      <div class="toggle-track" id="toggle" role="switch" aria-checked="false" tabindex="0" aria-label="Toggle dark mode">
+        <div class="toggle-thumb"></div>
+      </div>
+      <!-- Moon icon -->
+      <svg id="moon-icon" class="w-4 h-4" style="color:var(--text-muted)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+      </svg>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="max-w-3xl mx-auto px-6 py-10 space-y-8">
+
+    <!-- Hero -->
+    <div class="text-center py-6">
+      <h1 class="text-4xl font-bold mb-3" style="color:var(--text-primary)">Dark Mode Toggle</h1>
+      <p style="color:var(--text-secondary)" class="text-base max-w-lg mx-auto">
+        Built with CSS custom properties and vanilla JavaScript. Theme preference is saved to
+        <code>localStorage</code> and respects <code>prefers-color-scheme</code>.
+      </p>
+      <p id="sys-pref" class="mt-2" style="color:var(--text-muted)">
+        System preference: <span id="sys-pref-val">detecting…</span>
+      </p>
+      <a href="../../index.html" class="inline-block mt-4 text-sm underline" style="color:var(--text-muted)">← Back to Hub</a>
+    </div>
+
+    <!-- How it works -->
+    <div class="card">
+      <h2 class="section-title mb-4">How It Works</h2>
+      <ol class="space-y-3 text-sm" style="color:var(--text-secondary)">
+        <li class="flex gap-3">
+          <span class="badge badge-accent flex-shrink-0 mt-0.5">1</span>
+          All colors are defined as CSS custom properties in <code>:root</code> (light) and <code>[data-theme="dark"]</code>.
+        </li>
+        <li class="flex gap-3">
+          <span class="badge badge-accent flex-shrink-0 mt-0.5">2</span>
+          JavaScript toggles <code>data-theme="dark"</code> on <code>&lt;html&gt;</code>, instantly re-mapping every token.
+        </li>
+        <li class="flex gap-3">
+          <span class="badge badge-accent flex-shrink-0 mt-0.5">3</span>
+          The chosen theme is persisted in <code>localStorage</code> so it survives page reloads.
+        </li>
+        <li class="flex gap-3">
+          <span class="badge badge-accent flex-shrink-0 mt-0.5">4</span>
+          On first visit, the OS-level <code>prefers-color-scheme</code> media query is checked as the default.
+        </li>
+      </ol>
+    </div>
+
+    <!-- CSS snippet -->
+    <div class="card">
+      <h2 class="section-title mb-4">The CSS Pattern</h2>
+      <pre class="rounded-xl p-4 text-xs overflow-x-auto" style="background:var(--code-bg); color:var(--text-secondary)"><code>:root {
+  --bg: #f8fafc;
+  --text: #0f172a;
+  --accent: #4f46e5;
+}
+
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --text: #f1f5f9;
+  --accent: #818cf8;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.3s, color 0.3s;
+}</code></pre>
+    </div>
+
+    <!-- JS snippet -->
+    <div class="card">
+      <h2 class="section-title mb-4">The JavaScript</h2>
+      <pre class="rounded-xl p-4 text-xs overflow-x-auto" style="background:var(--code-bg); color:var(--text-secondary)"><code>const html = document.documentElement;
+const stored = localStorage.getItem('theme');
+const sysDark = matchMedia('(prefers-color-scheme: dark)').matches;
+
+// Apply saved or system preference
+html.dataset.theme = stored ?? (sysDark ? 'dark' : 'light');
+
+function toggleTheme() {
+  const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+  html.dataset.theme = next;
+  localStorage.setItem('theme', next);
+}</code></pre>
+    </div>
+
+    <!-- UI components demo -->
+    <div class="card">
+      <h2 class="section-title mb-5">UI Components Responding to Theme</h2>
+      <div class="space-y-5">
+        <!-- Input -->
+        <div>
+          <label class="block text-sm font-medium mb-1" style="color:var(--text-secondary)">Search</label>
+          <input type="text" placeholder="Type something…" class="input-demo">
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex flex-wrap gap-3">
+          <button class="px-4 py-2 rounded-lg text-sm font-semibold text-white transition"
+            style="background:var(--accent)"
+            onmouseover="this.style.filter='brightness(1.1)'"
+            onmouseout="this.style.filter=''">
+            Primary
+          </button>
+          <button class="px-4 py-2 rounded-lg text-sm font-semibold border transition"
+            style="border-color:var(--border-color); color:var(--text-primary); background:var(--bg-subtle)">
+            Secondary
+          </button>
+          <button class="px-4 py-2 rounded-lg text-sm font-medium" style="color:var(--accent)">
+            Ghost
+          </button>
+        </div>
+
+        <!-- Table -->
+        <div class="rounded-xl overflow-hidden border" style="border-color:var(--border-color)">
+          <table>
+            <thead>
+              <tr style="background:var(--bg-subtle)">
+                <th>Property</th><th>Light</th><th>Dark</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Background</td><td>#f8fafc</td><td>#0f172a</td></tr>
+              <tr><td>Surface</td><td>#ffffff</td><td>#1e293b</td></tr>
+              <tr><td>Text</td><td>#0f172a</td><td>#f1f5f9</td></tr>
+              <tr><td>Accent</td><td>#4f46e5</td><td>#818cf8</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="text-center py-6 text-sm border-t mt-10" style="color:var(--text-muted); border-color:var(--border-color)">
+    FrontEndFusion — Dark Mode Toggle Demo
+  </footer>
+
+  <script>
+    const html = document.documentElement;
+    const toggle = document.getElementById('toggle');
+
+    // Apply saved preference or detect system preference
+    const stored = localStorage.getItem('theme');
+    const sysDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const initial = stored ?? (sysDark ? 'dark' : 'light');
+    html.dataset.theme = initial;
+    toggle.setAttribute('aria-checked', initial === 'dark');
+
+    // Show system preference
+    document.getElementById('sys-pref-val').textContent = sysDark ? 'dark' : 'light';
+
+    function toggleTheme() {
+      const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+      html.dataset.theme = next;
+      localStorage.setItem('theme', next);
+      toggle.setAttribute('aria-checked', next === 'dark');
+    }
+
+    toggle.addEventListener('click', toggleTheme);
+    toggle.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTheme(); }
+    });
+
+    // Listen for OS-level changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      if (!localStorage.getItem('theme')) {
+        html.dataset.theme = e.matches ? 'dark' : 'light';
+      }
+    });
+  </script>
+</body>
+</html>
