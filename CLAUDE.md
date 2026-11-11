@@ -1,174 +1,144 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for agents working in this repository.
 
-## Repository Overview
+## Repository overview
 
-**FrontEndFusion** is a comprehensive HTML and CSS learning and resource repository. It serves as both a portfolio site and an educational hub with:
-- Fully functional demo projects with HTML/CSS implementations
-- Curated code snippets for common use cases
-- Educational documentation covering best practices, accessibility, and SEO
-- A structured learning path for mastering frontend fundamentals
+FrontEndFusion is a **Next.js 16 App Router** learning site for HTML, CSS, and
+frontend fundamentals. It is no longer a static HTML/CSS project. The entire
+site lives in `frontend/`:
 
-This is a **pure static frontend project** with no build system, backend, or runtime dependencies.
+- interactive project demos
+- copy-paste form snippets
+- nine Markdown-backed guides
+- a data-driven hub page with light/dark theming
 
-## Project Structure
+The repository root intentionally contains only project documentation and the
+`frontend/` app. Do not recreate `index.html`, `styles.css`, or root-level
+`projects/`, `snippets/`, `resources/`, or `web-dev-learning-path/` copies.
 
-### Core Files & Directories
+## Commands
 
-**Root Level**
-- `index.html` - Main portfolio/landing page demonstrating accessibility best practices
-- `styles.css` - Global stylesheet with CSS custom properties for theming
-- `README.md` - Main documentation for contributors and learners
-- `SECURITY.md` - Security policy and vulnerability reporting guidelines
+Run everything from `frontend/`:
 
-**Projects Directory** (`/projects/`)
-- Self-contained HTML/CSS projects with individual READMEs
-- Each project is a standalone working example (e.g., Responsive Navbar, landing-page)
-- Projects demonstrate real-world use cases and responsive design patterns
-- Include both structure (HTML) and styling (inline CSS or separate stylesheets)
+```bash
+npm run dev      # development server on :3000
+npm run build    # production build + type check
+npm run lint     # ESLint
+```
 
-**Snippets Directory** (`/snippets/`)
-- Reusable code examples for common components (forms, buttons, layouts)
-- Organized by functionality
-- Quick reference templates for developers to copy and adapt
+`next.config.ts` enables `cacheComponents` and `partialPrefetching`. Read the
+bundled Next.js docs in `frontend/node_modules/next/dist/docs/` before using an
+unfamiliar API; this version has breaking changes from older releases.
 
-**Resources Directory** (`/resources/`)
-- Markdown documentation files covering:
-  - `best-practices.md` - HTML/CSS conventions and optimization patterns
-  - `accessibility.md` - WCAG guidelines and inclusive design principles
-  - `seo-tips.md` - SEO optimization for static HTML sites
+## Architecture
 
-**Web Development Learning Path** (`/web-dev-learning-path/`)
-- Structured educational content organized in `/docs/` folder
-- Progressive learning modules (HTML basics → CSS fundamentals → responsive design → advanced topics)
-- Serves as a comprehensive guide for learners from beginner to advanced
+```text
+frontend/
+├── content/docs/*.md        # guide bodies (one file per docs.ts slug)
+├── src/app/
+│   ├── (site)/              # hub, /docs, /snippets with shared chrome
+│   ├── projects/            # standalone demo routes (no site chrome)
+│   ├── globals.css          # Tailwind import, tokens, shared styles
+│   └── layout.tsx           # <html>, metadata, pre-paint theme script
+├── src/components/          # UI, project demos, snippet demos, markdown
+├── src/data/                # single source of truth (8 datasets / 31 keys)
+└── src/lib/                 # markdown + icon helpers
+```
 
-### Styling Approach
+### Data contract
 
-- **CSS Custom Properties (Variables)**: Used extensively for theming
-  - Examples: `--primary-color`, `--secondary-color`, `--text-color`, `--bg-color`
-  - Enables consistent theming across projects and easy color scheme updates
-- **Mixed Styling Methods**: Projects may use:
-  - Inline `<style>` tags for encapsulation
-  - External stylesheets for larger projects
-  - Tailwind CSS and Bootstrap CDN for some demo pages (via CDN)
-- **Responsive Design**: Emphasis on mobile-first approach with media queries
-- **No CSS Preprocessors**: Pure CSS3 throughout the codebase
+All content comes from `src/data`. `src/data/index.ts` exports `siteData`
+(the eight datasets) and `dataSummary`. The eight datasets and their keys:
 
-## Working with Content
+1. `navigation.ts` — `label`, `href`
+2. `hero.ts` — `title`, `subtitle`, `actions`
+3. `features.ts` — `icon`, `title`, `detail`
+4. `projects.ts` — `slug`, `title`, `description`, `tags`, `level`
+5. `snippets.ts` — `slug`, `title`, `description`, `tags`, `icon`
+6. `resources.ts` — `title`, `href`, `icon`, `tint`
+7. `learning-path.ts` — `slug`, `title`, `description`, `icon`, `level`
+8. `docs.ts` — `slug`, `title`, `description`, `category`
 
-### Adding New Projects
+Rules:
 
-1. Create a new folder under `/projects/` with a descriptive name
-2. Include `index.html` as the entry point
-3. Add optional `style.css` or inline styles in `<style>` tags
-4. Create a `README.md` explaining the project purpose and features
-5. Keep projects self-contained with no external build steps
+- Never hard-code content in a page that already exists in `src/data`.
+- A `docs.ts` slug must match `content/docs/<slug>.md`.
+- Project/snippet slugs must match their route folders and component maps.
+- Keep the 8/31 count in sync if the schema changes, and update the README
+  table at the same time.
 
-**Project Guidelines:**
-- Ensure semantic HTML5 structure
-- Use descriptive class and id names following kebab-case convention
-- Make projects responsive using media queries (mobile-first approach)
-- Demonstrate at least one modern CSS technique (Flexbox, Grid, animations, etc.)
+## Adding content
 
-### Adding Snippets
+### Guide
 
-1. Place code examples in `/snippets/` organized by category
-2. Include clear comments explaining the purpose
-3. Ensure snippets are copy-paste ready and work independently
-4. Update `snippets/README.md` with descriptions of new snippets
+1. Create `frontend/content/docs/<slug>.md` with a single leading `# Title`.
+2. Add `{ slug, title, description, category }` to `src/data/docs.ts`.
+3. Optionally add the same slug to `src/data/learning-path.ts`.
 
-**Snippet Guidelines:**
-- Keep each snippet focused on a single feature or component
-- Include both HTML and CSS in the same file for portability
-- Provide context comments on non-obvious styling decisions
+The docs route strips the leading H1, builds a table of contents from `##` and
+`###` headings, and renders Markdown with `react-markdown` + `remark-gfm`.
 
-### Updating Documentation
+### Project
 
-1. **Best Practices** (`resources/best-practices.md`): Add conventions, performance tips, maintainability patterns
-2. **Accessibility** (`resources/accessibility.md`): Document WCAG compliance patterns, semantic HTML benefits
-3. **SEO Tips** (`resources/seo-tips.md`): Include optimization strategies for static sites, meta tags, structured data
-4. **Learning Path** (`web-dev-learning-path/docs/`): Expand structured tutorials with practical examples
+1. Add `{ slug, title, description, tags, level }` to `src/data/projects.ts`.
+2. Create `src/app/projects/<slug>/page.tsx` as a server component.
+3. Export `metadata` from the page.
+4. Put client interactivity in `src/components/projects/<demo>.tsx`.
 
-## Code Conventions
+Demo pages sit outside the `(site)` route group, so they do not inherit the
+site header/footer. Each demo must provide its own way back to `/`.
 
-### HTML Structure
-- Use semantic HTML5 elements (`<header>`, `<nav>`, `<main>`, `<article>`, `<footer>`, etc.)
-- Always include `<meta charset="UTF-8">` and viewport meta tag for responsiveness
-- Use meaningful IDs and class names in kebab-case
-- Include `lang="en"` attribute on `<html>` tag
+### Snippet
 
-### CSS Naming & Organization
-- Follow **CSS Custom Properties pattern** for colors and spacing:
-  ```css
-  :root {
-    --primary-color: #1d4ed8;
-    --secondary-color: #9333ea;
-    --text-color: #4b5563;
-    --background-color: #f3f4f6;
-  }
-  ```
-- Use BEM-inspired naming for clarity (e.g., `.card__header`, `.btn--primary`)
-- Group styles logically: reset → custom utilities → component-specific → animations
-- Always include transitions and hover states for interactive elements
+1. Add `{ slug, title, description, tags, icon }` to `src/data/snippets.ts`.
+2. Add a client component under `src/components/snippets/`.
+3. Register it in the `demos` record in
+   `src/app/(site)/snippets/[slug]/page.tsx`.
 
-### Accessibility Standards
-- Use proper heading hierarchy (`<h1>` → `<h2>` → `<h3>`, no skipping levels)
-- Include descriptive `alt` text for all images
-- Use `<label>` with form inputs (connected via `for` attribute)
-- Ensure sufficient color contrast (WCAG AA minimum: 4.5:1 for text)
-- Make interactive elements keyboard accessible (`:focus` states, logical tab order)
+## Conventions
 
-### File & Naming Conventions
-- HTML files: lowercase with hyphens (e.g., `contact-form.html`)
-- CSS files: lowercase with hyphens (e.g., `style.css`, `responsive-navbar.css`)
-- Asset folders: lowercase with descriptive names (e.g., `/assets/`, `/images/`)
+### Next.js
 
-## Common Development Tasks
+- `params` and `searchParams` are Promises in pages: `const { slug } = await params`.
+- Static dynamic routes use `generateStaticParams()`.
+- Prefer server components. Add `"use client"` only for state, effects, or
+  browser APIs.
+- Use `next/link` for internal navigation and `next/font` for fonts.
+- Do not add CDN `<script>` or `<link>` tags for CSS frameworks. Tailwind is
+  compiled locally from `globals.css`.
 
-### Viewing Projects
-Since this is a static site, projects can be viewed directly by opening HTML files in a browser:
-- Open any `.html` file in your browser to preview
-- Use VS Code's Live Preview extension (configured in `.vscode/settings.json`)
-- No server or build step required
+### Styling
 
-### Testing Responsive Design
-- Use browser DevTools to test at different breakpoints
-- Check mobile (375px), tablet (768px), and desktop (1024px+) viewport sizes
-- Verify touch-friendly button sizes (minimum 44x44px)
+- Theme tokens are CSS custom properties on `:root` / `[data-theme="light"]`
+  and `[data-theme="dark"]` in `globals.css`. Use `var(--bg)`, `var(--bg-card)`,
+  `var(--text)`, `var(--text-muted)`, `var(--border)`, `var(--primary)`, and
+  `var(--secondary)` instead of hard-coded colors.
+- `data-theme` lives on `<html>`. `ThemeToggle` and the inline boot script in
+  `layout.tsx` own it; `localStorage` key is `ffe-theme`.
+- Element selectors (`body`, `a`) live in `@layer base` so Tailwind utilities
+  can override them. New global element rules must follow the same pattern.
+- Reuse `.hub-card`, `.section-title`, `.tech-tag`, `.diff-badge`,
+  `.snippet-card`, `.resource-link`, `.doc-body`, and `.table-cell`.
+- Demo pages may use scoped `<style>` blocks, but scope every selector under a
+  demo wrapper. Never style `body`, `nav`, or `table` globally from a demo.
 
-### Adding External Dependencies
-- Prefer CDN links for libraries (e.g., Bootstrap, Tailwind, AOS)
-- Document CDN links in project READMEs for clarity
-- Keep dependencies minimal to maintain learning-focused approach
-- Include fallbacks for critical features if possible
+### Content and accessibility
 
-### Updating the Main Portfolio
-When modifying `index.html` or `styles.css`:
-- Test changes across modern browsers (Chrome, Firefox, Safari, Edge)
-- Maintain accessibility standards (all existing WCAG compliance)
-- Ensure responsive behavior is not broken
-- Update `README.md` if adding new projects or major features
+- Use semantic landmarks and a single `<h1>` per page.
+- Label every form control; connect hints and errors with `aria-describedby`.
+- Keep heading order and table captions/`scope` attributes.
+- Ensure interactive targets are keyboard reachable and show focus.
+- Respect `prefers-reduced-motion`; shared styled already disable animation.
+- Add `alt` text to images; decorative icons get `aria-hidden="true"`.
 
-## Key Principles
+## Verification
 
-1. **Education First**: Code examples should be clear and teachable; favor readability over cleverness
-2. **No Build Tools**: Everything is plain HTML/CSS/JavaScript when needed (no compilation, bundling, or frameworks)
-3. **Semantic HTML**: Structure always comes before styling; use HTML5 semantic elements
-4. **Responsive by Default**: All new projects must work on mobile, tablet, and desktop
-5. **Accessibility Matters**: Follow WCAG guidelines in all new content; demonstrate inclusive design
-6. **Reusability**: Snippets and patterns should be extractable and adaptable for learners
+Before finishing a change:
 
-## Resources & References
-
-- [MDN Web Docs](https://developer.mozilla.org/) - Authoritative reference for HTML/CSS
-- [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/) - Accessibility standards
-- [CSS Tricks](https://css-tricks.com/) - Best practices and techniques
-- Repository's own `/resources/` directory for curated best practices and SEO tips
-
-## Contact & Contribution
-
-- **Maintainer**: Bhargav (bhargav05@yandex.com)
-- **Repository**: [bhargavtz/FrontEndFusion](https://github.com/bhargavtz/FrontEndFusion)
-- **Contributions**: Follow the workflow in README.md; create feature branches and PRs
+1. `cd frontend && npm run build`
+2. `npm run lint`
+3. Spot-check `/`, `/docs`, `/docs/<slug>`, `/snippets/<slug>`, and the touched
+   project route in a browser.
+4. Confirm no dead links to removed HTML or Markdown files remain:
+   `grep -rn "index.html\|styles.css\|\.md\"" frontend/src`

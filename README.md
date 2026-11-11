@@ -1,196 +1,168 @@
-# FrontEndFusion  
-![GitHub repo size](https://img.shields.io/github/repo-size/bhargavtz/FrontEndFusion)  
+# FrontEndFusion
 
-**A Comprehensive Resource for Learning and Mastering HTML and CSS**
+**A Next.js learning hub for HTML, CSS, and modern frontend development.**
 
-## 📖 Overview  
+FrontEndFusion combines interactive demos, copy-paste form snippets, and a full
+guide library in one structured app. All site content lives in typed data
+modules, so pages are generated from a single source of truth instead of
+hand-maintained HTML.
 
-**FrontEndFusion** is your one-stop resource for learning, experimenting, and mastering the fundamentals of frontend web development using HTML and CSS.  
-Whether you're a beginner or an experienced developer, this repository offers:  
-- Code snippets  
-- Best practices  
-- Project templates  
-- Advanced concepts  
+## ✨ What's inside
 
-Designed to help you build responsive, accessible, and visually stunning websites.  
+- **6 interactive project demos** — responsive navbar, landing page, Flexbox,
+  CSS Grid, animations, and a dark-mode toggle.
+- **3 copy-paste form snippets** — login, contact, and newsletter, each with
+  working client-side interactions.
+- **9 in-app guides** — HTML, CSS, responsive design, advanced CSS, best
+  practices, accessibility, SEO, JavaScript, and a CSS cheat sheet.
+- **Dark and light themes** with system-preference detection, `localStorage`
+  persistence, and no flash on first paint.
+- **Accessible by default** — semantic landmarks, skip link, labelled controls,
+  visible focus states, and reduced-motion support.
 
+## 🛠 Tech stack
 
-## ✨ Features  
+- [Next.js 16](https://nextjs.org/) (App Router, Cache Components)
+- React 19 and TypeScript
+- Tailwind CSS 4
+- `react-markdown` + `remark-gfm` for the guide library
+- `next/font` (Geist and Geist Mono)
 
-- **Beginner-Friendly Tutorials**: Step-by-step guides to start with HTML and CSS.  
-- **Code Snippets**: Ready-to-use examples for tasks like forms, buttons, layouts, and navigation.  
-- **Responsive Design Tips**: Techniques to make websites look great on all devices.  
-- **CSS Animations and Transitions**: Enhance designs with smooth animations.  
-- **Accessibility Best Practices**: Create inclusive designs.  
-- **Real-World Projects**: Mini-projects to apply your knowledge.  
-- **Modern Techniques**: Flexbox, Grid, and CSS custom properties.  
-- **SEO Optimization Tips**: Ensure discoverability alongside beauty.  
+## 🚀 Run locally
 
-## 🛠️ Tech Stack  
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-- **HTML5**: Structuring web content.  
-- **CSS3**: Styling layout, typography, and responsiveness.  
+Open <http://localhost:3000>.
 
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the development server |
+| `npm run build` | Production build |
+| `npm start` | Serve the production build |
+| `npm run lint` | Run ESLint |
 
-## 🗂️ Repository Structure  
+## 🗂 Project structure
 
-```plaintext
-├── tutorials/  
-│   ├── beginner/  
-│   ├── intermediate/  
-│   ├── advanced/  
-├── snippets/  
-│   ├── layout/  
-│   ├── forms/  
-│   ├── buttons/  
-├── projects/  
-│   ├── landing-page/  
-│   ├── portfolio/  
-│   ├── e-commerce/  
-├── resources/  
-│   ├── best-practices.md  
-│   ├── seo-tips.md  
-│   ├── accessibility.md  
-├── README.md  
-```  
+```text
+FrontEndFusion/
+├── README.md
+├── CLAUDE.md
+├── LICENSE
+├── SECURITY.md
+└── frontend/
+    ├── content/
+    │   └── docs/              # Markdown sources for every guide (9 files)
+    ├── public/
+    └── src/
+        ├── app/
+        │   ├── (site)/        # Hub, docs, and snippets (shared header/footer)
+        │   │   ├── page.tsx
+        │   │   ├── docs/
+        │   │   └── snippets/
+        │   ├── projects/      # Standalone interactive demo routes
+        │   ├── globals.css    # Theme tokens and shared component styles
+        │   └── layout.tsx     # Root layout, metadata, theme bootstrap
+        ├── components/
+        │   ├── projects/      # Interactive demo components
+        │   ├── snippets/      # Form demo components
+        │   └── ...            # Header, footer, cards, table, markdown
+        ├── data/              # 8 typed datasets — 31 keys
+        └── lib/               # Markdown and icon helpers
+```
 
+## 🧩 Content model — 8 datasets, 31 keys
 
-## 📚 Learning Path  
+Every page reads from `frontend/src/data`. The exported `siteData` object in
+`src/data/index.ts` is the single entry point.
 
-### 1️⃣ HTML Basics  
+| # | Dataset | File | Keys |
+| --- | --- | --- | --- |
+| 1 | Navigation | `navigation.ts` | `label`, `href` |
+| 2 | Hero | `hero.ts` | `title`, `subtitle`, `actions` |
+| 3 | Features | `features.ts` | `icon`, `title`, `detail` |
+| 4 | Projects | `projects.ts` | `slug`, `title`, `description`, `tags`, `level` |
+| 5 | Snippets | `snippets.ts` | `slug`, `title`, `description`, `tags`, `icon` |
+| 6 | Resources | `resources.ts` | `title`, `href`, `icon`, `tint` |
+| 7 | Learning path | `learning-path.ts` | `slug`, `title`, `description`, `icon`, `level` |
+| 8 | Docs | `docs.ts` | `slug`, `title`, `description`, `category` |
 
-- Understanding elements, attributes, and tags  
-- Creating layouts (headings, paragraphs, lists, etc.)  
-- Linking pages using anchor tags  
-- Adding multimedia (images, videos)  
+Guide bodies live in `frontend/content/docs/<slug>.md`. The slug in `docs.ts`
+must match the Markdown filename.
 
-### 2️⃣ CSS Fundamentals  
+## 🧭 Routes
 
-- Selectors, properties, and values  
-- Styling text and backgrounds  
-- Box model (margin, padding, border)  
-- Positioning elements  
+| Route | Description |
+| --- | --- |
+| `/` | Hub with features, projects, snippets, resources, and learning path |
+| `/docs` | Full guide library |
+| `/docs/[slug]` | Rendered guide with table of contents and prev/next navigation |
+| `/snippets/[slug]` | Interactive form demo |
+| `/projects/responsive-navbar` | Responsive navbar demo |
+| `/projects/landing-page` | Landing page demo |
+| `/projects/flexbox-layout` | Flexbox showcase |
+| `/projects/css-grid` | CSS Grid showcase |
+| `/projects/animations` | CSS animation showcase |
+| `/projects/dark-mode` | Scoped dark-mode toggle demo |
 
-### 3️⃣ Responsive Design  
+## ➕ Adding content
 
-- Media queries  
-- Flexbox for dynamic layouts  
-- CSS Grid for complex structures  
-- Mobile-first design  
+**A new guide**
 
-### 4️⃣ Advanced Topics  
+1. Add `frontend/content/docs/my-guide.md`.
+2. Add an entry to `docs` in `src/data/docs.ts` with the same slug.
+3. Optionally add it to `learningPath` in `src/data/learning-path.ts`.
 
-- CSS animations and transitions  
-- Using custom properties (CSS variables)  
-- Pseudo-classes and pseudo-elements  
-- Browser compatibility  
+**A new project**
 
-### 5️⃣ Best Practices  
+1. Add an entry to `src/data/projects.ts`.
+2. Create `src/app/projects/<slug>/page.tsx`.
+3. Put interactive UI in `src/components/projects/` and keep the page a server
+   component so it can export metadata.
 
-- Writing semantic HTML  
-- Structuring CSS for maintainability  
-- Ensuring accessibility (WCAG guidelines)  
-- Optimizing CSS for performance  
+**A new snippet**
 
-## 🚀 Getting Started  
+1. Add an entry to `src/data/snippets.ts`.
+2. Build the client component in `src/components/snippets/`.
+3. Register it in the `demos` map in
+   `src/app/(site)/snippets/[slug]/page.tsx`.
 
-### Prerequisites  
+## 🎨 Theming
 
-1. Text editor (e.g., VS Code).  
-2. Modern browser (e.g., Chrome, Firefox).  
-3. Basic understanding of web development.  
+Theme tokens are CSS custom properties in `globals.css`:
 
-### Installation  
+- `:root`, `[data-theme="light"]` — light palette
+- `[data-theme="dark"]` — dark palette
 
-1. Clone the repository:  
+A small inline script in `src/app/layout.tsx` applies the stored or system
+theme before paint. The header toggle writes `ffe-theme` to `localStorage`.
+Use the token variables (`var(--bg)`, `var(--text)`, `var(--primary)`, …)
+rather than hard-coded colors so both themes keep working.
 
-   ```bash
-   git clone https://github.com/bhargavtz/FrontEndFusion.git
-   ```  
+## ♿ Accessibility
 
-2. Navigate to the project folder:  
+- Semantic landmarks and a skip-to-content link.
+- Labelled inputs, `aria-expanded` menu buttons, and `role="switch"` theme
+  toggle.
+- Visible `:focus-visible` outlines.
+- Reduced-motion media query disables non-essential animation.
+- Tables include captions and scoped headers.
 
-   ```bash
-   cd FrontEndFusion
-   ```  
+## 🤝 Contributing
 
-3. Open files in your favorite editor or browser.  
+1. Fork the repository.
+2. Create a branch: `git checkout -b feature/my-change`.
+3. Make the change and run `npm run build` inside `frontend/`.
+4. Open a pull request describing the change.
 
+## 📄 License
 
-## 🖥️ Demo Projects  
+MIT — see [`LICENSE`](./LICENSE).
 
-| Project No. | Project Name       | Folder Link                  | Live Review Link          |
-|-------------|--------------------|-----------------------------|---------------------------|
-| 1           | Responsive Navbar       | [Folder](./projects/Responsive%20Navbar/)                 | [Live Demo](./projects/Responsive%20Navbar/index.html)            |
-| 2           | Landing page  | [Folder](./projects/landing-page/)                 | [Live Demo](./projects/landing-page/index.html)            |
-| 3           | E-commerce Template| [Folder](#)                 | [Live Demo](#)            |
+## 📫 Contact
 
-Check out live demos of the sample projects included in this repository.  
-
-
-## 🌟 Contributing  
-
-Contributions are welcome!  
-
-1. Fork the repository.  
-2. Create a new branch:  
-
-   ```bash
-   git checkout -b feature-branch-name
-   ```  
-
-3. Commit changes:  
-
-   ```bash
-   git commit -m "Add feature"
-   ```  
-
-4. Push to the branch:  
-
-   ```bash
-   git push origin feature-branch-name
-   ```  
-
-5. Create a pull request.  
-
-
-## 🧰 Best Resources for Web Developers  
-
-| No. | Resource Name                  | Website Link                                   |
-|-----|--------------------------------|-----------------------------------------------|
-| 1   | CSS Gradient                  | [cssgradient.io](https://cssgradient.io/)     |
-| 2   | Colorhunt                     | [colorhunt.co](https://colorhunt.co/)         |
-| 3   | CSS Tricks                    | [css-tricks.com](https://css-tricks.com/)     |
-| 4   | Generators by Haikei          | [haikei.app](https://www.haikei.app/)         |
-| 5   | FFFuel                       | [fffuel.co](https://fffuel.co/)               |
-| 6   | SVG Backgrounds              | [svgbackgrounds.com](https://www.svgbackgrounds.com/) |
-| 7   | Animated Backgrounds         | [animatedbackgrounds.me](https://animatedbackgrounds.me/) |
-| 8   | Flowbite                     | [flowbite.com](https://flowbite.com/)         |
-| 9   | DaisyUI                      | [daisyui.com](https://daisyui.com/)           |
-| 10  | HTML Templates by Quackit    | [quackit.com](https://www.quackit.com/html/templates/) |
-| 11  | Devicon                      | [devicon.dev](https://devicon.dev/)           |
-| 12  | Flaticon                     | [flaticon.com](https://www.flaticon.com/)     |
-| 13  | Framer                       | [framer.com](https://www.framer.com/)         |
-| 14  | Bubble                       | [bubble.io](https://bubble.io/)               |
-| 15  | Adalo                        | [adalo.com](https://www.adalo.com/)           |
-| 16  | CDN JS                       | [cdnjs.com](https://cdnjs.com/)               |
-| 17  | Unsplash                     | [unsplash.com](https://unsplash.com/)         |
-| 18  | DALLE-3 (Bing AI Generator)  | [bing.com](https://www.bing.com/images/create)|
-| 19  | Mockup World                 | [mockupworld.co](https://www.mockupworld.co/) |
-| 20  | Free Mockup World            | [freemockupworld.com](https://freemockupworld.com/) |
-| 21  | UI Design Daily              | [uidesigndaily.com](https://www.uidesigndaily.com/) |
-| 22  | ShadCN                      | [shadcn.com](https://shadcn.com/)             |
-| 23  | Clickvote                   | [clickvote.dev](https://clickvote.dev/)       |
-| 24  | Spartan NG                  | [spartan-ng.shadcn.com](https://spartan-ng.shadcn.com/) |
-
-
-## 🛡️ License  
-
-This project is licensed under the **MIT License**. See the `LICENSE` file for details.  
-
-
-## 📫 Contact  
-
-For queries or suggestions, reach out at:  
-- **Email**: bhargav05@yandex.com  
-- **GitHub**: [bhargavtz](https://github.com/bhargavtz)  
+- GitHub: [bhargavtz](https://github.com/bhargavtz)
+- Email: bhargav05@yandex.com

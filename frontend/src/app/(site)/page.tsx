@@ -1,0 +1,204 @@
+import Link from "next/link";
+import { hero } from "@/data/hero";
+import { features } from "@/data/features";
+import { snippets } from "@/data/snippets";
+import { resourceGroups } from "@/data/resources";
+import { learningPath } from "@/data/learning-path";
+import { docs } from "@/data/docs";
+import { SectionHeading } from "@/components/section-heading";
+import { ProjectTable } from "@/components/project-table";
+import { SnippetCard } from "@/components/snippet-card";
+import { ResourceGroup } from "@/components/resource-group";
+import { LearningCard } from "@/components/learning-card";
+
+export default function HomePage() {
+  return (
+    <>
+      {/* ── Hero ─────────────────────────────────────────────── */}
+      <header
+        className="relative overflow-hidden"
+        style={{
+          background:
+            "linear-gradient(135deg, #1b5e20 0%, #2e7d32 50%, #1b1b1b 100%)",
+        }}
+      >
+        <div
+          className="pointer-events-none absolute inset-0 opacity-20"
+          aria-hidden="true"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 20% 20%, #81c784 0, transparent 42%), radial-gradient(circle at 80% 0%, #a5d6a7 0, transparent 38%)",
+          }}
+        />
+        <div className="relative mx-auto max-w-6xl px-4 py-20 text-center">
+          <p
+            className="mb-4 inline-block rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-widest"
+            style={{
+              borderColor: "rgba(232,245,233,.5)",
+              color: "#e8f5e9",
+            }}
+          >
+            Open-source learning hub
+          </p>
+          <h1
+            className="mb-4 text-5xl font-bold tracking-tight sm:text-6xl"
+            style={{
+              background:
+                "linear-gradient(to right, #ffffff 0%, #e8f5e9 45%, #b9e4bb 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              color: "transparent",
+            }}
+          >
+            {hero.title}
+          </h1>
+          <p
+            className="mx-auto mb-8 max-w-xl text-lg leading-relaxed"
+            style={{ color: "#e8f5e9" }}
+          >
+            {hero.subtitle}
+          </p>
+          <div className="flex flex-wrap justify-center gap-3">
+            {hero.actions.map((action) =>
+              action.variant === "primary" ? (
+                <Link
+                  key={action.href}
+                  href={action.href}
+                  className="rounded-xl px-5 py-2.5 text-sm font-semibold no-underline transition hover:brightness-110"
+                  style={{ background: "#2e7d32", color: "#fff" }}
+                >
+                  {action.label} <span aria-hidden="true">→</span>
+                </Link>
+              ) : (
+                <Link
+                  key={action.href}
+                  href={action.href}
+                  className="rounded-xl border px-5 py-2.5 text-sm font-semibold no-underline transition hover:bg-white/10"
+                  style={{
+                    borderColor: "rgba(232,245,233,.55)",
+                    color: "#e8f5e9",
+                  }}
+                >
+                  {action.label}
+                </Link>
+              ),
+            )}
+          </div>
+          <p className="mt-8 text-xs" style={{ color: "rgba(232,245,233,.9)" }}>
+            {docs.length} guides · 6 interactive demos · 3 copy-paste forms
+          </p>
+        </div>
+      </header>
+
+      {/* ── Main ─────────────────────────────────────────────── */}
+      <main id="main-content" className="mx-auto max-w-6xl px-4 py-12">
+        {/* Introduction */}
+        <section id="intro" className="mb-16 scroll-mt-24">
+          <SectionHeading title="What Is FrontEndFusion?" />
+          <p
+            className="mt-4 max-w-3xl text-lg leading-relaxed"
+            style={{ color: "var(--text-muted)" }}
+          >
+            FrontEndFusion is an open-source collection of HTML &amp; CSS
+            demos, code snippets, and learning guides. Whether you&apos;re a
+            beginner exploring semantic HTML or an intermediate developer
+            mastering CSS Grid and animations — this hub has something for you.
+          </p>
+
+          <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+            {features.map((feature) => (
+              <div key={feature.title} className="hub-card text-center">
+                <div className="mb-2 text-2xl" aria-hidden="true">
+                  {feature.icon}
+                </div>
+                <p className="text-sm font-semibold">{feature.title}</p>
+                <p
+                  className="mt-1 text-xs"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  {feature.detail}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Projects */}
+        <section id="projects" className="mb-16 scroll-mt-24">
+          <SectionHeading
+            title="Projects Overview"
+            description="Click any project to open the interactive demo."
+          />
+          <ProjectTable />
+        </section>
+
+        {/* Snippets */}
+        <section id="snippets" className="mb-16 scroll-mt-24">
+          <SectionHeading
+            title="Code Snippets"
+            description="Copy-paste ready HTML form templates — fully styled, responsive, and keyboard accessible."
+          />
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+            {snippets.map((snippet) => (
+              <SnippetCard key={snippet.slug} snippet={snippet} />
+            ))}
+          </div>
+        </section>
+
+        {/* Resources */}
+        <section id="resources" className="mb-16 scroll-mt-24">
+          <SectionHeading
+            title="Resources & Guides"
+            description="Reference guides on accessibility, SEO, and frontend best practices."
+          />
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {resourceGroups.map((group) => (
+              <ResourceGroup key={group.title} group={group} />
+            ))}
+          </div>
+        </section>
+
+        {/* Learning path */}
+        <section id="learning" className="mb-16 scroll-mt-24">
+          <SectionHeading
+            title="Learning Path"
+            description="A structured guide from HTML basics to advanced CSS techniques."
+          />
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {learningPath.map((step) => (
+              <LearningCard key={step.slug} step={step} />
+            ))}
+          </div>
+        </section>
+
+        {/* Docs CTA */}
+        <section
+          className="hub-card flex flex-col items-start justify-between gap-5 sm:flex-row sm:items-center"
+          style={{
+            background:
+              "linear-gradient(120deg, var(--bg-card) 0%, var(--bg-subtle) 100%)",
+          }}
+        >
+          <div>
+            <h2 className="text-xl font-bold">Browse the full guide library</h2>
+            <p
+              className="mt-1 text-sm"
+              style={{ color: "var(--text-muted)" }}
+            >
+              Every tutorial is rendered in-app with a table of contents, code
+              samples, and previous/next navigation.
+            </p>
+          </div>
+          <Link
+            href="/docs"
+            className="whitespace-nowrap rounded-xl px-5 py-2.5 text-sm font-semibold no-underline transition hover:brightness-110"
+            style={{ background: "#2e7d32", color: "#fff" }}
+          >
+            Open Docs <span aria-hidden="true">→</span>
+          </Link>
+        </section>
+      </main>
+    </>
+  );
+}
