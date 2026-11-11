@@ -53,10 +53,10 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
         <Link
           href="/"
-          className="text-lg font-bold no-underline"
+          className="flex items-center gap-2 text-lg font-extrabold tracking-tight no-underline"
           style={{
-            background:
-              "linear-gradient(to right, var(--primary), var(--secondary))",
+            backgroundImage:
+              "linear-gradient(120deg, var(--primary), var(--secondary))",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             backgroundClip: "text",
@@ -64,6 +64,11 @@ export function SiteHeader() {
           }}
           onClick={() => setOpen(false)}
         >
+          <span
+            className="inline-block h-2.5 w-2.5 rounded-full"
+            style={{ background: "var(--primary)" }}
+            aria-hidden="true"
+          />
           FrontEndFusion
         </Link>
 

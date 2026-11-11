@@ -18,8 +18,8 @@ const demoStyles = `
   --dm-text-secondary: #475569;
   --dm-text-muted: #94a3b8;
   --dm-border: #e2e8f0;
-  --dm-accent: #4f46e5;
-  --dm-accent-hover: #4338ca;
+  --dm-accent: #22c55e;
+  --dm-accent-hover: #16a34a;
   --dm-shadow: 0 4px 20px rgba(0,0,0,.08);
   --dm-toggle-bg: #e2e8f0;
   --dm-toggle-thumb: #ffffff;
@@ -39,10 +39,10 @@ const demoStyles = `
   --dm-text-secondary: #94a3b8;
   --dm-text-muted: #64748b;
   --dm-border: #334155;
-  --dm-accent: #818cf8;
-  --dm-accent-hover: #a5b4fc;
+  --dm-accent: #4ade80;
+  --dm-accent-hover: #86efac;
   --dm-shadow: 0 4px 20px rgba(0,0,0,.4);
-  --dm-toggle-bg: #4f46e5;
+  --dm-toggle-bg: #22c55e;
   --dm-toggle-thumb: #f1f5f9;
   --dm-code-bg: #0f172a;
 }
@@ -72,7 +72,7 @@ const demoStyles = `
   font-weight: 600;
   padding: 2px 8px;
   border-radius: 99px;
-  background: rgba(79,70,229,.15);
+  background: rgba(34,197,94,.15);
   color: var(--dm-accent);
   transition: background .3s, color .3s;
 }
@@ -92,7 +92,7 @@ const demoStyles = `
 .dark-demo .dm-input:focus {
   outline: none;
   border-color: var(--dm-accent);
-  box-shadow: 0 0 0 3px rgba(79,70,229,.2);
+  box-shadow: 0 0 0 3px rgba(34,197,94,.2);
 }
 .dark-demo table { width: 100%; border-collapse: collapse; }
 .dark-demo th, .dark-demo td {
@@ -148,13 +148,13 @@ const demoStyles = `
 const cssSnippet = `:root {
   --bg: #f8fafc;
   --text: #0f172a;
-  --accent: #4f46e5;
+  --accent: #22c55e;
 }
 
 [data-theme="dark"] {
   --bg: #0f172a;
   --text: #f1f5f9;
-  --accent: #818cf8;
+  --accent: #4ade80;
 }
 
 body {
@@ -469,8 +469,8 @@ export function DarkModeDemo() {
                   </tr>
                   <tr>
                     <td>Accent</td>
-                    <td>#4f46e5</td>
-                    <td>#818cf8</td>
+                    <td>#22c55e</td>
+                    <td>#4ade80</td>
                   </tr>
                 </tbody>
               </table>

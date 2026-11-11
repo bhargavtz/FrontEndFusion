@@ -24,6 +24,8 @@ const canvasBySlug: Record<string, string> = {
   "newsletter-form": "linear-gradient(135deg, #f5f3ff 0%, #faf5ff 100%)",
 };
 
+export const instant = false;
+
 export function generateStaticParams() {
   return snippets.map((snippet) => ({ slug: snippet.slug }));
 }

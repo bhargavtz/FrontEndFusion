@@ -19,18 +19,27 @@ export default function HomePage() {
         className="relative overflow-hidden"
         style={{
           background:
-            "linear-gradient(135deg, #1b5e20 0%, #2e7d32 50%, #1b1b1b 100%)",
+            "linear-gradient(160deg, #052e16 0%, #14532d 35%, #16a34a 70%, #22c55e 100%)",
         }}
       >
         <div
-          className="pointer-events-none absolute inset-0 opacity-20"
+          className="pointer-events-none absolute inset-0 opacity-30"
           aria-hidden="true"
           style={{
             backgroundImage:
-              "radial-gradient(circle at 20% 20%, #81c784 0, transparent 42%), radial-gradient(circle at 80% 0%, #a5d6a7 0, transparent 38%)",
+              "radial-gradient(circle at 15% 15%, #ffffff 0, transparent 35%), radial-gradient(circle at 85% 85%, #bbf7d0 0, transparent 40%), radial-gradient(circle at 50% 50%, #16a34a 0, transparent 60%)",
           }}
         />
-        <div className="relative mx-auto max-w-6xl px-4 py-20 text-center">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.04]"
+          aria-hidden="true"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, #fff 1px, transparent 1px), linear-gradient(to bottom, #fff 1px, transparent 1px)",
+            backgroundSize: "48px 48px",
+          }}
+        />
+        <div className="relative mx-auto max-w-6xl px-4 py-24 text-center sm:py-28">
           <p
             className="mb-4 inline-block rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-widest"
             style={{
@@ -43,7 +52,7 @@ export default function HomePage() {
           <h1
             className="mb-4 text-5xl font-bold tracking-tight sm:text-6xl"
             style={{
-              background:
+              backgroundImage:
                 "linear-gradient(to right, #ffffff 0%, #e8f5e9 45%, #b9e4bb 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
@@ -92,9 +101,9 @@ export default function HomePage() {
       </header>
 
       {/* ── Main ─────────────────────────────────────────────── */}
-      <main id="main-content" className="mx-auto max-w-6xl px-4 py-12">
+      <main id="main-content" className="mx-auto max-w-6xl px-4 py-16">
         {/* Introduction */}
-        <section id="intro" className="mb-16 scroll-mt-24">
+        <section id="intro" className="mb-20 scroll-mt-24 fade-in">
           <SectionHeading title="What Is FrontEndFusion?" />
           <p
             className="mt-4 max-w-3xl text-lg leading-relaxed"
@@ -125,16 +134,16 @@ export default function HomePage() {
         </section>
 
         {/* Projects */}
-        <section id="projects" className="mb-16 scroll-mt-24">
+        <section id="projects" className="mb-20 scroll-mt-24 fade-in">
           <SectionHeading
             title="Projects Overview"
-            description="Click any project to open the interactive demo."
+            description="Six hands-on demos. Click any card to open the interactive showcase."
           />
           <ProjectTable />
         </section>
 
         {/* Snippets */}
-        <section id="snippets" className="mb-16 scroll-mt-24">
+        <section id="snippets" className="mb-20 scroll-mt-24 fade-in">
           <SectionHeading
             title="Code Snippets"
             description="Copy-paste ready HTML form templates — fully styled, responsive, and keyboard accessible."
@@ -147,7 +156,7 @@ export default function HomePage() {
         </section>
 
         {/* Resources */}
-        <section id="resources" className="mb-16 scroll-mt-24">
+        <section id="resources" className="mb-20 scroll-mt-24 fade-in">
           <SectionHeading
             title="Resources & Guides"
             description="Reference guides on accessibility, SEO, and frontend best practices."
@@ -160,7 +169,7 @@ export default function HomePage() {
         </section>
 
         {/* Learning path */}
-        <section id="learning" className="mb-16 scroll-mt-24">
+        <section id="learning" className="mb-20 scroll-mt-24 fade-in">
           <SectionHeading
             title="Learning Path"
             description="A structured guide from HTML basics to advanced CSS techniques."

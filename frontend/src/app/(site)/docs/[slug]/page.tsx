@@ -14,6 +14,8 @@ type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
+export const instant = false;
+
 export function generateStaticParams() {
   return docs.map((doc) => ({ slug: doc.slug }));
 }
