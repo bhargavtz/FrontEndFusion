@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { TerminalRain } from "@/components/terminal-rain";
 import "./globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -48,7 +49,11 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="font-sans leading-relaxed antialiased">{children}</body>
+      <body className="font-sans leading-relaxed antialiased">
+        <div className="app-bg" aria-hidden="true" />
+        <TerminalRain />
+        <div className="relative z-10">{children}</div>
+      </body>
     </html>
   );
 }
