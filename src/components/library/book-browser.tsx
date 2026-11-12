@@ -93,22 +93,24 @@ export function BookBrowser({ books }: { books: Book[] }) {
           />
         </div>
 
-        <div role="group" aria-labelledby="topic-filter-label" className="flex flex-wrap items-center gap-2">
-          <span
-            id="topic-filter-label"
-            className="mr-1 text-xs font-semibold uppercase tracking-[.14em]"
-            style={{ color: "var(--text-muted)" }}
+        <div>
+          <label htmlFor="book-topic" className="mb-2 block text-sm font-semibold">
+            Category
+          </label>
+          <select
+            id="book-topic"
+            value={topic}
+            onChange={(event) => setTopic(event.target.value as TopicFilter)}
+            className="w-full rounded-xl border px-4 py-2.5 text-base sm:w-96"
+            style={inputStyle}
           >
-            Topic
-          </span>
-          <FilterButton active={topic === "All"} onClick={() => setTopic("All")}>
-            All
-          </FilterButton>
-          {bookTopics.map((item) => (
-            <FilterButton key={item} active={topic === item} onClick={() => setTopic(item)}>
-              {item}
-            </FilterButton>
-          ))}
+            <option value="All">All categories</option>
+            {bookTopics.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div role="group" aria-labelledby="level-filter-label" className="flex flex-wrap items-center gap-2">
@@ -170,15 +172,19 @@ export function BookBrowser({ books }: { books: Book[] }) {
                   >
                     {book.topic}
                   </span>
-                  <LevelBadge level={book.level} />
+                  {book.level && <LevelBadge level={book.level} />}
                 </div>
                 <h2 className="mb-1 text-base font-semibold">{book.title}</h2>
-                <p className="mb-3 text-xs" style={{ color: "var(--text-muted)" }}>
-                  {book.author} · {book.year}
-                </p>
-                <p className="mb-4 flex-1 text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
-                  {book.description}
-                </p>
+                {(book.author || book.year) && (
+                  <p className="mb-3 text-xs" style={{ color: "var(--text-muted)" }}>
+                    {[book.author, book.year].filter(Boolean).join(" · ")}
+                  </p>
+                )}
+                {book.description && (
+                  <p className="mb-4 flex-1 text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                    {book.description}
+                  </p>
+                )}
                 <span className="text-sm font-semibold" style={{ color: "var(--secondary)" }}>
                   View details <span aria-hidden="true">→</span>
                 </span>

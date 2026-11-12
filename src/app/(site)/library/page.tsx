@@ -30,9 +30,9 @@ export default function LibraryPage() {
         </p>
         <h1 className="section-title">Free Programming Books</h1>
         <p className="mt-3 text-lg" style={{ color: "var(--text-muted)" }}>
-          Hand-picked free books and official docs for frontend development and
-          AI-assisted coding. Search by title, author, or topic, then open an
-          entry for a summary and key takeaways.
+          Programming books for frontend development, AI-assisted coding, and
+          more. Search by title, author, or category, then open an entry for its
+          details, cover, and read or download links.
         </p>
       </header>
 

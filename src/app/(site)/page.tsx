@@ -233,8 +233,8 @@ export default function HomePage() {
               className="mt-1 text-sm"
               style={{ color: "var(--text-muted)" }}
             >
-              {books.length} free books and official docs for frontend and
-              AI-assisted coding, with search, topic and level filters.
+              {books.length} programming books and PDFs, with search and category
+              filters.
             </p>
           </div>
           <Link

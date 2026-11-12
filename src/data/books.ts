@@ -1,28 +1,47 @@
-export type BookTopic = "Web Frontend" | "AI & LLM";
+import { codingPdfBooks } from "./codingpdf-books";
+
+export type BookTopic = string;
 export type BookLevel = "Beginner" | "Intermediate" | "Advanced";
+
+/**
+ * "Free" = openly licensed or official free material (curated entries).
+ * "Third-party listing" = a PDF listing from another site. We do not host it
+ * and have not verified its copyright status.
+ */
+export type BookAccess = "Free" | "Third-party listing";
 
 export type Book = {
   slug: string;
   title: string;
-  author: string;
+  author?: string;
   /** Publication year, or "Ongoing" for living docs and courses. */
-  year: string;
-  description: string;
-  takeaways: string[];
+  year?: string;
+  description?: string;
+  takeaways?: string[];
+  /** Curated entries use a fixed topic; imported entries use their catalog category. */
   topic: BookTopic;
-  level: BookLevel;
+  level?: BookLevel;
   tags: string[];
-  /** External link. Free books and free official docs only. */
-  href: string;
-  /** Publisher or hosting site. */
-  source: string;
+  /** Main external link. Curated entries only. */
+  href?: string;
+  /** Publisher or hosting site. Curated entries only. */
+  source?: string;
+  /** Defaults to "Free" when omitted. */
+  access?: BookAccess;
+  /** Cover image URL. */
+  cover?: string;
+  /** Read-online (view) URL. */
+  readUrl?: string;
+  /** Direct PDF download URL. */
+  downloadUrl?: string;
+  /** Human-readable file size, e.g. "75.57 MB". */
+  size?: string;
 };
 
-export const bookTopics: BookTopic[] = ["Web Frontend", "AI & LLM"];
 export const bookLevels: BookLevel[] = ["Beginner", "Intermediate", "Advanced"];
 
-/** Free programming books and official docs (dataset 9/9 — 11 keys per book). */
-export const books: Book[] = [
+/** Curated free books and official docs (hand-picked, 11 entries). */
+const curatedBooks: Book[] = [
   {
     slug: "eloquent-javascript",
     title: "Eloquent JavaScript",
@@ -222,5 +241,13 @@ export const books: Book[] = [
     source: "Stanford (free draft)",
   },
 ];
+
+/** Curated entries first, then the imported CodingPDF catalog. */
+export const books: Book[] = [...curatedBooks, ...codingPdfBooks];
+
+/** Distinct topics across all books, sorted for the category filter. */
+export const bookTopics: BookTopic[] = [
+  ...new Set(books.map((book) => book.topic)),
+].sort((a, b) => a.localeCompare(b));
 
 export const getBook = (slug: string) => books.find((book) => book.slug === slug);
