@@ -6,6 +6,7 @@ import { snippets } from "@/data/snippets";
 import { resourceGroups } from "@/data/resources";
 import { learningPath } from "@/data/learning-path";
 import { docs } from "@/data/docs";
+import { books } from "@/data/books";
 import { SectionHeading } from "@/components/section-heading";
 import { ProjectTable } from "@/components/project-table";
 import { SnippetCard } from "@/components/snippet-card";
@@ -216,6 +217,33 @@ export default function HomePage() {
               <LearningCard key={step.slug} step={step} />
             ))}
           </div>
+        </section>
+
+        {/* Library CTA */}
+        <section
+          className="hub-card mb-6 flex flex-col items-start justify-between gap-5 sm:flex-row sm:items-center"
+          style={{
+            background:
+              "linear-gradient(120deg, var(--bg-card) 0%, var(--bg-subtle) 100%)",
+          }}
+        >
+          <div>
+            <h2 className="text-xl font-bold">Find your next free book</h2>
+            <p
+              className="mt-1 text-sm"
+              style={{ color: "var(--text-muted)" }}
+            >
+              {books.length} free books and official docs for frontend and
+              AI-assisted coding, with search, topic and level filters.
+            </p>
+          </div>
+          <Link
+            href="/library"
+            className="font-display whitespace-nowrap rounded-xl px-5 py-2.5 text-sm font-semibold no-underline transition hover:brightness-110"
+            style={{ background: "#2e7d32", color: "#fff" }}
+          >
+            Browse the library <span aria-hidden="true">→</span>
+          </Link>
         </section>
 
         {/* Docs CTA */}

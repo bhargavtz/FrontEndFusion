@@ -6,20 +6,21 @@ Guidance for agents working in this repository.
 
 FrontEndFusion is a **Next.js 16 App Router** learning site for HTML, CSS, and
 frontend fundamentals. It is no longer a static HTML/CSS project. The entire
-site lives in `frontend/`:
+site lives at the repository root:
 
 - interactive project demos
 - copy-paste form snippets
 - nine Markdown-backed guides
 - a data-driven hub page with light/dark theming
 
-The repository root intentionally contains only project documentation and the
-`frontend/` app. Do not recreate `index.html`, `styles.css`, or root-level
-`projects/`, `snippets/`, `resources/`, or `web-dev-learning-path/` copies.
+The repository root holds the Next.js app plus project documentation. Serverless
+backend code will be added later. Do not recreate `index.html`, `styles.css`, or
+top-level `projects/`, `snippets/`, `resources/`, or `web-dev-learning-path/`
+copies.
 
 ## Commands
 
-Run everything from `frontend/`:
+Run everything from the repository root:
 
 ```bash
 npm run dev      # development server on :3000
@@ -28,13 +29,13 @@ npm run lint     # ESLint
 ```
 
 `next.config.ts` enables `cacheComponents` and `partialPrefetching`. Read the
-bundled Next.js docs in `frontend/node_modules/next/dist/docs/` before using an
+bundled Next.js docs in `node_modules/next/dist/docs/` before using an
 unfamiliar API; this version has breaking changes from older releases.
 
 ## Architecture
 
 ```text
-frontend/
+./
 ├── components.json          # shadcn config + @react-bits registry mapping
 ├── content/docs/*.md        # guide bodies (one file per docs.ts slug)
 ├── src/app/
@@ -44,7 +45,7 @@ frontend/
 │   └── layout.tsx           # <html>, metadata, pre-paint theme script
 ├── src/components/          # UI, project demos, snippet demos, markdown
 │   └── react-bits/          # upstream React Bits components (GradientASCII)
-├── src/data/                # single source of truth (8 datasets / 31 keys)
+├── src/data/                # single source of truth (9 datasets / 42 keys)
 └── src/lib/                 # markdown + icon helpers
 ```
 
@@ -55,8 +56,8 @@ palette, and density controls. The component is client-only (WebGL2), lives in
 `prefers-reduced-motion`. Keep its `.gradient-ascii-*` class names namespaced.
 
 React Bits components can also be added through shadcn:
-`npx shadcn@latest add @react-bits/<Name>-<LANG>-<STYLE>` (run it in
-`frontend/`). The registry lives in `components.json`. The installed
+`npx shadcn@latest add @react-bits/<Name>-<LANG>-<STYLE>` (run it at
+the repository root). The registry lives in `components.json`. The installed
 `SplitText.jsx` is generated JavaScript with one local patch: an `aria` prop
 forwarded to GSAP's SplitText options so callers can avoid an invalid
 `aria-label` on a paragraph. `SplitText.d.ts` provides its TypeScript props for
@@ -66,7 +67,7 @@ and add a matching `.d.ts` instead of annotating generated files.
 ### Data contract
 
 All content comes from `src/data`. `src/data/index.ts` exports `siteData`
-(the eight datasets) and `dataSummary`. The eight datasets and their keys:
+(the nine datasets) and `dataSummary`. The nine datasets and their keys:
 
 1. `navigation.ts` — `label`, `href`
 2. `hero.ts` — `title`, `subtitle`, `actions`
@@ -76,20 +77,21 @@ All content comes from `src/data`. `src/data/index.ts` exports `siteData`
 6. `resources.ts` — `title`, `href`, `icon`, `tint`
 7. `learning-path.ts` — `slug`, `title`, `description`, `icon`, `level`
 8. `docs.ts` — `slug`, `title`, `description`, `category`
+9. `books.ts` — `slug`, `title`, `author`, `year`, `description`, `takeaways`, `topic`, `level`, `tags`, `href`, `source`
 
 Rules:
 
 - Never hard-code content in a page that already exists in `src/data`.
 - A `docs.ts` slug must match `content/docs/<slug>.md`.
 - Project/snippet slugs must match their route folders and component maps.
-- Keep the 8/31 count in sync if the schema changes, and update the README
+- Keep the 9/42 count in sync if the schema changes, and update the README
   table at the same time.
 
 ## Adding content
 
 ### Guide
 
-1. Create `frontend/content/docs/<slug>.md` with a single leading `# Title`.
+1. Create `content/docs/<slug>.md` with a single leading `# Title`.
 2. Add `{ slug, title, description, category }` to `src/data/docs.ts`.
 3. Optionally add the same slug to `src/data/learning-path.ts`.
 
@@ -153,9 +155,9 @@ site header/footer. Each demo must provide its own way back to `/`.
 
 Before finishing a change:
 
-1. `cd frontend && npm run build`
+1. `npm run build`
 2. `npm run lint`
 3. Spot-check `/`, `/docs`, `/docs/<slug>`, `/snippets/<slug>`, and the touched
    project route in a browser.
 4. Confirm no dead links to removed HTML or Markdown files remain:
-   `grep -rn "index.html\|styles.css\|\.md\"" frontend/src`
+   `grep -rn "index.html\|styles.css\|\.md\"" src`

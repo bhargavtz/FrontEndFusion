@@ -38,7 +38,6 @@ hand-maintained HTML.
 ## 🚀 Run locally
 
 ```bash
-cd frontend
 npm install
 npm run dev
 ```
@@ -60,31 +59,33 @@ FrontEndFusion/
 ├── CLAUDE.md
 ├── LICENSE
 ├── SECURITY.md
-└── frontend/
-    ├── content/
-    │   └── docs/              # Markdown sources for every guide (9 files)
-    ├── public/
-    └── src/
-        ├── app/
-        │   ├── (site)/        # Hub, docs, and snippets (shared header/footer)
-        │   │   ├── page.tsx
-        │   │   ├── docs/
-        │   │   └── snippets/
-        │   ├── projects/      # Standalone interactive demo routes
-        │   ├── globals.css    # Theme tokens and shared component styles
-        │   └── layout.tsx     # Root layout, metadata, theme bootstrap
-        ├── components/
-        │   ├── projects/      # Interactive demo components
-        │   ├── snippets/      # Form demo components
-        │   ├── react-bits/    # Upstream React Bits components (GradientASCII)
-        │   └── ...            # Header, footer, cards, table, markdown
-        ├── data/              # 8 typed datasets — 31 keys
-        └── lib/               # Markdown and icon helpers
+├── content/
+│   └── docs/              # Markdown sources for every guide (9 files)
+├── public/
+├── src/
+│   ├── app/
+│   │   ├── (site)/        # Hub, docs, library, and snippets (shared header/footer)
+│   │   │   ├── page.tsx
+│   │   │   ├── docs/
+│   │   │   ├── library/
+│   │   │   └── snippets/
+│   │   ├── projects/      # Standalone interactive demo routes
+│   │   ├── globals.css    # Theme tokens and shared component styles
+│   │   └── layout.tsx     # Root layout, metadata, theme bootstrap
+│   ├── components/
+│   │   ├── projects/      # Interactive demo components
+│   │   ├── snippets/      # Form demo components
+│   │   ├── library/       # Book list search and filters
+│   │   ├── react-bits/    # Upstream React Bits components (GradientASCII)
+│   │   └── ...            # Header, footer, cards, table, markdown
+│   ├── data/              # 9 typed datasets — 42 keys
+│   └── lib/               # Markdown and icon helpers
+└── package.json
 ```
 
-## 🧩 Content model — 8 datasets, 31 keys
+## 🧩 Content model — 9 datasets, 42 keys
 
-Every page reads from `frontend/src/data`. The exported `siteData` object in
+Every page reads from `src/data`. The exported `siteData` object in
 `src/data/index.ts` is the single entry point.
 
 | # | Dataset | File | Keys |
@@ -97,8 +98,9 @@ Every page reads from `frontend/src/data`. The exported `siteData` object in
 | 6 | Resources | `resources.ts` | `title`, `href`, `icon`, `tint` |
 | 7 | Learning path | `learning-path.ts` | `slug`, `title`, `description`, `icon`, `level` |
 | 8 | Docs | `docs.ts` | `slug`, `title`, `description`, `category` |
+| 9 | Books | `books.ts` | `slug`, `title`, `author`, `year`, `description`, `takeaways`, `topic`, `level`, `tags`, `href`, `source` |
 
-Guide bodies live in `frontend/content/docs/<slug>.md`. The slug in `docs.ts`
+Guide bodies live in `content/docs/<slug>.md`. The slug in `docs.ts`
 must match the Markdown filename.
 
 ## 🧭 Routes
@@ -107,6 +109,8 @@ must match the Markdown filename.
 | --- | --- |
 | `/` | Hub with a WebGL visual lab, features, projects, snippets, resources, and learning path |
 | `/docs` | Full guide library |
+| `/library` | Free programming book library with search and topic/level filters |
+| `/library/[slug]` | Book info page with summary, takeaways, and the external link |
 | `/docs/[slug]` | Rendered guide with table of contents and prev/next navigation |
 | `/snippets/[slug]` | Interactive form demo |
 | `/projects/responsive-navbar` | Responsive navbar demo |
@@ -120,7 +124,7 @@ must match the Markdown filename.
 
 **A new guide**
 
-1. Add `frontend/content/docs/my-guide.md`.
+1. Add `content/docs/my-guide.md`.
 2. Add an entry to `docs` in `src/data/docs.ts` with the same slug.
 3. Optionally add it to `learningPath` in `src/data/learning-path.ts`.
 
@@ -163,7 +167,7 @@ rather than hard-coded colors so both themes keep working.
 
 1. Fork the repository.
 2. Create a branch: `git checkout -b feature/my-change`.
-3. Make the change and run `npm run build` inside `frontend/`.
+3. Make the change and run `npm run build` from the repository root.
 4. Open a pull request describing the change.
 
 ## 🙏 Credits
@@ -173,7 +177,7 @@ The hero background and visual lab use the open-source
 [React Bits](https://reactbits.dev), adapted to TypeScript and styled for this
 site. It renders entirely in the browser with WebGL2. The hero subtitle uses
 React Bits' `SplitText` (installed through the shadcn CLI) for its word reveal;
-`frontend/components.json` maps the `@react-bits` registry for future additions.
+`components.json` maps the `@react-bits` registry for future additions.
 
 ## 📄 License
 

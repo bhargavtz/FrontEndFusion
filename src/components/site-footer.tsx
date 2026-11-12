@@ -33,9 +33,6 @@ export function SiteFooter() {
             <Link href="/#projects" className="no-underline hover:underline">
               Projects
             </Link>
-            <Link href="/#visual-lab" className="no-underline hover:underline">
-              Visual Lab
-            </Link>
             <Link href="/#snippets" className="no-underline hover:underline">
               Snippets
             </Link>
