@@ -35,6 +35,7 @@ unfamiliar API; this version has breaking changes from older releases.
 
 ```text
 frontend/
+├── components.json          # shadcn config + @react-bits registry mapping
 ├── content/docs/*.md        # guide bodies (one file per docs.ts slug)
 ├── src/app/
 │   ├── (site)/              # hub, /docs, /snippets with shared chrome
@@ -42,9 +43,25 @@ frontend/
 │   ├── globals.css          # Tailwind import, tokens, shared styles
 │   └── layout.tsx           # <html>, metadata, pre-paint theme script
 ├── src/components/          # UI, project demos, snippet demos, markdown
+│   └── react-bits/          # upstream React Bits components (GradientASCII)
 ├── src/data/                # single source of truth (8 datasets / 31 keys)
 └── src/lib/                 # markdown + icon helpers
 ```
+
+The home page renders `GradientASCII` twice: as the full-bleed hero backdrop and
+inside `gradient-showcase.tsx`, an interactive lab (`/#visual-lab`) with shape,
+palette, and density controls. The component is client-only (WebGL2), lives in
+`src/components/react-bits/gradient-ascii.tsx`, and respects
+`prefers-reduced-motion`. Keep its `.gradient-ascii-*` class names namespaced.
+
+React Bits components can also be added through shadcn:
+`npx shadcn@latest add @react-bits/<Name>-<LANG>-<STYLE>` (run it in
+`frontend/`). The registry lives in `components.json`. The installed
+`SplitText.jsx` is generated JavaScript with one local patch: an `aria` prop
+forwarded to GSAP's SplitText options so callers can avoid an invalid
+`aria-label` on a paragraph. `SplitText.d.ts` provides its TypeScript props for
+the hero subtitle. Re-apply the `aria` patch if the component is regenerated,
+and add a matching `.d.ts` instead of annotating generated files.
 
 ### Data contract
 

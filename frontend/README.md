@@ -27,6 +27,11 @@ Open <http://localhost:3000>.
 - `src/app/(site)/` — hub, `/docs`, and `/snippets` routes with shared chrome.
 - `src/app/projects/` — standalone demo routes.
 - `src/components/` — shared UI, project demos, snippet demos, Markdown.
+- `src/components/react-bits/` — upstream React Bits components. `GradientASCII`
+  powers the hero and the `/#visual-lab` playground.
+- `src/components/SplitText.jsx` — React Bits `SplitText`, installed via shadcn;
+  `SplitText.d.ts` supplies its TypeScript props.
+- `components.json` — shadcn config and the `@react-bits` registry mapping.
 - `content/docs/` — Markdown sources for the nine guides.
 - `src/app/globals.css` — theme tokens and shared component styles.
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { hero } from "@/data/hero";
 import { features } from "@/data/features";
+import { projects } from "@/data/projects";
 import { snippets } from "@/data/snippets";
 import { resourceGroups } from "@/data/resources";
 import { learningPath } from "@/data/learning-path";
@@ -10,93 +11,120 @@ import { ProjectTable } from "@/components/project-table";
 import { SnippetCard } from "@/components/snippet-card";
 import { ResourceGroup } from "@/components/resource-group";
 import { LearningCard } from "@/components/learning-card";
+import { GradientShowcase } from "@/components/gradient-showcase";
+import GradientASCII from "@/components/react-bits/gradient-ascii";
+import SplitText from "@/components/SplitText";
+
+const MONO_FONT =
+  '"Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
 
 export default function HomePage() {
   return (
     <>
       {/* ── Hero ─────────────────────────────────────────────── */}
-      <header
-        className="relative overflow-hidden"
-        style={{
-          background:
-            "linear-gradient(160deg, #052e16 0%, #14532d 35%, #16a34a 70%, #22c55e 100%)",
-        }}
-      >
+      <header className="hero-stage relative isolate overflow-hidden">
+        <div className="hero-ascii-wrap absolute inset-0 -z-10" aria-hidden="true">
+          <GradientASCII
+            colors={["#0b3b24", "#15803d", "#4ade80", "#a7f3d0"]}
+            shape="eclipse"
+            characters=" .:-=+*#%@"
+            cellSize={14}
+            density={0.7}
+            glyphOpacity={0.55}
+            gradientOpacity={0.55}
+            glow={0.4}
+            flicker={0.18}
+            softness={0.6}
+            scale={2.2}
+            flow={0.45}
+            speed={0.45}
+            grain={0.2}
+            variation={3}
+            clickEffect="wave"
+            intro
+            dpr={1.75}
+            fontFamily={MONO_FONT}
+            className="hero-ascii"
+          />
+        </div>
         <div
-          className="pointer-events-none absolute inset-0 opacity-30"
+          className="hero-scrim pointer-events-none absolute inset-0 -z-10"
           aria-hidden="true"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 15% 15%, #ffffff 0, transparent 35%), radial-gradient(circle at 85% 85%, #bbf7d0 0, transparent 40%), radial-gradient(circle at 50% 50%, #16a34a 0, transparent 60%)",
-          }}
         />
         <div
-          className="pointer-events-none absolute inset-0 opacity-[0.04]"
+          className="hero-grid pointer-events-none absolute inset-0 -z-10"
           aria-hidden="true"
-          style={{
-            backgroundImage:
-              "linear-gradient(to right, #fff 1px, transparent 1px), linear-gradient(to bottom, #fff 1px, transparent 1px)",
-            backgroundSize: "48px 48px",
-          }}
         />
-        <div className="relative mx-auto max-w-6xl px-4 py-24 text-center sm:py-28">
-          <p
-            className="mb-4 inline-block rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-widest"
-            style={{
-              borderColor: "rgba(232,245,233,.5)",
-              color: "#e8f5e9",
-            }}
-          >
+
+        <div className="relative mx-auto flex min-h-[clamp(38rem,82vh,48rem)] max-w-6xl flex-col items-center justify-center px-4 py-24 text-center sm:py-28">
+          <p className="hero-badge">
+            <span className="hero-badge-dot" aria-hidden="true" />
             Open-source learning hub
           </p>
-          <h1
-            className="mb-4 text-5xl font-bold tracking-tight sm:text-6xl"
-            style={{
-              backgroundImage:
-                "linear-gradient(to right, #ffffff 0%, #e8f5e9 45%, #b9e4bb 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-              color: "transparent",
-            }}
-          >
+          <h1 className="hero-title font-display text-[clamp(2.9rem,7.5vw,5.1rem)] font-bold leading-[0.94] tracking-[-0.045em] text-balance">
             {hero.title}
           </h1>
-          <p
-            className="mx-auto mb-8 max-w-xl text-lg leading-relaxed"
-            style={{ color: "#e8f5e9" }}
-          >
-            {hero.subtitle}
-          </p>
-          <div className="flex flex-wrap justify-center gap-3">
-            {hero.actions.map((action) =>
-              action.variant === "primary" ? (
-                <Link
-                  key={action.href}
-                  href={action.href}
-                  className="rounded-xl px-5 py-2.5 text-sm font-semibold no-underline transition hover:brightness-110"
-                  style={{ background: "#2e7d32", color: "#fff" }}
-                >
-                  {action.label} <span aria-hidden="true">→</span>
-                </Link>
-              ) : (
-                <Link
-                  key={action.href}
-                  href={action.href}
-                  className="rounded-xl border px-5 py-2.5 text-sm font-semibold no-underline transition hover:bg-white/10"
-                  style={{
-                    borderColor: "rgba(232,245,233,.55)",
-                    color: "#e8f5e9",
-                  }}
-                >
-                  {action.label}
-                </Link>
-              ),
-            )}
+          <SplitText
+            text={hero.subtitle}
+            tag="p"
+            splitType="words"
+            effect="blur"
+            trigger="load"
+            delay={24}
+            duration={1.1}
+            aria="none"
+            className="hero-subtitle mx-auto mt-5 max-w-xl text-lg leading-relaxed"
+          />
+          <div className="mt-9 flex flex-wrap justify-center gap-3">
+            {hero.actions.map((action) => (
+              <Link
+                key={action.href}
+                href={action.href}
+                className={
+                  action.variant === "primary"
+                    ? "hero-cta hero-cta-primary font-display no-underline"
+                    : "hero-cta hero-cta-ghost font-display no-underline"
+                }
+              >
+                {action.label} <span aria-hidden="true">→</span>
+              </Link>
+            ))}
           </div>
-          <p className="mt-8 text-xs" style={{ color: "rgba(232,245,233,.9)" }}>
-            {docs.length} guides · 6 interactive demos · 3 copy-paste forms
-          </p>
+
+          <dl className="hero-stats">
+            <div className="hero-stat">
+              <dt>In-app guides</dt>
+              <dd>{docs.length}</dd>
+            </div>
+            <div className="hero-stat">
+              <dt>Interactive demos</dt>
+              <dd>{projects.length}</dd>
+            </div>
+            <div className="hero-stat">
+              <dt>Form snippets</dt>
+              <dd>{snippets.length}</dd>
+            </div>
+            <div className="hero-stat">
+              <dt>License</dt>
+              <dd>MIT</dd>
+            </div>
+          </dl>
+
+          <a href="#intro" className="hero-scroll" aria-label="Scroll to content">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.6}
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 4v14m0 0l-5-5m5 5l5-5"
+              />
+            </svg>
+          </a>
         </div>
       </header>
 
@@ -131,6 +159,15 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+        </section>
+
+        {/* Visual lab */}
+        <section id="visual-lab" className="mb-20 scroll-mt-24 fade-in">
+          <SectionHeading
+            title="Interactive Visual Lab"
+            description="A live WebGL light field made of characters, powered by the GradientASCII component from React Bits. Swap the shape, palette, and density — then move your cursor across it and click for a wave."
+          />
+          <GradientShowcase />
         </section>
 
         {/* Projects */}
@@ -201,7 +238,7 @@ export default function HomePage() {
           </div>
           <Link
             href="/docs"
-            className="whitespace-nowrap rounded-xl px-5 py-2.5 text-sm font-semibold no-underline transition hover:brightness-110"
+            className="font-display whitespace-nowrap rounded-xl px-5 py-2.5 text-sm font-semibold no-underline transition hover:brightness-110"
             style={{ background: "#2e7d32", color: "#fff" }}
           >
             Open Docs <span aria-hidden="true">→</span>

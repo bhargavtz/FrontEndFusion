@@ -11,6 +11,11 @@ hand-maintained HTML.
 
 - **6 interactive project demos** — responsive navbar, landing page, Flexbox,
   CSS Grid, animations, and a dark-mode toggle.
+- **An interactive WebGL visual lab** — a live `GradientASCII` light field from
+  React Bits powers the hero and a playground where you can swap shapes,
+  palettes, and density.
+- **GSAP text reveals** — the hero subtitle uses the React Bits `SplitText`
+  component for a staggered word animation.
 - **3 copy-paste form snippets** — login, contact, and newsletter, each with
   working client-side interactions.
 - **9 in-app guides** — HTML, CSS, responsive design, advanced CSS, best
@@ -26,7 +31,9 @@ hand-maintained HTML.
 - React 19 and TypeScript
 - Tailwind CSS 4
 - `react-markdown` + `remark-gfm` for the guide library
-- `next/font` (Geist and Geist Mono)
+- [GSAP](https://gsap.com/) + `@gsap/react` for the hero `SplitText` reveal
+- `next/font` — Geist (body), Space Grotesk (display), Instrument Serif
+  (editorial accents), and Geist Mono (code)
 
 ## 🚀 Run locally
 
@@ -69,6 +76,7 @@ FrontEndFusion/
         ├── components/
         │   ├── projects/      # Interactive demo components
         │   ├── snippets/      # Form demo components
+        │   ├── react-bits/    # Upstream React Bits components (GradientASCII)
         │   └── ...            # Header, footer, cards, table, markdown
         ├── data/              # 8 typed datasets — 31 keys
         └── lib/               # Markdown and icon helpers
@@ -97,7 +105,7 @@ must match the Markdown filename.
 
 | Route | Description |
 | --- | --- |
-| `/` | Hub with features, projects, snippets, resources, and learning path |
+| `/` | Hub with a WebGL visual lab, features, projects, snippets, resources, and learning path |
 | `/docs` | Full guide library |
 | `/docs/[slug]` | Rendered guide with table of contents and prev/next navigation |
 | `/snippets/[slug]` | Interactive form demo |
@@ -157,6 +165,15 @@ rather than hard-coded colors so both themes keep working.
 2. Create a branch: `git checkout -b feature/my-change`.
 3. Make the change and run `npm run build` inside `frontend/`.
 4. Open a pull request describing the change.
+
+## 🙏 Credits
+
+The hero background and visual lab use the open-source
+[`GradientASCII`](https://reactbits.dev) component from
+[React Bits](https://reactbits.dev), adapted to TypeScript and styled for this
+site. It renders entirely in the browser with WebGL2. The hero subtitle uses
+React Bits' `SplitText` (installed through the shadcn CLI) for its word reveal;
+`frontend/components.json` maps the `@react-bits` registry for future additions.
 
 ## 📄 License
 
