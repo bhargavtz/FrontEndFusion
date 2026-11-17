@@ -8,13 +8,52 @@ import { learningPath } from "@/data/learning-path";
 import { docs } from "@/data/docs";
 import { books } from "@/data/books";
 import { SectionHeading } from "@/components/section-heading";
-import { ProjectTable } from "@/components/project-table";
-import { SnippetCard } from "@/components/snippet-card";
-import { ResourceGroup } from "@/components/resource-group";
-import { LearningCard } from "@/components/learning-card";
 import { GradientShowcase } from "@/components/gradient-showcase";
 import GradientASCII from "@/components/react-bits/gradient-ascii";
 import SplitText from "@/components/SplitText";
+
+const explore = [
+  {
+    href: "/projects",
+    icon: "🧩",
+    title: "Projects",
+    description: "Hands-on HTML and CSS demos, filterable by difficulty.",
+    count: `${projects.length} demos`,
+    cta: "Browse projects",
+  },
+  {
+    href: "/snippets",
+    icon: "🔐",
+    title: "Snippets",
+    description: "Copy-paste ready, accessible form templates.",
+    count: `${snippets.length} snippets`,
+    cta: "Browse snippets",
+  },
+  {
+    href: "/resources",
+    icon: "📖",
+    title: "Resources",
+    description: "Official docs, accessibility tools, and in-project guides.",
+    count: `${resourceGroups.reduce((n, g) => n + g.items.length, 0)} links`,
+    cta: "Open resources",
+  },
+  {
+    href: "/learning",
+    icon: "🗺️",
+    title: "Learning Path",
+    description: "A structured route from HTML basics to advanced CSS.",
+    count: `${learningPath.length} steps`,
+    cta: "Start the path",
+  },
+  {
+    href: "/library",
+    icon: "📚",
+    title: "Book Library",
+    description: "Programming books and PDFs with search and category filters.",
+    count: `${books.length} books`,
+    cta: "Browse the library",
+  },
+];
 
 const MONO_FONT =
   '"Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
@@ -171,79 +210,44 @@ export default function HomePage() {
           <GradientShowcase />
         </section>
 
-        {/* Projects */}
-        <section id="projects" className="mb-20 scroll-mt-24 fade-in">
+        {/* Explore: one card per section page */}
+        <section id="explore" className="mb-20 scroll-mt-24 fade-in">
           <SectionHeading
-            title="Projects Overview"
-            description="Six hands-on demos. Click any card to open the interactive showcase."
+            title="Explore the hub"
+            description="Each section has its own page. Pick one to start."
           />
-          <ProjectTable />
-        </section>
-
-        {/* Snippets */}
-        <section id="snippets" className="mb-20 scroll-mt-24 fade-in">
-          <SectionHeading
-            title="Code Snippets"
-            description="Copy-paste ready HTML form templates — fully styled, responsive, and keyboard accessible."
-          />
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-            {snippets.map((snippet) => (
-              <SnippetCard key={snippet.slug} snippet={snippet} />
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {explore.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="hub-card flex h-full flex-col no-underline"
+                style={{ color: "var(--text)" }}
+              >
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <span className="text-2xl" aria-hidden="true">
+                    {item.icon}
+                  </span>
+                  <span
+                    className="rounded-full border px-2.5 py-0.5 text-xs font-semibold tabular-nums"
+                    style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
+                  >
+                    {item.count}
+                  </span>
+                </div>
+                <h3 className="mb-1.5 text-lg font-semibold">{item.title}</h3>
+                <p
+                  className="mb-4 flex-1 text-sm leading-relaxed"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  {item.description}
+                </p>
+                <span className="text-sm font-semibold" style={{ color: "var(--secondary)" }}>
+                  {item.cta} <span aria-hidden="true">→</span>
+                </span>
+              </Link>
             ))}
           </div>
-        </section>
-
-        {/* Resources */}
-        <section id="resources" className="mb-20 scroll-mt-24 fade-in">
-          <SectionHeading
-            title="Resources & Guides"
-            description="Reference guides on accessibility, SEO, and frontend best practices."
-          />
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {resourceGroups.map((group) => (
-              <ResourceGroup key={group.title} group={group} />
-            ))}
-          </div>
-        </section>
-
-        {/* Learning path */}
-        <section id="learning" className="mb-20 scroll-mt-24 fade-in">
-          <SectionHeading
-            title="Learning Path"
-            description="A structured guide from HTML basics to advanced CSS techniques."
-          />
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {learningPath.map((step) => (
-              <LearningCard key={step.slug} step={step} />
-            ))}
-          </div>
-        </section>
-
-        {/* Library CTA */}
-        <section
-          className="hub-card mb-6 flex flex-col items-start justify-between gap-5 sm:flex-row sm:items-center"
-          style={{
-            background:
-              "linear-gradient(120deg, var(--bg-card) 0%, var(--bg-subtle) 100%)",
-          }}
-        >
-          <div>
-            <h2 className="text-xl font-bold">Find your next free book</h2>
-            <p
-              className="mt-1 text-sm"
-              style={{ color: "var(--text-muted)" }}
-            >
-              {books.length} programming books and PDFs, with search and category
-              filters.
-            </p>
-          </div>
-          <Link
-            href="/library"
-            className="font-display whitespace-nowrap rounded-xl px-5 py-2.5 text-sm font-semibold no-underline transition hover:brightness-110"
-            style={{ background: "#2e7d32", color: "#fff" }}
-          >
-            Browse the library <span aria-hidden="true">→</span>
-          </Link>
         </section>
 
         {/* Docs CTA */}

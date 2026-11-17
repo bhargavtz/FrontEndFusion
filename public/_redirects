@@ -1,0 +1,5 @@
+/index.html / 301
+/snippets/:slug.html /snippets/:slug 301
+/learn/:slug /docs/:slug 301
+/resources/:slug.md /docs/:slug 301
+/web-dev-learning-path/docs/:slug.md /docs/:slug 301

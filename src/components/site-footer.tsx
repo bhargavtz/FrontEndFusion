@@ -30,13 +30,13 @@ export function SiteFooter() {
             <Link href="/docs" className="no-underline hover:underline">
               Docs
             </Link>
-            <Link href="/#projects" className="no-underline hover:underline">
+            <Link href="/projects" className="no-underline hover:underline">
               Projects
             </Link>
-            <Link href="/#snippets" className="no-underline hover:underline">
+            <Link href="/snippets" className="no-underline hover:underline">
               Snippets
             </Link>
-            <Link href="/#learning" className="no-underline hover:underline">
+            <Link href="/learning" className="no-underline hover:underline">
               Learn
             </Link>
             <Link

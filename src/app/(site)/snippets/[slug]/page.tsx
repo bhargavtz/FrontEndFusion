@@ -24,8 +24,6 @@ const canvasBySlug: Record<string, string> = {
   "newsletter-form": "linear-gradient(135deg, #f5f3ff 0%, #faf5ff 100%)",
 };
 
-export const instant = false;
-
 export function generateStaticParams() {
   return snippets.map((snippet) => ({ slug: snippet.slug }));
 }
@@ -63,7 +61,7 @@ export default async function SnippetPage({ params }: PageProps) {
   return (
     <main id="main-content" className="mx-auto max-w-6xl px-4 py-12">
       <Link
-        href="/#snippets"
+        href="/snippets"
         className="text-sm no-underline hover:underline"
         style={{ color: "var(--text-muted)" }}
       >

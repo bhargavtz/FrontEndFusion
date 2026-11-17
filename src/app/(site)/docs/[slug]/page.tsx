@@ -14,8 +14,6 @@ type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export const instant = false;
-
 export function generateStaticParams() {
   return docs.map((doc) => ({ slug: doc.slug }));
 }
@@ -58,8 +56,23 @@ export default async function DocPage({ params }: PageProps) {
   const previous = index > 0 ? docs[index - 1] : null;
   const next = index < docs.length - 1 ? docs[index + 1] : null;
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: doc.title,
+    description: doc.description,
+    author: { "@type": "Organization", name: "FrontEndFusion contributors" },
+    publisher: { "@type": "Organization", name: "FrontEndFusion" },
+    mainEntityOfPage: `https://frontendfusion.vercel.app/docs/${doc.slug}`,
+  };
+
   return (
-    <main id="main-content" className="mx-auto max-w-6xl px-4 py-12">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <main id="main-content" className="mx-auto max-w-6xl px-4 py-12">
       <nav aria-label="Breadcrumb" className="text-sm">
         <ol
           className="m-0 flex list-none flex-wrap items-center gap-2 p-0"
@@ -221,5 +234,6 @@ export default async function DocPage({ params }: PageProps) {
         )}
       </div>
     </main>
+    </>
   );
 }

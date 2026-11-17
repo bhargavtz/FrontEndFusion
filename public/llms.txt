@@ -1,0 +1,34 @@
+# FrontEndFusion
+
+> An open-source learning hub for HTML5, CSS3, responsive design, and modern frontend techniques — with interactive demos, copy-paste snippets, and in-depth guides.
+
+FrontEndFusion is a structured, static learning resource for frontend developers. All content is server-rendered/static HTML, so it is fully readable by AI crawlers and LLMs. Topics include HTML basics, CSS fundamentals, responsive design, advanced CSS, best practices, accessibility, SEO, JavaScript basics, and a CSS cheat sheet.
+
+## Key pages
+- Home: https://frontendfusion.vercel.app/
+- Projects (interactive demos): https://frontendfusion.vercel.app/projects
+- Code Snippets (copy-paste forms): https://frontendfusion.vercel.app/snippets
+- Guides (docs): https://frontendfusion.vercel.app/docs
+- Resources: https://frontendfusion.vercel.app/resources
+- Learning Path: https://frontendfusion.vercel.app/learning
+- Book Library: https://frontendfusion.vercel.app/library
+
+## Guides
+- HTML Basics: https://frontendfusion.vercel.app/docs/html-basics
+- CSS Fundamentals: https://frontendfusion.vercel.app/docs/css-fundamentals
+- Responsive Design: https://frontendfusion.vercel.app/docs/responsive-design
+- Advanced Topics: https://frontendfusion.vercel.app/docs/advanced-topics
+- Best Practices: https://frontendfusion.vercel.app/docs/best-practices
+- Accessibility: https://frontendfusion.vercel.app/docs/accessibility
+- SEO Tips: https://frontendfusion.vercel.app/docs/seo-tips
+- JavaScript Basics: https://frontendfusion.vercel.app/docs/javascript-basics
+- CSS Cheat Sheet: https://frontendfusion.vercel.app/docs/css-cheatsheet
+
+## Snippets
+- Login Form: https://frontendfusion.vercel.app/snippets/login-form
+- Contact Form: https://frontendfusion.vercel.app/snippets/contact-form
+- Newsletter Form: https://frontendfusion.vercel.app/snippets/newsletter-form
+
+## Optional
+- Sitemap: https://frontendfusion.vercel.app/sitemap.xml
+- robots.txt: https://frontendfusion.vercel.app/robots.txt

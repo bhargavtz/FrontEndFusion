@@ -16,7 +16,7 @@ export const hero: Hero = {
   subtitle:
     "A complete learning hub for HTML5, CSS3, responsive design, and modern frontend techniques.",
   actions: [
-    { label: "View Projects", href: "/#projects", variant: "primary" },
-    { label: "Start Learning", href: "/#learning", variant: "outline" },
+    { label: "View Projects", href: "/projects", variant: "primary" },
+    { label: "Start Learning", href: "/learning", variant: "outline" },
   ],
 };

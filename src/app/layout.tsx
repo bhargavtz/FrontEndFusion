@@ -73,6 +73,23 @@ export default function RootLayout({
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: "FrontEndFusion",
+              url: "https://frontendfusion.vercel.app",
+              description:
+                "An open-source learning hub for HTML5, CSS3, responsive design, and modern frontend techniques.",
+              publisher: {
+                "@type": "Organization",
+                name: "FrontEndFusion contributors",
+              },
+            }),
+          }}
+        />
       </head>
       <body className="font-sans leading-relaxed antialiased">{children}</body>
     </html>
