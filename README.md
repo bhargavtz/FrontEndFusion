@@ -30,7 +30,8 @@ hand-maintained HTML.
 - [Next.js 16](https://nextjs.org/) (App Router, Cache Components)
 - React 19 and TypeScript
 - Tailwind CSS 4
-- `react-markdown` + `remark-gfm` for the guide library
+- `next-mdx-remote` + `remark-gfm` for MDX guides
+- `gray-matter` for typed frontmatter
 - [GSAP](https://gsap.com/) + `@gsap/react` for the hero `SplitText` reveal
 - `next/font` — Geist (body), Space Grotesk (display), Instrument Serif
   (editorial accents), and Geist Mono (code)
@@ -60,7 +61,9 @@ FrontEndFusion/
 ├── LICENSE
 ├── SECURITY.md
 ├── content/
-│   └── docs/              # Markdown sources for every guide (9 files)
+│   ├── docs/              # MDX guide sources (9 files)
+│   ├── snippets/          # MDX snippet docs with live previews
+│   └── README.md          # MDX authoring guide
 ├── public/
 ├── src/
 │   ├── app/
@@ -77,7 +80,8 @@ FrontEndFusion/
 │   │   ├── snippets/      # Form demo components
 │   │   ├── library/       # Book list search and filters
 │   │   ├── react-bits/    # Upstream React Bits components (GradientASCII)
-│   │   └── ...            # Header, footer, cards, table, markdown
+│   │   └── mdx/           # MDX renderer, code blocks, preview, source loader
+│   │   └── ...            # Header, footer, cards, table
 │   ├── data/              # 9 typed datasets — 42 keys
 │   └── lib/               # Markdown and icon helpers
 └── package.json
@@ -100,8 +104,9 @@ Every page reads from `src/data`. The exported `siteData` object in
 | 8 | Docs | `docs.ts` | `slug`, `title`, `description`, `category` |
 | 9 | Books | `books.ts` | `slug`, `title`, `author`, `year`, `description`, `takeaways`, `topic`, `level`, `tags`, `href`, `source` |
 
-Guide bodies live in `content/docs/<slug>.md`. The slug in `docs.ts`
-must match the Markdown filename.
+Guide bodies live in `content/docs/<slug>.mdx`. The typed content layer in
+`src/lib/content.ts` discovers files automatically and reads their frontmatter,
+so `src/data/docs.ts` is only a thin re-export.
 
 ## 🧭 Routes
 
@@ -124,9 +129,10 @@ must match the Markdown filename.
 
 **A new guide**
 
-1. Add `content/docs/my-guide.md`.
-2. Add an entry to `docs` in `src/data/docs.ts` with the same slug.
-3. Optionally add it to `learningPath` in `src/data/learning-path.ts`.
+1. Add `content/docs/my-guide.mdx` with `title`, `description`, `category`,
+   and `order` frontmatter.
+2. Optionally add it to `learningPath` in `src/data/learning-path.ts`.
+3. Run `npm run build` — the slug and metadata are discovered automatically.
 
 **A new project**
 

@@ -1,0 +1,35 @@
+---
+title: Login Form
+description: Email + password inputs, show/hide toggle, remember me checkbox, social login buttons (Google, GitHub).
+tags: [Tailwind, Accessible, Responsive]
+icon: 🔐
+component: LoginForm
+order: 1
+---
+
+## Preview
+
+<Preview>
+  <LoginForm />
+</Preview>
+
+## Notes
+
+- Email and password fields use visible labels and inline validation.
+- The password field has a show/hide toggle with an accessible name.
+- Social login buttons are keyboard reachable and include brand icons.
+- No data leaves the browser — submit is handled client-side only.
+
+## Usage
+
+```tsx
+import { LoginForm } from "@/components/snippets/login-form";
+
+export function Page() {
+  return <LoginForm />;
+}
+```
+
+## Source
+
+<SourceCode file="src/components/snippets/login-form.tsx" />

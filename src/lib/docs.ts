@@ -1,22 +1,12 @@
-import fs from "node:fs";
-import path from "node:path";
-
 export type Heading = {
   id: string;
   text: string;
   depth: 2 | 3;
 };
 
-const DOCS_DIR = path.join(process.cwd(), "content", "docs");
-
-export function readDocSource(slug: string) {
-  const filePath = path.join(DOCS_DIR, `${slug}.md`);
-  return fs.readFileSync(filePath, "utf8");
-}
-
 /** Remove the leading H1 so the page header is the only page title. */
 export function stripLeadingTitle(markdown: string) {
-  return markdown.replace(/^#\s+.+\r?\n+/, "");
+  return markdown.replace(/^\s*#\s+.+\r?\n+/, "");
 }
 
 export function slugifyHeading(text: string) {

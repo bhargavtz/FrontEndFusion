@@ -2,13 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { docs, getDoc } from "@/data/docs";
-import { MarkdownBody } from "@/components/markdown";
+import { MdxContent } from "@/components/mdx/mdx-content";
 import { docIcon } from "@/lib/doc-icons";
-import {
-  extractHeadings,
-  readDocSource,
-  stripLeadingTitle,
-} from "@/lib/docs";
+import { extractHeadings, stripLeadingTitle } from "@/lib/docs";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -48,7 +44,7 @@ export default async function DocPage({ params }: PageProps) {
     notFound();
   }
 
-  const source = stripLeadingTitle(readDocSource(doc.slug));
+  const source = stripLeadingTitle(doc.body);
   const headings = extractHeadings(source);
   const icon = docIcon(doc.slug);
 
@@ -151,7 +147,7 @@ export default async function DocPage({ params }: PageProps) {
             </details>
           )}
 
-          <MarkdownBody content={source} />
+          <MdxContent source={source} />
 
           <nav
             className="mt-12 grid grid-cols-1 gap-4 border-t pt-8 sm:grid-cols-2"
