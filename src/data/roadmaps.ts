@@ -68,7 +68,7 @@ export const roadmaps: Roadmap[] = [
       {
         title: "Layout",
         goal: "Use Flexbox and Grid for real layouts.",
-        topics: ["css", "responsive-design"],
+        topics: ["css", "flexbox", "css-grid", "responsive-design"],
         guides: ["css-flexbox", "css-grid", "css-positioning", "css-media-queries"],
         milestone: "A responsive landing page with no horizontal scroll from 320px to 1440px.",
         exercises: ["Build a holy-grail layout with Grid areas.", "Build a card grid with auto-fit."],
@@ -77,7 +77,7 @@ export const roadmaps: Roadmap[] = [
       {
         title: "Polish and scale",
         goal: "Add motion, theming, and structure.",
-        topics: ["css", "tailwind-css", "design-systems"],
+        topics: ["css", "css-animations", "css-architecture", "tailwind-css", "design-systems"],
         guides: ["css-custom-properties", "css-transitions", "css-animations", "advanced-topics"],
         milestone: "A themed component set with light and dark modes.",
         exercises: ["Add dark mode using custom properties.", "Replace a hover animation's layout properties with transform."],
@@ -95,7 +95,7 @@ export const roadmaps: Roadmap[] = [
       {
         title: "Language core",
         goal: "Write correct JavaScript without a framework.",
-        topics: ["javascript"],
+        topics: ["javascript", "js-closures-and-scope"],
         guides: ["js-getting-started-with-javascript", "js-javascript-variables", "js-functions", "js-arrays", "js-objects", "js-scope"],
         milestone: "Solve 20 small problems using arrays, objects, and closures.",
         exercises: ["Implement your own map, filter, and reduce.", "Write a function that deep-clones plain data."],
@@ -112,7 +112,7 @@ export const roadmaps: Roadmap[] = [
       {
         title: "Async and the event loop",
         goal: "Reason about when code runs.",
-        topics: ["async-javascript"],
+        topics: ["async-javascript", "js-error-handling", "js-modules"],
         guides: ["js-promises", "js-async-functions-async-await", "js-fetch", "js-modules", "js-error-handling"],
         milestone: "A weather app with search, loading, error, and cancellation.",
         exercises: ["Predict the output order of mixed timers and promises.", "Add retry with backoff."],
@@ -146,7 +146,7 @@ export const roadmaps: Roadmap[] = [
       {
         title: "Generics and utilities",
         goal: "Write reusable, well-typed abstractions.",
-        topics: ["typescript"],
+        topics: ["typescript", "ts-generics-and-utility-types"],
         milestone: "Publish a typed utility library with generics and tests.",
         exercises: ["Implement your own Pick, Omit, and Readonly."],
       },
