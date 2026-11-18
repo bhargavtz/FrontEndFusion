@@ -7,6 +7,7 @@ import { uiLibraries } from "./ui-libraries";
 import { tooling } from "./tooling";
 import { architecture } from "./architecture";
 import { aiDevelopment } from "./ai-development";
+import { deepDives } from "./deep-dives";
 import type { DomainId } from "../curriculum";
 import type { Technology } from "./types";
 
@@ -22,6 +23,7 @@ export const technologies: Technology[] = [
   ...tooling,
   ...architecture,
   ...aiDevelopment,
+  ...deepDives,
 ];
 
 export const getTechnology = (slug: string) =>
