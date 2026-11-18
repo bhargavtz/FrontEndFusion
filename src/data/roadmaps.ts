@@ -16,6 +16,8 @@ export type Roadmap = {
   title: string;
   audience: string;
   summary: string;
+  /** Longer introduction shown under the summary. */
+  description?: string;
   duration: string;
   prerequisites: string[];
   stages: RoadmapStage[];
@@ -131,32 +133,114 @@ export const roadmaps: Roadmap[] = [
   {
     slug: "typescript",
     title: "TypeScript Developer",
-    audience: "JavaScript developers",
+    audience: "JavaScript developers who want type safety at scale",
     summary: "Add types incrementally and use the type system to prevent bugs.",
-    duration: "3–4 weeks",
-    prerequisites: ["JavaScript fundamentals"],
+    description:
+      "TypeScript is not a different language; it is JavaScript with a type checker. This roadmap starts with the compiler and inference, then narrows unions safely, builds reusable generics, types React components, and finishes with migration, testing, and real-world architecture. Every stage has a concrete milestone so you can prove the skill instead of only reading about it.",
+    duration: "6–8 weeks",
+    prerequisites: ["JavaScript fundamentals", "Comfort with functions, objects, and modules"],
     stages: [
       {
-        title: "Everyday types",
-        goal: "Annotate, infer, and narrow.",
+        title: "Set up the compiler",
+        goal: "Understand what tsc checks, how tsconfig.json works, and why strict mode is the default for new projects.",
+        topics: ["typescript", "code-editors"],
+        guides: ["javascript-basics", "js-modules"],
+        milestone: "Convert a small JavaScript file to TypeScript with strict mode on and zero errors.",
+        exercises: [
+          "Create a tsconfig.json with strict, noUncheckedIndexedAccess, and noImplicitOverride.",
+          "Explain what happens when target, module, and moduleResolution are changed.",
+          "Add a type-check script to package.json and run it in CI.",
+        ],
+      },
+      {
+        title: "Everyday types and inference",
+        goal: "Annotate only where inference cannot help, and model real data with objects, arrays, functions, and unions.",
         topics: ["typescript"],
-        milestone: "Convert a 500-line JavaScript project to strict TypeScript.",
-        exercises: ["Replace every any with a real type or unknown.", "Model a state machine with a discriminated union."],
+        guides: ["js-datatypes-in-javascript", "js-functions", "js-objects"],
+        milestone: "Model a shopping cart with products, quantities, totals, and a union for payment state.",
+        exercises: [
+          "Type a function that accepts a callback and returns a transformed array.",
+          "Replace every any in a 200-line file with a real type or unknown.",
+          "Use readonly, optional properties, and index signatures deliberately.",
+        ],
+        projects: ["calculator"],
       },
       {
-        title: "Generics and utilities",
-        goal: "Write reusable, well-typed abstractions.",
+        title: "Narrowing and safe unions",
+        goal: "Make impossible states unrepresentable and let the compiler prove every branch is handled.",
         topics: ["typescript", "ts-generics-and-utility-types"],
-        milestone: "Publish a typed utility library with generics and tests.",
-        exercises: ["Implement your own Pick, Omit, and Readonly."],
+        guides: ["js-conditions", "js-error-handling"],
+        milestone: "Build a discriminated union for a checkout flow and make every reducer branch exhaustive.",
+        exercises: [
+          "Use typeof, in, instanceof, and user-defined type predicates to narrow a value.",
+          "Write an assertNever helper and prove exhaustiveness in a switch.",
+          "Model loading, success, and error states without optional booleans.",
+        ],
       },
       {
-        title: "TypeScript in React",
-        goal: "Type components, hooks, and events.",
-        topics: ["typescript-react", "react"],
-        milestone: "A typed component library with exported prop types.",
-        exercises: ["Build a generic Table<T> component."],
-        projects: ["dashboard-ui"],
+        title: "Generics and utility types",
+        goal: "Write reusable abstractions without losing the exact type at the call site.",
+        topics: ["ts-generics-and-utility-types", "typescript"],
+        guides: ["js-functions", "js-arrow-functions"],
+        milestone: "Publish a small typed utility library with generic functions, constraints, and type tests.",
+        exercises: [
+          "Implement your own Pick, Omit, Readonly, and Partial.",
+          "Write a generic groupBy<T, K extends keyof T> that preserves keys.",
+          "Use keyof, mapped types, conditional types, and infer in one practical helper.",
+        ],
+      },
+      {
+        title: "Objects, classes, and modules",
+        goal: "Choose between type aliases and interfaces, use classes safely, and organise code with ES modules.",
+        topics: ["typescript", "js-modules"],
+        guides: ["js-objects", "js-classes", "js-modules"],
+        milestone: "Structure a small app into typed modules with a clear public API and no circular imports.",
+        exercises: [
+          "Convert a prototype-based model to a class with private fields and implements.",
+          "Write a .d.ts file for an untyped JavaScript package.",
+          "Use import type and verbatimModuleSyntax to keep runtime imports clean.",
+        ],
+        projects: ["todo-app"],
+      },
+      {
+        title: "TypeScript with React",
+        goal: "Type props, events, hooks, context, refs, and generic components without fighting the compiler.",
+        topics: ["typescript-react", "react", "component-architecture"],
+        guides: ["js-event-attributes", "js-data-attributes"],
+        milestone: "Ship a typed component library with exported prop types and a generic Table<T> component.",
+        exercises: [
+          "Type onChange, onClick, and form submit handlers from the element type.",
+          "Build a generic Select<T> that preserves the value union.",
+          "Type a context and a custom hook with a discriminated result.",
+        ],
+        projects: ["dashboard-ui", "design-system-build"],
+      },
+      {
+        title: "Testing, migration, and architecture",
+        goal: "Introduce TypeScript safely into an existing codebase and keep it healthy in CI.",
+        topics: ["testing", "typescript", "production-frontend"],
+        guides: ["js-unit-testing-javascript", "js-error-handling", "js-performance-tips"],
+        milestone: "Migrate a real JavaScript feature to strict TypeScript with tests, lint, and a CI type-check.",
+        exercises: [
+          "Migrate one feature using allowJs and a gradual strictness plan.",
+          "Add type-level tests with expect-type or tsd.",
+          "Set up project references for a small monorepo.",
+          "Type a REST contract with Zod and infer the client types from the schema.",
+        ],
+        projects: ["saas-dashboard", "admin-dashboard"],
+      },
+      {
+        title: "Advanced type-level patterns",
+        goal: "Use conditional types, template literal types, satisfies, and branded types where they genuinely improve safety.",
+        topics: ["ts-generics-and-utility-types", "typescript"],
+        guides: ["js-functional-javascript", "js-regular-expressions"],
+        milestone: "Build a typed API client whose route names and response types are derived from one schema.",
+        exercises: [
+          "Derive a union of route names from a const object with keyof typeof.",
+          "Use satisfies to validate a config without widening its literal types.",
+          "Create a branded type for validated user IDs.",
+          "Write a conditional type that extracts the resolved value of a promise.",
+        ],
       },
     ],
   },

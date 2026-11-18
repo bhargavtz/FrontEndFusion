@@ -49,6 +49,7 @@ export default async function RoadmapPage({ params }: PageProps) {
         <p className="eyebrow">Roadmap</p>
         <h1>{roadmap.title} roadmap</h1>
         <p className="page-head__lead">{roadmap.summary}</p>
+        {roadmap.description && <p>{roadmap.description}</p>}
         <dl className="facts">
           <div>
             <dt>For</dt>
