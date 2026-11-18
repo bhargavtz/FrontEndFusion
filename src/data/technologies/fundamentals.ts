@@ -200,7 +200,7 @@ Cache-Control: max-age=3600
     ],
     guidePrefix: "html-",
     guides: ["html-basics"],
-    related: ["accessibility", "css", "seo"],
+    related: ["accessibility", "css", "seo", "html-modern-elements"],
     projects: ["personal-portfolio", "landing-page-build"],
   },
   {

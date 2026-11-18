@@ -929,4 +929,164 @@ const patch: UserPatch = { name: 'Ada Lovelace' };`,
     ],
     related: ["typescript", "typescript-react"],
   },
+  {
+    slug: "html-modern-elements",
+    name: "Modern HTML Elements",
+    domain: "web-fundamentals",
+    level: "Intermediate",
+    summary: "Native disclosure, dialogs, templates, meters and input hints: interactive HTML without a library.",
+    what:
+      "HTML has built-in elements for many interactions that were once rebuilt with JavaScript: expandable sections (details), modal dialogs (dialog), reusable markup (template), value gauges (meter) and mobile keyboard hints (inputmode).",
+    why:
+      "Native elements come with keyboard handling, focus management and screen reader roles for free. Using them first means less code to maintain and fewer accessibility bugs.",
+    how:
+      "details and summary toggle a section without any script, and the browser exposes the open state to assistive tech. dialog.showModal() opens a modal that traps focus, closes on Escape and sits in the top layer. template holds markup that is parsed but not rendered until you clone it. meter represents a scalar value within a known range, and inputmode asks mobile browsers for a suitable keyboard.",
+    prerequisites: ["html"],
+    roadmap: [
+      "details and summary for disclosure",
+      "dialog for modal and non-modal windows",
+      "template for reusable markup",
+      "meter and progress for values and progress",
+      "inputmode and autocomplete for form usability",
+    ],
+    concepts: [
+      "Native disclosure with details/summary",
+      "dialog.showModal() and dialog.close()",
+      "template and cloneNode()",
+      "meter vs progress",
+      "inputmode vs type",
+    ],
+    examples: [
+      {
+        title: "A disclosure list and a native modal dialog",
+        language: "html",
+        code: `<style>
+  body { font-family: system-ui, sans-serif; padding: 1rem; }
+  details { border: 1px solid #cbd5e1; border-radius: 8px; padding: 0.6rem 0.9rem; margin-bottom: 0.5rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  dialog { border: 0; border-radius: 12px; padding: 1.25rem; max-width: 22rem; }
+  dialog::backdrop { background: rgb(15 23 42 / 0.5); }
+  button { padding: 0.5rem 0.9rem; border-radius: 6px; border: 0; background: #16a34a; color: #fff; cursor: pointer; }
+</style>
+
+<details open>
+  <summary>What is the free plan?</summary>
+  <p>It includes up to three projects and community support.</p>
+</details>
+<details>
+  <summary>Can I cancel at any time?</summary>
+  <p>Yes. Cancellation takes effect at the end of the billing period.</p>
+</details>
+
+<button id="open">Delete project…</button>
+<dialog id="confirm" aria-labelledby="title">
+  <h2 id="title">Delete this project?</h2>
+  <p>This cannot be undone.</p>
+  <form method="dialog">
+    <button value="cancel">Cancel</button>
+    <button value="delete" style="background:#b91c1c">Delete</button>
+  </form>
+</dialog>
+<p id="result" aria-live="polite"></p>
+
+<script>
+  const dialog = document.getElementById('confirm');
+  document.getElementById('open').addEventListener('click', () => dialog.showModal());
+  dialog.addEventListener('close', () => {
+    document.getElementById('result').textContent =
+      dialog.returnValue === 'delete' ? 'Project deleted.' : 'Nothing was deleted.';
+  });
+</script>`,
+        explanation: [
+          "details needs no JavaScript: clicking summary toggles the section, and open sets the default state.",
+          "showModal() makes the dialog modal: the rest of the page is inert, Escape closes it, and focus returns to the button.",
+          "A form with method=\"dialog\" closes the dialog when a button is pressed and stores that button's value in returnValue.",
+          "The close event reads returnValue, so the page reacts to the user's choice without extra state.",
+        ],
+      },
+      {
+        title: "A template cloned into a list, with meter and inputmode",
+        language: "html",
+        code: `<style>
+  body { font-family: system-ui, sans-serif; padding: 1rem; }
+  li { margin: 0.4rem 0; }
+  meter { width: 12rem; vertical-align: middle; }
+</style>
+
+<template id="row">
+  <li>
+    <span class="name"></span>
+    <meter min="0" max="100"></meter>
+  </li>
+</template>
+<ul id="skills"></ul>
+
+<label for="score">Add a skill score (0–100)</label>
+<input id="score" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" />
+<button id="add">Add</button>
+
+<script>
+  const template = document.getElementById('row');
+  const list = document.getElementById('skills');
+  const skills = [['HTML', 90], ['CSS', 75]];
+
+  function addRow(name, value) {
+    const row = template.content.cloneNode(true);   // a fresh copy of the markup
+    row.querySelector('.name').textContent = name + ' (' + value + ')';
+    row.querySelector('meter').value = value;
+    list.append(row);
+  }
+  skills.forEach(([name, value]) => addRow(name, value));
+
+  document.getElementById('add').addEventListener('click', () => {
+    const value = Number(document.getElementById('score').value);
+    if (Number.isFinite(value) && value >= 0 && value <= 100) addRow('Custom', value);
+  });
+</script>`,
+        explanation: [
+          "template is parsed once but not rendered; template.content.cloneNode(true) makes an independent copy for each row.",
+          "meter shows a value within min and max; unlike progress it is for a measurement, not a task's completion.",
+          "inputmode=\"numeric\" asks phones for a number keypad while keeping the field a text input, so pattern can accept leading zeros.",
+          "Values are checked before use, so an invalid entry is simply ignored.",
+        ],
+      },
+    ],
+    bestPractices: [
+      "Use details/summary before writing a custom accordion; it is accessible by default.",
+      "Use showModal() rather than a div with a backdrop; you get focus trapping and Escape for free.",
+      "Give dialog an accessible name with aria-labelledby or aria-label.",
+      "Pair inputmode with type or pattern; inputmode changes the keyboard, not validation.",
+    ],
+    mistakes: [
+      "Using dialog.show() for a modal; it opens without blocking the page or trapping focus.",
+      "Using meter for task progress, where progress is the right element.",
+      "Expecting template contents to exist in the DOM until they are cloned.",
+      "Using inputmode=\"numeric\" on a field that needs decimals or negative numbers without checking the keyboard on real devices.",
+    ],
+    performance: ["Cloning a template is cheaper than building the same markup with createElement calls for each item."],
+    useCases: ["FAQ and settings sections", "Confirmation prompts and login dialogs", "Repeated rows such as cart items", "Scores, quotas and storage usage"],
+    interview: [
+      {
+        q: "How is dialog.showModal() different from dialog.show()?",
+        a: "showModal() opens the dialog in the top layer, makes the rest of the page inert, traps focus and closes on Escape. show() opens it as a non-modal element that does not block interaction.",
+      },
+      {
+        q: "When would you use meter instead of progress?",
+        a: "meter is for a measurement within a known range, such as disk usage or a score. progress is for the completion of a task that is in flight.",
+      },
+    ],
+    exercises: [
+      "Build a FAQ with five details elements, and make only one open at a time using the name attribute.",
+      "Create a dialog-based edit form that returns the entered values with method=\"dialog\".",
+      "Use a template to render a list of product cards from an array of objects.",
+    ],
+    docs: [
+      { label: "MDN — details", href: "https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/details" },
+      { label: "MDN — dialog", href: "https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog" },
+      { label: "MDN — template", href: "https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/template" },
+      { label: "MDN — inputmode", href: "https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/inputmode" },
+    ],
+    guides: ["html-forms", "html-input-controls"],
+    related: ["html", "accessibility", "forms-validation"],
+  },
 ];
