@@ -1,0 +1,97 @@
+---
+title: Global error handling in browsers
+description: Capture uncaught browser errors and rejected promises with global handlers and report them back to a server.
+chapter: 98
+category: "JavaScript"
+order: 398
+---
+
+# Global error handling in browsers
+
+Even a careful application will miss an exception somewhere. Global handlers act as a safety net: they observe errors that nobody caught and give you a chance to log them, show a friendly message, or send a report. They are a complement to, not a replacement for, local `try`/`catch` blocks.
+
+## window.onerror and error events
+
+Assigning a function to `window.onerror` registers a handler that receives the message, source file, line, column, and the error object. Returning `true` from it suppresses the browser's default message. The more modern approach is `window.addEventListener("error", handler)`, which supports multiple listeners and also captures resource-loading failures when used in the capturing phase.
+
+For promise failures that are never caught, listen for the `unhandledrejection` event. Its `reason` is usually the value the promise rejected with. In both cases, the handler should stay small and never throw itself, or you risk an infinite loop of error reports.
+
+## Reporting back to a server
+
+A real handler packages the details into a payload and sends it with a beacon or `fetch` keepalive request, so the report survives a page unload. Because the payload may contain sensitive text, scrub URLs and avoid dumping whole objects. Throttle repeated reports so a broken loop does not flood your backend. Feature detection matters too: in a sandboxed or restricted frame, some APIs may be unavailable, so keep a visible fallback.
+
+The demo installs both global handlers and a mock reporter. Buttons dispatch synthetic error events so you can see the report queue fill up without actually breaking the page.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Global error handler</title>
+    <style>
+      body { margin: 0; padding: 24px 16px; font-family: system-ui, sans-serif;
+        color: #2a2a35; background: linear-gradient(135deg, #eef7f3, #fdf1ec 80%); }
+      .card { max-width: 640px; margin: 0 auto; padding: 22px; background: #fff;
+        border-radius: 18px; box-shadow: 0 20px 40px -28px rgba(40,70,60,.4); }
+      h1 { margin: 0 0 6px; font-size: 1.15rem; }
+      p.hint { margin: 0 0 14px; font-size: .82rem; color: #6c716f; }
+      .row { display: flex; flex-wrap: wrap; gap: 8px; }
+      button { padding: 8px 11px; border: 0; border-radius: 9px; color: #fff;
+        background: #2f8f74; font: inherit; font-size: .76rem; cursor: pointer; }
+      pre { margin: 14px 0 0; padding: 12px; min-height: 150px; border-radius: 10px;
+        background: #1f2428; color: #cfeee0; font-size: .76rem; line-height: 1.6;
+        white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Global error net</h1>
+      <p class="hint">Reports are collected locally instead of being sent to a real server.</p>
+      <div class="row">
+        <button id="raise">Dispatch an error event</button>
+        <button id="reject">Reject a promise</button>
+        <button id="clear">Clear reports</button>
+      </div>
+      <pre id="out">No reports yet.</pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      var reports = [];
+      function log(line) { out.textContent += line + "\n"; }
+
+      function report(kind, detail) {
+        reports.push({ kind: kind, detail: detail, at: new Date().toISOString() });
+        log("[" + reports.length + "] " + kind + " -> " + detail);
+      }
+
+      window.addEventListener("error", function (event) {
+        report("error", event.message || "unknown error");
+      });
+      window.addEventListener("unhandledrejection", function (event) {
+        var reason = event.reason;
+        report("unhandledrejection", reason && reason.message ? reason.message : String(reason));
+        // Prevent the default console noise in this demo.
+        if (event.preventDefault) event.preventDefault();
+      });
+
+      document.getElementById("raise").addEventListener("click", function () {
+        var err = new TypeError("synthetic widget failure");
+        var event = new ErrorEvent("error", { message: err.message, error: err });
+        window.dispatchEvent(event);
+      });
+      document.getElementById("reject").addEventListener("click", function () {
+        Promise.reject(new Error("synthetic async failure"));
+      });
+      document.getElementById("clear").addEventListener("click", function () {
+        reports.length = 0;
+        out.textContent = "Reports cleared.";
+      });
+
+      if (typeof ErrorEvent !== "function") {
+        log("Fallback: your browser cannot build synthetic ErrorEvents.");
+      }
+    </script>
+  </body>
+</html>
+```

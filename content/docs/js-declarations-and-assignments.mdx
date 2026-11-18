@@ -1,0 +1,97 @@
+---
+title: Declarations and Assignments
+description: Declare variables with let, const, and var, then update them with simple and compound assignment operators.
+chapter: 17
+category: "JavaScript"
+order: 317
+---
+
+# Declarations and Assignments
+
+Before you can use a value, you usually give it a name. JavaScript offers several ways to declare a name, and several operators to change the value it holds.
+
+## let, const, and var
+
+`let` declares a block-scoped variable that you can reassign later. `const` also has block scope but fixes the binding after its initial assignment, which is a good default for values that should not be swapped out. Note that `const` prevents reassignment of the binding, not mutation of the object it points to. Older code often uses `var`, which is function-scoped rather than block-scoped and can be declared again without error; its quirks are why `let` and `const` are preferred today. A variable declared but never given a value holds `undefined`.
+
+## Assignment and compound operators
+
+The single `=` operator stores the value on its right into the name on its left. Compound operators combine an operation with an assignment: `+=` adds, `-=` subtracts, `*=` multiplies, `/=` divides, and `%=` stores the remainder. They are shorter and clearer than repeating the variable name. The `++` and `--` operators increment or decrement by one; placing them before or after the name changes whether the old or new value is used in the surrounding expression. Assignment expressions evaluate to the value assigned, so chains such as `a = b = 0` set both names.
+
+## Demo: scoreboard
+
+The demo keeps a score in a `let` variable and a fixed step in a `const`. Buttons apply compound assignments and show the result.
+
+```html
+<div class="wrap">
+  <div class="card">
+    <h2>Scoreboard</h2>
+    <p class="hint">A constant step and a mutable score, updated with compound operators.</p>
+    <div class="score" id="score">0</div>
+    <div class="row">
+      <button data-op="add">+ step</button>
+      <button data-op="sub">− step</button>
+      <button data-op="double">× 2</button>
+      <button data-op="reset" class="alt">Reset</button>
+    </div>
+    <pre class="out" id="out"></pre>
+  </div>
+</div>
+
+<style>
+  .wrap {
+    min-height: 70vh; display: grid; place-items: center;
+    padding: 2rem 1rem; background: #edf1f3;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+  .card {
+    width: min(100%, 26rem); background: #fff; border-radius: 18px;
+    padding: 1.75rem; box-shadow: 0 18px 40px -24px rgba(40, 70, 80, 0.5);
+  }
+  h2 { margin: 0 0 0.35rem; font-size: 1.2rem; color: #243d45; }
+  .hint { margin: 0 0 1.1rem; font-size: 0.85rem; color: #6f8890; }
+  .score {
+    text-align: center; font-size: 3rem; font-weight: 800;
+    color: #2f7f8c; padding: 0.5rem 0;
+  }
+  .row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  button {
+    flex: 1; padding: 0.6rem 0.4rem; border: 0; border-radius: 10px;
+    background: #2f7f8c; color: #fff; font-weight: 600; cursor: pointer;
+  }
+  button.alt { background: #6b8b93; }
+  button:hover { filter: brightness(0.94); }
+  .out {
+    margin: 1rem 0 0; padding: 0.85rem; border-radius: 12px;
+    background: #edf1f3; color: #304c54; font-size: 0.82rem; white-space: pre-wrap;
+  }
+</style>
+
+<script>
+  const STEP = 5;
+  let score = 0;
+  let lastAction = "start";
+  let notSet;
+
+  function render() {
+    document.getElementById("score").textContent = score;
+    document.getElementById("out").textContent =
+      "Step (const): " + STEP + "\n" +
+      "Score (let): " + score + "\n" +
+      "Last action: " + lastAction + "\n" +
+      "Unassigned variable: " + String(notSet);
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll("button[data-op]"), function (btn) {
+    btn.addEventListener("click", function () {
+      var op = btn.dataset.op;
+      if (op === "add") { score += STEP; lastAction = "score += STEP"; }
+      if (op === "sub") { score -= STEP; lastAction = "score -= STEP"; }
+      if (op === "double") { score *= 2; lastAction = "score *= 2"; }
+      if (op === "reset") { score = 0; lastAction = "score = 0"; }
+      render();
+    });
+  });
+  render();
+</script>
+```

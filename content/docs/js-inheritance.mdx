@@ -1,0 +1,165 @@
+---
+title: Inheritance
+description: Reuse behavior through the prototype chain with Object.create, constructor prototypes, and ES6 class extension.
+chapter: 27
+category: "JavaScript"
+order: 327
+---
+
+# Inheritance
+
+Inheritance lets one object reuse another object's behavior without duplicating code. JavaScript implements this with the prototype chain: a lookup that fails on the current object continues up through its ancestors until it finds a match or reaches the end.
+
+## The chain behind every object
+
+Setting up inheritance manually is straightforward with `Object.create(parent)`. The new object's internal link points at `parent`, so any property missing locally is looked up there. You can add your own fields to shadow inherited ones while still reaching the shared methods.
+
+In the older constructor pattern, you assign a prototype object to the child constructor's `prototype` and then repair its `constructor` property. One subtlety is worth remembering: a method on the prototype is shared, but a field written on an instance belongs only to that instance. Also, a property found directly on an object takes precedence over the identical name further up the chain.
+
+## Extending with classes
+
+Class syntax expresses the same idea more plainly. `extends` establishes the link, `super()` in the constructor runs the parent setup, and `super.method()` calls a parent implementation from an override. Subclasses can add fields, replace methods, and still inherit everything they did not touch.
+
+Both styles produce the same chain. Classes are not a separate inheritance model, just a friendlier notation over the prototype machinery.
+
+One limitation is worth flagging. Inheritance creates tight coupling: a child depends on the parent's field names and method behavior. If the parent changes, every descendant may need attention. Composition, where an object holds another object and delegates to it explicitly, is often the calmer long-term choice.
+
+## Demo: a mixed fleet
+
+```html
+<div class="fleet">
+  <h2>Mixed fleet</h2>
+  <p>Three kinds of vehicle, all sharing behavior from one base prototype.</p>
+  <div class="fleet__buttons">
+    <button id="addCar" type="button">Add car</button>
+    <button id="addBike" type="button">Add bicycle</button>
+    <button id="addScooter" type="button">Add scooter</button>
+    <button id="startAll" type="button">Start all</button>
+  </div>
+  <div id="list" class="fleet__list"></div>
+  <pre id="out" class="fleet__out">Fleet is empty.</pre>
+</div>
+
+<style>
+  body {
+    margin: 0;
+    padding: 2rem 1.25rem;
+    background: #f0eee9;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    color: #37332d;
+  }
+  .fleet {
+    max-width: 36rem;
+    margin: 0 auto;
+    background: #fffdfa;
+    border-radius: 18px;
+    padding: 1.5rem;
+    box-shadow: 0 18px 40px -28px rgba(60, 50, 35, 0.6);
+  }
+  .fleet h2 { margin: 0 0 0.4rem; font-size: 1.25rem; }
+  .fleet p { margin: 0 0 1rem; color: #857c6e; font-size: 0.88rem; }
+  .fleet__buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  button {
+    font: inherit;
+    font-size: 0.8rem;
+    padding: 0.5rem 0.8rem;
+    border: 0;
+    border-radius: 9px;
+    background: #6b5b8a;
+    color: #fff;
+    cursor: pointer;
+  }
+  #startAll { background: #2e7d6b; }
+  button:hover { filter: brightness(1.1); }
+  .fleet__list { display: grid; gap: 0.5rem; margin-bottom: 1rem; }
+  .vehicle {
+    background: #f6f2fb;
+    border: 1px solid #e3dbef;
+    border-radius: 10px;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
+  }
+  .fleet__out {
+    margin: 0;
+    min-height: 4rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: #2a2437;
+    color: #e2d6ff;
+    border-radius: 10px;
+    padding: 0.85rem;
+    font-size: 0.8rem;
+    line-height: 1.5;
+  }
+</style>
+
+<script>
+  class Vehicle {
+    constructor(name, wheels) {
+      this.name = name;
+      this.wheels = wheels;
+      this.running = false;
+    }
+    start() {
+      this.running = true;
+      return this.name + " starts";
+    }
+    describe() {
+      return this.name + " rolls on " + this.wheels + " wheels";
+    }
+  }
+
+  class Car extends Vehicle {
+    constructor(name) { super(name, 4); }
+    describe() { return super.describe() + " inside a sealed cabin"; }
+  }
+
+  class Bicycle extends Vehicle {
+    constructor(name) { super(name, 2); }
+    start() { return super.start() + " after a good push"; }
+  }
+
+  var fleet = [];
+  var list = document.getElementById("list");
+  var out = document.getElementById("out");
+
+  function render() {
+    list.innerHTML = "";
+    fleet.forEach(function (v) {
+      var row = document.createElement("div");
+      row.className = "vehicle";
+      row.textContent = v.describe() + (v.running ? " - running" : " - parked");
+      list.appendChild(row);
+    });
+    out.textContent = fleet.length ? "Fleet has " + fleet.length + " vehicle(s)." : "Fleet is empty.";
+  }
+
+  document.getElementById("addCar").addEventListener("click", function () {
+    fleet.push(new Car("Sedan"));
+    out.textContent = "Car inherits describe from Vehicle and adds its own detail.";
+    render();
+  });
+  document.getElementById("addBike").addEventListener("click", function () {
+    fleet.push(new Bicycle("Racer"));
+    out.textContent = "Bicycle overrides start but still calls the parent version first.";
+    render();
+  });
+  document.getElementById("addScooter").addEventListener("click", function () {
+    var scooter = Object.create(Vehicle.prototype);
+    scooter.name = "Scooter";
+    scooter.wheels = 2;
+    scooter.running = false;
+    fleet.push(scooter);
+    out.textContent = "Scooter was built with Object.create, with no constructor at all.";
+    render();
+  });
+  document.getElementById("startAll").addEventListener("click", function () {
+    out.textContent = fleet.length
+      ? fleet.map(function (v) { return v.start(); }).join(" | ")
+      : "Nothing to start yet.";
+    render();
+  });
+
+  render();
+</script>
+```

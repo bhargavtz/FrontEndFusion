@@ -1,0 +1,170 @@
+---
+title: Shapes for Floats
+description: Let text wrap around a circle, an ellipse, or a custom polygon with shape-outside, and use shape-margin to keep a comfortable gap.
+chapter: 33
+category: "CSS"
+order: 133
+---
+
+# Shapes for Floats
+
+A floated image always wraps text into a rectangle. Even when the picture is a round avatar on a transparent background, the text stops at the corners of an invisible box. `shape-outside` replaces that box with a real outline, so the prose follows the curve instead.
+
+## How the property fits together
+
+Three declarations do the work:
+
+- `float: left` or `float: right` — puts the element in the flow and makes text wrap at all. Without a float, `shape-outside` has no effect.
+- `shape-outside` — defines the outline text must respect.
+- `shape-margin` — adds breathing room between the shape and the first character of every line.
+
+The element keeps its own box for layout purposes; only the wrap contour changes. Text still cannot overlap the original rectangle's margin box when it sits directly beside the float, so pair a shaped float with a generous width and let the shape carve the visible area smaller.
+
+## Circles, ellipses, and polygons
+
+`circle()` takes an optional radius and an optional centre, and `ellipse()` takes two radii plus a centre. Both default to the element's margin box, and both can be anchored to `content-box`, `padding-box`, or `border-box`.
+
+```css
+.avatar {
+  float: left;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  shape-outside: circle(50% at 50% 50%);
+  shape-margin: 18px;
+}
+```
+
+The `border-radius` does no wrapping work at all — it only makes the element visually round. `shape-outside` is what the text obeys. Keeping the two in step means what you see is what the layout uses.
+
+`ellipse(45% 35% at 50% 50%)` squeezes the same idea into a wide, low form, useful for a background blob behind a pull quote.
+
+For edges the round functions cannot express, `polygon()` accepts a list of coordinate pairs. Each pair is measured from the top-left of the reference box, so `0% 0%` is the top-left corner and `100% 100%` the bottom-right. A triangle is three points; a slanted photo edge is four.
+
+```css
+.shape {
+  float: right;
+  shape-outside: polygon(100% 0, 100% 100%, 0 100%);
+  shape-margin: 14px;
+}
+```
+
+That triangle leaves the text free to spill into the empty upper-left region of the box. Add points for star shapes, blobs, or a mask cut from a photograph.
+
+The same syntax can pull its coordinates from an image with `shape-outside: url(shape.png)`, which reads the alpha channel. Because the task here forbids external assets, every demo below is built from gradients and border radii.
+
+## A complete example
+
+A recipe intro wraps around a round jar badge, and a second block uses a triangle so the copy runs along a diagonal.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Wrapping around shapes</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 44px 20px;
+        font-family: Georgia, "Times New Roman", serif;
+        background: #fbf7f1;
+        color: #2c2419;
+        line-height: 1.65;
+      }
+
+      article {
+        max-width: 620px;
+        margin: 0 auto;
+        padding: 32px;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 24px 50px -34px rgba(80, 60, 30, 0.5);
+      }
+
+      h1 {
+        margin: 0 0 6px;
+        font-size: 1.55rem;
+        letter-spacing: -0.01em;
+      }
+
+      .kicker {
+        margin: 0 0 18px;
+        font-family: system-ui, sans-serif;
+        font-size: 0.68rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #b08b52;
+      }
+
+      .jar {
+        float: left;
+        width: 150px;
+        height: 150px;
+        margin: 4px 0 0;
+        border-radius: 50%;
+        background:
+          radial-gradient(circle at 34% 30%, #ffd07a, #f2994a 58%, #d9772f);
+        shape-outside: circle(50% at 50% 50%);
+        shape-margin: 16px;
+        display: grid;
+        place-items: center;
+        font-size: 2.4rem;
+      }
+
+      p {
+        margin: 0 0 14px;
+        font-size: 0.95rem;
+      }
+
+      .diagonal {
+        clear: both;
+        margin-top: 26px;
+        padding-top: 24px;
+        border-top: 1px dashed #e6dcc9;
+      }
+
+      .wedge {
+        float: right;
+        width: 130px;
+        height: 130px;
+        margin-left: 10px;
+        background: linear-gradient(200deg, #cfe5d2, #9ac7a5);
+        shape-outside: polygon(100% 0, 100% 100%, 0 100%);
+        shape-margin: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <article>
+      <p class="kicker">Preserves · Autumn batch</p>
+      <h1>Spiced pear butter</h1>
+      <div class="jar" role="img" aria-label="A jar of pear butter">🍐</div>
+      <p>
+        Pears arrive in a rush at the end of September, and the good ones are the
+        ugly ones. They soften faster than you can eat them, which is exactly the
+        point: a slow afternoon, a heavy pot, and a spoon that never quite stops
+        stirring.
+      </p>
+      <p>
+        Peel, core, and quarter about two kilos. Cook them down with a splash of
+        water until they collapse, then let the mixture reduce until a spoon
+        dragged across the base leaves a clean track. The whole batch keeps for a
+        month in the fridge.
+      </p>
+      <div class="diagonal">
+        <div class="wedge"></div>
+        <p>
+          The triangle on the right is not a picture — it is an empty div carrying
+          a polygon outline. Notice how each line of this paragraph gets shorter as
+          the slope descends, until the text meets the bottom corner and runs full
+          width again.
+        </p>
+      </div>
+    </article>
+  </body>
+</html>
+```
+
+Delete the `shape-outside` line in dev tools and the paragraphs snap back to a straight left edge. That comparison is the clearest way to feel what the property actually buys you.

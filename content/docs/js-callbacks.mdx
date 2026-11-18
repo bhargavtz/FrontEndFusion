@@ -1,0 +1,131 @@
+---
+title: Callbacks
+description: Pass functions as arguments to react to results, handle errors first, and work with both synchronous and async tasks.
+chapter: 29
+category: "JavaScript"
+order: 329
+---
+
+# Callbacks
+
+A callback is a function handed to another function so it can be called later. Instead of returning a value directly, the receiving function decides when the right moment has arrived and invokes what you passed in. This is the oldest and most basic way to express "when this is done, do that."
+
+## A function passed to a function
+
+Functions are values in JavaScript, so they can be stored in variables, placed in arrays, and passed as arguments. A helper that walks a list can accept a callback to decide what happens to each item. Because the caller supplies the behavior, the same helper can be reused for many tasks.
+
+Callbacks are not automatically asynchronous. Array methods such as `forEach()` and `map()` call their functions immediately. The word only describes how the function is used, not when it runs.
+
+## Error-first and asynchronous work
+
+For operations that may fail later, a common convention is an error-first callback. Its first parameter receives an error or `null`, and the second receives the result. The receiving function calls you back once work finishes, often through a timer or a browser event.
+
+When a callback is a method taken from an object, remember that its `this` depends on how it is invoked. Passing the bare method can lose the original receiver, so binding it or using an arrow wrapper is often necessary.
+
+Deeply nested callbacks can become hard to read, a problem often called callback hell. Naming the functions, splitting them into small helpers, or moving to promises keeps the flow visible. The underlying idea does not change: you are still describing what should happen after an operation finishes.
+
+## Demo: the callback kitchen
+
+```html
+<div class="kitchen">
+  <h2>Callback kitchen</h2>
+  <p>Orders call back when the dish is ready, or with an error when it fails.</p>
+  <div class="kitchen__buttons">
+    <button id="bake" type="button">Bake a cake</button>
+    <button id="burnt" type="button">Order burnt toast</button>
+    <button id="serve" type="button">Serve table (sync)</button>
+  </div>
+  <pre id="out" class="kitchen__out">The kitchen is open.</pre>
+</div>
+
+<style>
+  body {
+    margin: 0;
+    padding: 2rem 1.25rem;
+    background: #eef0e8;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    color: #37402f;
+  }
+  .kitchen {
+    max-width: 36rem;
+    margin: 0 auto;
+    background: #fdfef9;
+    border-radius: 18px;
+    padding: 1.5rem;
+    box-shadow: 0 18px 40px -28px rgba(60, 80, 40, 0.6);
+  }
+  .kitchen h2 { margin: 0 0 0.4rem; font-size: 1.25rem; }
+  .kitchen p { margin: 0 0 1rem; color: #78856a; font-size: 0.88rem; }
+  .kitchen__buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  button {
+    font: inherit;
+    font-size: 0.8rem;
+    padding: 0.5rem 0.8rem;
+    border: 0;
+    border-radius: 9px;
+    background: #6d8b45;
+    color: #fff;
+    cursor: pointer;
+  }
+  #burnt { background: #b3583f; }
+  #serve { background: #5b7d8c; }
+  button:hover { filter: brightness(1.08); }
+  .kitchen__out {
+    margin: 0;
+    min-height: 9rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: #222b1d;
+    color: #d8efc2;
+    border-radius: 10px;
+    padding: 0.9rem;
+    font-size: 0.8rem;
+    line-height: 1.6;
+  }
+</style>
+
+<script>
+  var out = document.getElementById("out");
+  var ticket = 0;
+
+  function log(text) {
+    ticket += 1;
+    out.textContent += "\n#" + ticket + "  " + text;
+  }
+
+  function prepare(dish, delay, done) {
+    log("Order received: " + dish);
+    setTimeout(function () {
+      if (dish === "burnt toast") {
+        done(new Error("The toaster smoked. That order is ruined."));
+        return;
+      }
+      done(null, { dish: dish, minutes: delay / 1000 });
+    }, delay);
+  }
+
+  function serveTable(items, onServe) {
+    items.forEach(function (item) { onServe(item); });
+  }
+
+  document.getElementById("bake").addEventListener("click", function () {
+    prepare("cake", 1000, function (err, result) {
+      if (err) { log("ERROR: " + err.message); return; }
+      log("Served " + result.dish + " after " + result.minutes + "s (callback succeeded)");
+    });
+  });
+
+  document.getElementById("burnt").addEventListener("click", function () {
+    prepare("burnt toast", 700, function (err, result) {
+      if (err) { log("ERROR: " + err.message); return; }
+      log("Served " + result.dish);
+    });
+  });
+
+  document.getElementById("serve").addEventListener("click", function () {
+    serveTable(["tea", "soup", "salad"], function (item) {
+      log("Served " + item + " synchronously via a callback");
+    });
+  });
+</script>
+```

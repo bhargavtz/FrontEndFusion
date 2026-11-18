@@ -1,0 +1,73 @@
+---
+title: Timestamps
+description: Measure time with high-resolution performance.now(), wall-clock Date.now(), and seconds-based values.
+chapter: 39
+category: "JavaScript"
+order: 339
+---
+
+# Timestamps
+
+A timestamp is a number representing a point in time. JavaScript offers more than one clock, and choosing the right one matters. `Date.now()` returns milliseconds since the Unix epoch and reflects the wall clock, so it can jump if the system time changes. `performance.now()` returns a monotonic, high-resolution count of milliseconds since the page started - it never goes backwards and resolves to tiny fractions of a millisecond.
+
+## High-resolution versus low-resolution clocks
+
+Use `performance.now()` for measuring durations: animation timing, benchmarks, and anything where a clock adjustment would corrupt the result. Its values are relative to the current document, not to a calendar date, so they cannot be compared across pages. `Date.now()` is the low-resolution, wall-clock option, ideal for stamping records with a real date and for converting to seconds by dividing by one thousand.
+
+## Getting seconds and supporting legacy browsers
+
+To get a Unix timestamp in seconds, divide milliseconds by 1000 and round or truncate. Older browsers without `performance.now` fall back to `Date.now`, giving a low-resolution but still usable stopwatch. A robust helper checks for the high-resolution API first and degrades gracefully.
+
+The demo runs a stopwatch with a start, stop, and reset control. It prints both the precise elapsed time from `performance.now()` and a coarse wall-clock reading so you can see the difference.
+
+```html
+<div style="background:#f8fafc;border-radius:16px;padding:20px;max-width:560px;font-family:system-ui,sans-serif;color:#0f172a;">
+  <h3 style="margin-top:0;">Precision stopwatch</h3>
+  <div style="display:flex;gap:8px;margin-bottom:12px;">
+    <button id="start">Start</button>
+    <button id="stop">Stop</button>
+    <button id="reset">Reset</button>
+  </div>
+  <pre id="out" style="background:#0f172a;color:#e2e8f0;padding:12px;border-radius:10px;min-height:90px;white-space:pre-wrap;"></pre>
+</div>
+<script>
+  (function () {
+    var out = document.getElementById("out");
+    var hasHighRes = typeof performance !== "undefined" && typeof performance.now === "function";
+    var hi = hasHighRes
+      ? function () { return performance.now(); }
+      : function () { return Date.now(); };
+    var started = 0, elapsed = 0, running = false, timer = null;
+    function precisionLabel() {
+      return hasHighRes ? "high-resolution performance.now" : "fallback Date.now";
+    }
+    function render() {
+      var ms = running ? (hi() - started) + elapsed : elapsed;
+      out.textContent = "Elapsed: " + ms.toFixed(3) + " ms"
+        + "\nSeconds: " + (ms / 1000).toFixed(3)
+        + "\nWall clock: " + Date.now()
+        + "\nClock: " + precisionLabel();
+    }
+    document.getElementById("start").onclick = function () {
+      if (running) return;
+      running = true;
+      started = hi();
+      timer = setInterval(render, 50);
+    };
+    document.getElementById("stop").onclick = function () {
+      if (!running) return;
+      elapsed += hi() - started;
+      running = false;
+      clearInterval(timer);
+      render();
+    };
+    document.getElementById("reset").onclick = function () {
+      running = false;
+      clearInterval(timer);
+      elapsed = 0;
+      render();
+    };
+    render();
+  })();
+</script>
+```

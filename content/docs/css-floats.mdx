@@ -1,0 +1,132 @@
+---
+title: "Floats"
+description: "Wrap text around images, clear and contain floats, and build simple fixed-width column layouts the old-fashioned way."
+chapter: 14
+category: "CSS"
+order: 114
+---
+
+# Floats
+
+Floats were invented for one modest job: letting text flow around an image. Before Flexbox and Grid, they were stretched into a full layout system, and understanding that history makes their quirks easier to reason about.
+
+## Floating an image into text
+
+`float: left` removes an element from normal flow and pushes it to the edge of its container. Following inline content — the lines of a paragraph — shortens itself to avoid the float's box. `float: right` does the mirror image. A `margin` on the float creates the gutter between it and the text.
+
+Only inline-level content wraps. A block-level sibling will slide underneath the float and place its own content beside it, which is why uncontained floats appear to burst out of their parent. The parent's height no longer includes the floated child, because the float is out of flow.
+
+## Clearing and containing
+
+`clear` tells an element that it must not sit beside a float: `clear: left`, `clear: right`, or `clear: both`. Adding `clear: both` to a footer is the simplest way to push it below any floats above.
+
+Clearing a single element does not repair the parent's collapsed height. The classic clearfix solves that with a pseudo-element: `::after` with `content: ""`, `display: table`, and `clear: both`. An alternative is to give the parent `overflow: hidden`, which creates a block formatting context and contains its floats. `display: flow-root` is the modern, side-effect-free version of that trick.
+
+## Float-based columns
+
+Two- and three-column layouts built on floats use fixed widths plus gutters. Float every column, give each a width, and make sure the widths and margins sum to the container width. Percentages make the same structure elastic; the "lazy" variant floats the main column and lets the sidebar rely on the remaining space.
+
+Floats cannot equalise column heights, cannot vertically centre, and need explicit clearing. That is exactly why Flexbox exists — but for a quick text-wrap or a legacy email template, the old technique still works.
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Floats in an article</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 26px;
+      font-family: Georgia, "Times New Roman", serif;
+      background: #fbf7f1;
+      color: #2b2620;
+      line-height: 1.65;
+    }
+    .clearfix::after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+    .article {
+      max-width: 640px;
+      padding: 22px 24px;
+      background: #fff;
+      border: 1px solid #ece3d6;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(43, 38, 32, .07);
+    }
+    .article h2 { margin: 0 0 4px; font-size: 1.25rem; font-family: ui-sans-serif, system-ui, sans-serif; }
+    .kicker {
+      margin: 0 0 12px;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      font-size: .72rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: #9a6b3f;
+    }
+    .thumb {
+      float: left;
+      width: 112px;
+      height: 112px;
+      margin: 4px 16px 6px 0;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 25%, #f3c98b, #c8794a 60%, #8c4a2f);
+      shape-outside: circle(50%);
+      box-shadow: inset 0 -8px 18px rgba(0, 0, 0, .18);
+    }
+    .article p { margin: 0 0 10px; font-size: .9rem; }
+    .footer {
+      clear: both;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px dashed #e3d6c4;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      font-size: .74rem;
+      color: #7a6a58;
+    }
+    .columns {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 14px;
+      background: #f6efe4;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      font-size: .76rem;
+    }
+    .col {
+      float: left;
+      width: 31.5%;
+      margin-right: 2.75%;
+      padding: 12px 10px;
+      border-radius: 10px;
+      background: #fff;
+      border: 1px solid #e8dccb;
+    }
+    .col:last-child { margin-right: 0; }
+    .col strong { display: block; color: #9a6b3f; }
+  </style>
+</head>
+<body>
+  <article class="article">
+    <h2>A shop that grew sideways</h2>
+    <p class="kicker">Craft · Six minute read</p>
+    <div class="thumb"></div>
+    <p>
+      The workshop started with one bench and a loaned lathe. Text wraps around this circular
+      float because the paragraph is inline content, shortened line by line until it clears the shape.
+    </p>
+    <p>
+      Floats ignore the height of their parent, so the card needs a clearfix after the copy. Without it,
+      the footer would rise into the empty space and the panel would collapse.
+    </p>
+    <div class="footer">By the riverside workshop · Photograph replaced with a gradient</div>
+  </article>
+  <div class="columns clearfix">
+    <div class="col"><strong>Two columns</strong>Float both halves, give each half the width, and clear the row.</div>
+    <div class="col"><strong>Three columns</strong>Thirds with a small gutter work if the arithmetic is exact.</div>
+    <div class="col"><strong>Clearing</strong>Each column floats; the wrapper clears them all at once.</div>
+  </div>
+</body>
+</html>
+```

@@ -1,0 +1,71 @@
+---
+title: Tabindex
+description: Add elements to the tab order, remove them safely, and understand why custom order is usually a mistake.
+chapter: 36
+category: "HTML"
+order: 46
+---
+
+# Tabindex
+
+The `tabindex` attribute controls whether an element can receive keyboard focus and where it sits in the tab order.
+
+## Add an element to the tabbing order
+
+Natively focusable elements such as links and buttons join the tab order automatically. A generic element needs `tabindex="0"`.
+
+```html
+<div
+  role="button"
+  tabindex="0"
+  onclick="this.textContent = 'Activated'"
+  onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.click(); }"
+>
+  Activate me
+</div>
+```
+
+`tabindex="0"` inserts the element into the natural order based on its position in the document. The element also needs a role and keyboard handlers.
+
+Prefer a real button:
+
+```html
+<button type="button" onclick="this.textContent = 'Activated'">Activate me</button>
+```
+
+## Remove an element from the tabbing order
+
+`tabindex="-1"` makes an element programmatically focusable but removes it from sequential keyboard navigation.
+
+```html
+<div id="dialog" tabindex="-1" role="dialog" aria-modal="true">
+  <h2>Dialog title</h2>
+  <p>Focus moves here when the dialog opens.</p>
+</div>
+```
+
+This is useful for dialogs, skip targets, and error summaries that receive focus from JavaScript.
+
+## Define a custom tabbing order
+
+Positive `tabindex` values force a specific order:
+
+```html
+<a href="#one" tabindex="2">Second</a>
+<a href="#two" tabindex="1">First</a>
+<a href="#three" tabindex="3">Third</a>
+```
+
+This is almost always a bad idea. The order becomes hard to maintain, conflicts with the visual order, and confuses assistive technology. Use the DOM order instead.
+
+## Tab order rules
+
+1. Let native controls handle focus.
+2. Use `tabindex="0"` only for custom interactive widgets.
+3. Use `tabindex="-1"` for programmatic focus.
+4. Avoid positive values.
+5. Keep the DOM order and visual order aligned.
+
+## Testing
+
+Press Tab repeatedly through the page. The focus should move in a logical order, every focused element should have a visible outline, and no interactive element should be skipped.

@@ -1,0 +1,64 @@
+---
+title: Unary Operators
+description: Apply single-operand operators such as typeof, void, unary plus, negation, bitwise NOT, and logical NOT.
+chapter: 40
+category: "JavaScript"
+order: 340
+---
+
+# Unary Operators
+
+A unary operator acts on a single value. JavaScript has several, each with its own coercion rules. They are small but appear constantly in idiomatic code, so understanding what each returns helps avoid surprises.
+
+## Type inspection and erasure
+
+The `typeof` operator returns a string naming the operand's type, such as `"number"`, `"string"`, or `"object"`. It reports `null` as an object, a well-known quirk. The `void` operator evaluates its operand and then produces `undefined`; it is occasionally used to discard a value or in `javascript:` URLs. The `delete` operator removes a property from an object and returns a boolean, though it cannot delete variables or non-configurable properties.
+
+## Numeric and logical operators
+
+Unary plus `+` coerces its operand to a number, which is a compact way to turn a numeric string into a number. Unary negation `-` does the same and flips the sign. The bitwise NOT `~` inverts every bit and, for integers, maps a value to its negative counterpart minus one - a trick sometimes used as a truthy test for "not negative one". Logical NOT `!` flips truthiness and always returns a boolean; using it twice, `!!value`, coerces any value to a boolean.
+
+The demo is a playground: choose a value and an operator, and the result plus its type appear in the output panel.
+
+```html
+<div style="background:#f8fafc;border-radius:16px;padding:20px;max-width:560px;font-family:system-ui,sans-serif;color:#0f172a;">
+  <h3 style="margin-top:0;">Unary operator playground</h3>
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+    <input id="operand" value="42" style="padding:8px;border-radius:8px;border:1px solid #cbd5e1;">
+    <select id="op" style="padding:8px;border-radius:8px;border:1px solid #cbd5e1;">
+      <option value="typeof">typeof</option>
+      <option value="plus">unary +</option>
+      <option value="minus">unary -</option>
+      <option value="not">logical !</option>
+      <option value="doubleNot">double !!</option>
+      <option value="tilde">bitwise ~</option>
+      <option value="void">void</option>
+    </select>
+    <button id="run">Apply</button>
+  </div>
+  <pre id="out" style="background:#0f172a;color:#e2e8f0;padding:12px;border-radius:10px;min-height:80px;white-space:pre-wrap;"></pre>
+</div>
+<script>
+  (function () {
+    var out = document.getElementById("out");
+    document.getElementById("run").onclick = function () {
+      var raw = document.getElementById("operand").value;
+      var value = isNaN(Number(raw)) ? raw : Number(raw);
+      var op = document.getElementById("op").value;
+      var result;
+      switch (op) {
+        case "typeof":  result = typeof value; break;
+        case "plus":    result = +value; break;
+        case "minus":   result = -value; break;
+        case "not":     result = !value; break;
+        case "doubleNot": result = !!value; break;
+        case "tilde":   result = ~value; break;
+        case "void":    result = void value; break;
+      }
+      out.textContent = "operand: " + JSON.stringify(value) + " (" + typeof value + ")"
+        + "\noperator: " + op
+        + "\nresult: " + String(result) + " (" + typeof result + ")";
+    };
+  })();
+</script>
+```

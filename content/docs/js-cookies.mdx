@@ -1,0 +1,99 @@
+---
+title: Cookies
+description: Store small text values in the browser with document.cookie, then read, update, and remove them safely.
+chapter: 32
+category: "JavaScript"
+order: 332
+---
+
+# Cookies
+
+Cookies are tiny text values a page stores on a visitor's machine and reads back later. They travel with every matching HTTP request, which makes them useful for session identifiers, but that same behaviour means they are small and are sent to the server repeatedly. For purely client-side data, web storage is usually the better tool; cookies shine when the server also needs to see the value.
+
+The `document.cookie` property is unusual. Reading it returns one semicolon-separated string containing every cookie visible to the page, while assigning to it creates or updates a single cookie. You never replace the whole jar with one assignment - you add to it.
+
+## Testing availability and writing a cookie
+
+Before relying on cookies, check that `document.cookie` exists and that a value can actually be written. Sandboxed iframes and strict privacy settings often block writes. The demo below falls back to an in-memory object so the pattern still works. Each assignment can carry attributes such as `expires`, `path`, and `SameSite`. Encoding names and values with `encodeURIComponent` keeps spaces and semicolons from breaking the format.
+
+## Reading and removing cookies
+
+To read one cookie, split the jar string on semicolons and look for the matching name. To remove a cookie, write it again with an expiry date in the past and the same `path` used when it was created. A cookie written without a path belongs to the current directory, which is a common reason deletions appear to fail.
+
+The example gives each operation a button and prints results into a visible panel.
+
+```html
+<div style="background:#f8fafc;border-radius:16px;padding:20px;max-width:560px;font-family:system-ui,sans-serif;color:#0f172a;">
+  <h3 style="margin-top:0;">Cookie jar demo</h3>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+    <label>Key <input id="cKey" value="theme" style="padding:6px;border-radius:8px;border:1px solid #cbd5e1;"></label>
+    <label>Value <input id="cVal" value="dark" style="padding:6px;border-radius:8px;border:1px solid #cbd5e1;"></label>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:12px;">
+    <button id="cSet">Set</button>
+    <button id="cGet">Read</button>
+    <button id="cAll">List all</button>
+    <button id="cDel">Remove</button>
+  </div>
+  <div id="status" style="font-size:13px;color:#64748b;margin-bottom:8px;"></div>
+  <pre id="out" style="background:#0f172a;color:#e2e8f0;padding:12px;border-radius:10px;min-height:70px;white-space:pre-wrap;"></pre>
+</div>
+<script>
+  (function () {
+    var out = document.getElementById("out");
+    var status = document.getElementById("status");
+    var memory = {};
+    var canUse = false;
+    try { canUse = typeof document.cookie === "string"; } catch (e) { canUse = false; }
+    status.textContent = canUse
+      ? "Using document.cookie"
+      : "Cookies blocked by this sandbox - using a memory fallback.";
+
+    function write(name, value) {
+      if (canUse) {
+        document.cookie = encodeURIComponent(name) + "=" + encodeURIComponent(value) + ";path=/";
+      } else {
+        memory[name] = value;
+      }
+    }
+    function readAll() {
+      var jar = {};
+      if (canUse) {
+        document.cookie.split(";").forEach(function (part) {
+          var i = part.indexOf("=");
+          if (i < 0) return;
+          var k = decodeURIComponent(part.slice(0, i).trim());
+          jar[k] = decodeURIComponent(part.slice(i + 1));
+        });
+      } else {
+        for (var k in memory) jar[k] = memory[k];
+      }
+      return jar;
+    }
+    function show(text) { out.textContent = text; }
+    function key() { return document.getElementById("cKey").value.trim(); }
+
+    document.getElementById("cSet").onclick = function () {
+      write(key(), document.getElementById("cVal").value);
+      show("Saved " + key() + " = " + document.getElementById("cVal").value);
+    };
+    document.getElementById("cGet").onclick = function () {
+      var jar = readAll();
+      show(jar[key()] === undefined ? "(not set)" : key() + " = " + jar[key()]);
+    };
+    document.getElementById("cAll").onclick = function () {
+      var jar = readAll();
+      var lines = Object.keys(jar).map(function (k) { return k + " = " + jar[k]; });
+      show(lines.length ? lines.join("\n") : "(jar is empty)");
+    };
+    document.getElementById("cDel").onclick = function () {
+      if (canUse) {
+        document.cookie = encodeURIComponent(key()) + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+      } else {
+        delete memory[key()];
+      }
+      show("Removed " + key());
+    };
+  })();
+</script>
+```

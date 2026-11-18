@@ -1,0 +1,79 @@
+---
+title: Destructuring assignment
+description: Unpack values from objects and arrays into variables with concise syntax.
+chapter: 60
+category: "JavaScript"
+order: 360
+---
+
+# Destructuring assignment
+
+Destructuring is a shorthand for extracting several values from an array or object and assigning them to variables in one statement. It cuts down on repetitive property access and makes function signatures self-documenting.
+
+## Object destructuring
+
+Put a pattern of property names on the left of an assignment to pull matching values out of an object on the right:
+
+```js
+const user = { name: 'Ada', age: 36 };
+const { name, age } = user;
+```
+
+Only the properties you list are extracted, and the variable names match the keys by default. The same syntax works in a `const`, `let`, or `var` declaration, or on its own inside parentheses when reassigning existing variables.
+
+## Defaults, renaming, and nesting
+
+If a property is missing, a default value keeps the variable defined: place an equals sign after the name. To use a different local name, write the source key followed by a colon and the new name, and a default can follow that. Patterns can be nested to dig into structured data, such as pulling a city from an address object inside a user.
+
+```js
+const { name: fullName, role = 'Guest', address: { city } } = user;
+```
+
+## Array destructuring and function arguments
+
+Array patterns use square brackets and follow position rather than names. You can skip slots with a gap, and a rest pattern gathers the remaining items into a new array. Destructuring is especially common in function parameters: an options object becomes a clean list of named arguments with defaults, which removes the need for a block of `if` statements filling in missing settings.
+
+The profile card below extracts a nested, partially filled object with defaults and renaming, then uses an array pattern to unpack a pair of coordinates.
+
+```html
+<div class="ds-wrap">
+  <div class="ds-card">
+    <h2>Profile from Destructuring</h2>
+    <p class="ds-sub">Built by unpacking one object and one array.</p>
+    <div id="card" class="ds-profile"></div>
+    <pre id="out" class="ds-out"></pre>
+  </div>
+</div>
+<style>
+  .ds-wrap{font-family:system-ui,sans-serif;background:#faf5ff;padding:18px;border-radius:14px;}
+  .ds-card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 6px 18px rgba(80,30,110,.08);}
+  .ds-card h2{margin:0 0 4px;font-size:18px;color:#6b21a8;}
+  .ds-sub{margin:0 0 14px;color:#7e22ce;font-size:13px;}
+  .ds-profile{background:linear-gradient(135deg,#f3e8ff,#ede9fe);border:1px solid #e9d5ff;border-radius:10px;padding:12px;margin-bottom:12px;}
+  .ds-profile h3{margin:0 0 4px;color:#581c87;font-size:16px;}
+  .ds-profile p{margin:2px 0;font-size:13px;color:#6b21a8;}
+  .ds-out{background:#0f172a;color:#d8b4fe;padding:12px;border-radius:8px;font-size:12px;line-height:1.7;white-space:pre-wrap;margin:0;}
+</style>
+<script>
+  const record = {
+    name: 'Grace Hopper',
+    title: 'Rear Admiral',
+    address: { city: 'New York', country: 'USA' }
+  };
+  // Rename, give a default, and dig into a nested object in one line.
+  const { name: fullName, title = 'Member', address: { city }, role = 'Engineer' } = record;
+  // Array destructuring with a skipped slot and a rest pattern.
+  const coords = [40.7, -74.0, 'sea level'];
+  const [lat, lng, ...extra] = coords;
+  document.getElementById('card').innerHTML =
+    '<h3>' + fullName + '</h3>' +
+    '<p>Role: ' + role + ' / ' + title + '</p>' +
+    '<p>Location: ' + city + '</p>';
+  document.getElementById('out').textContent =
+    'fullName = ' + fullName + '\n' +
+    'role (default) = ' + role + '\n' +
+    'city (nested) = ' + city + '\n' +
+    'lat = ' + lat + ', lng = ' + lng + '\n' +
+    'extra = ' + JSON.stringify(extra);
+</script>
+```

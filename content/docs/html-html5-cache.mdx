@@ -1,0 +1,90 @@
+---
+title: HTML5 Cache
+description: Understand the deprecated Application Cache manifest and what replaced it.
+chapter: 38
+category: "HTML"
+order: 48
+---
+
+# HTML5 Cache
+
+The HTML5 Application Cache (AppCache) was designed to let a page run offline by listing resources in a manifest file. It is now **deprecated** and should not be used in new projects.
+
+## Basic example of the old cache
+
+A page declared the manifest on the `html` element:
+
+```html
+<!doctype html>
+<html manifest="/offline.appcache">
+  <head>
+    <title>Offline notes</title>
+  </head>
+  <body>
+    <h1>Offline notes</h1>
+    <p>This page once worked without a network connection.</p>
+  </body>
+</html>
+```
+
+The manifest listed the files to cache:
+
+```text
+CACHE MANIFEST
+# version 1
+
+CACHE:
+/
+/css/site.css
+/js/app.js
+/offline.html
+
+NETWORK:
+/api/
+```
+
+Browsers removed support for AppCache because it was difficult to update and debug.
+
+## Why it was removed
+
+- Updates were unpredictable; users could see stale files.
+- The manifest format was easy to get wrong.
+- It conflicted with modern caching headers.
+- It had no reliable way to clear a broken cache.
+
+## What replaced it
+
+Use a **service worker** for offline support. A service worker is a JavaScript file that intercepts network requests and can cache responses.
+
+```js
+// sw.js
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open("v1").then((cache) => cache.addAll(["/", "/css/site.css"])),
+  );
+});
+
+self.addEventListener("fetch", (event) => {
+  event.respondWith(
+    caches.match(event.request).then((cached) => cached || fetch(event.request)),
+  );
+});
+```
+
+Register it from the page:
+
+```html
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/sw.js");
+  }
+</script>
+```
+
+## Practical advice
+
+- Do not add `manifest` to new HTML.
+- Use HTTP cache headers for normal caching.
+- Use a service worker only when offline behaviour is a real requirement.
+- Version the cache name and clean up old caches during activation.
+- Always test with the network throttled and with the cache cleared.

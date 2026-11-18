@@ -1,0 +1,57 @@
+---
+title: Map
+description: Store key/value pairs with Map, using any value as a key and iterating in insertion order.
+chapter: 38
+category: "JavaScript"
+order: 338
+---
+
+# Map
+
+A `Map` is an ordered collection of key/value pairs. Unlike a plain object, its keys can be any value - objects, functions, even other maps - not just strings and symbols. It also preserves insertion order when iterated, and it has a real `size` property instead of requiring you to count keys.
+
+## Creating a map and working with entries
+
+You build a map with `new Map()`, optionally passing an array of pairs. The core methods are `set(key, value)`, `get(key)`, `has(key)`, and `delete(key)`; `clear()` empties the whole map. Chaining works because `set` returns the map itself. Keys are compared by identity for objects and by value for primitives, so two distinct objects with identical content are still two separate keys.
+
+## Iteration and size
+
+Maps are iterable. A `for...of` loop over the map yields two-element arrays of key and value, and the `keys()`, `values()`, and `entries()` methods give you focused iterators. Spreading a map into an array is a quick way to snapshot it. Because iteration follows insertion order, updating an existing key does not move it to the end - only a fresh insert does.
+
+The demo below tallies words typed by the user. Each word is a string key and its count is the value; buttons add words, show the count, and clear the map, with results printed into a panel.
+
+```html
+<div style="background:#f8fafc;border-radius:16px;padding:20px;max-width:560px;font-family:system-ui,sans-serif;color:#0f172a;">
+  <h3 style="margin-top:0;">Word tally with Map</h3>
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+    <input id="word" placeholder="Type a word..." style="padding:8px;border-radius:8px;border:1px solid #cbd5e1;">
+    <button id="add">Count it</button>
+    <button id="clear">Clear</button>
+  </div>
+  <pre id="out" style="background:#0f172a;color:#e2e8f0;padding:12px;border-radius:10px;min-height:110px;white-space:pre-wrap;"></pre>
+</div>
+<script>
+  (function () {
+    var out = document.getElementById("out");
+    var tally = new Map();
+    function render() {
+      if (tally.size === 0) { out.textContent = "(map is empty)"; return; }
+      var lines = [];
+      tally.forEach(function (count, word) { lines.push(word + ": " + count); });
+      out.textContent = "size = " + tally.size + "\n" + lines.join("\n");
+    }
+    document.getElementById("add").onclick = function () {
+      var word = document.getElementById("word").value.trim().toLowerCase();
+      if (!word) return;
+      tally.set(word, (tally.get(word) || 0) + 1);
+      document.getElementById("word").value = "";
+      render();
+    };
+    document.getElementById("clear").onclick = function () {
+      tally.clear();
+      render();
+    };
+    render();
+  })();
+</script>
+```

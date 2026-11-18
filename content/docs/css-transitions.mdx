@@ -1,0 +1,156 @@
+---
+title: Transitions
+description: Animate property changes with transition shorthand and longhand, easing curves, and cubic-bezier timing.
+chapter: 26
+category: "CSS"
+order: 126
+---
+
+# Transitions
+
+A transition interpolates between two states of a property. You declare it on the element's base rule, then change the property in a state such as `:hover`, `:focus-visible`, or a class added by JavaScript. Without a transition, the change is instant; with one, the browser fills in the frames.
+
+## Shorthand and longhand
+
+The shorthand takes four parts in any order: property, duration, timing function, and delay.
+
+```css
+.card {
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1) 40ms;
+}
+```
+
+The longhands are `transition-property`, `transition-duration`, `transition-timing-function`, and `transition-delay`. Use them when you need different timing per property:
+
+```css
+.card {
+  transition-property: transform, box-shadow;
+  transition-duration: 220ms, 400ms;
+  transition-timing-function: ease-out, linear;
+}
+```
+
+You can also list multiple transitions in one shorthand, comma-separated. `transition: all` is tempting but costly: it watches every animatable property, including ones you did not intend to animate. Name the properties you actually change. Only interpolatable values transition — colors, lengths, transforms, opacity. `display` and `height: auto` are not animatable in the classic sense.
+
+## Easing
+
+The timing function shapes the speed curve. `linear` is constant and feels mechanical. `ease`, `ease-in`, `ease-out`, and `ease-in-out` are the presets. `cubic-bezier(x1, y1, x2, y2)` gives full control: the two control points shape how quickly the value leaves the start and arrives at the end. A curve that overshoots slightly above 1 creates a pleasing snap without keyframes.
+
+For UI feedback, short durations work best — around 150–250ms for hover states, a little longer for larger movements. Long transitions feel sluggish; abrupt ones feel broken. Always declare the transition on the base state so the return trip animates too.
+
+Hover is not the only trigger. `:focus-visible` deserves the same transition so keyboard users see the same polish, and class changes from JavaScript animate identically. On touch devices hover can stick after a tap, so avoid relying on it for essential information. A `transition-delay` in the tens of milliseconds can also stagger a row of cards into a subtle cascade without any keyframes.
+
+## Demo: product card
+
+```html
+<article class="product">
+  <div class="product__media">
+    <span class="product__tag">Limited</span>
+    <span class="product__shape"></span>
+  </div>
+  <div class="product__body">
+    <h2>Clay Mug No. 4</h2>
+    <p>Hand-thrown stoneware, matte glaze, 320 ml.</p>
+    <a class="product__cta" href="#">View details</a>
+  </div>
+</article>
+
+<style>
+  body {
+    margin: 0;
+    min-height: 60vh;
+    display: grid;
+    place-items: center;
+    padding: 2rem 1.25rem;
+    background: #f3f0ea;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+  .product {
+    width: min(20rem, 100%);
+    background: #ffffff;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 14px 30px -24px rgba(52, 44, 32, 0.8);
+    transition:
+      transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 320ms ease-out;
+  }
+  .product:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 28px 46px -26px rgba(52, 44, 32, 0.65);
+  }
+  .product__media {
+    position: relative;
+    display: grid;
+    place-items: center;
+    height: 11rem;
+    background: linear-gradient(140deg, #dfe9dd, #f6e7cf);
+  }
+  .product__tag {
+    position: absolute;
+    top: 0.85rem;
+    left: 0.85rem;
+    padding: 0.22rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.85);
+    color: #4b5b46;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+  .product__shape {
+    width: 5.5rem;
+    height: 5.5rem;
+    border-radius: 42% 58% 55% 45%;
+    background: linear-gradient(160deg, #c8d6c2, #9fb59a);
+    box-shadow: inset -8px -10px 18px rgba(60, 80, 55, 0.28);
+    transition:
+      transform 420ms cubic-bezier(0.34, 1.56, 0.64, 1),
+      border-radius 420ms ease;
+  }
+  .product:hover .product__shape {
+    transform: scale(1.12) rotate(-6deg);
+    border-radius: 52% 48% 44% 56%;
+  }
+  .product__body {
+    padding: 1.15rem 1.25rem 1.35rem;
+  }
+  .product__body h2 {
+    margin: 0 0 0.35rem;
+    font-family: ui-serif, Georgia, serif;
+    font-size: 1.15rem;
+    color: #2f3a2c;
+  }
+  .product__body p {
+    margin: 0 0 1rem;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: #6d7a67;
+  }
+  .product__cta {
+    display: inline-block;
+    padding: 0.5rem 0.9rem;
+    border-radius: 10px;
+    background: #3c4a37;
+    color: #f4f7f2;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      background-color 180ms ease-out,
+      letter-spacing 180ms ease-out;
+  }
+  .product__cta:hover {
+    background: #55684e;
+    letter-spacing: 0.02em;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .product,
+    .product__shape,
+    .product__cta {
+      transition-duration: 1ms;
+    }
+  }
+</style>
+```

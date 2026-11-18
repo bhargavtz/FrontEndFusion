@@ -1,0 +1,136 @@
+---
+title: Getting started with JavaScript
+description: Learn the first ways JavaScript talks to you and to a page, from console output to DOM updates and dialogs.
+chapter: 1
+category: "JavaScript"
+order: 301
+---
+
+# Getting started with JavaScript
+
+JavaScript is the language that makes web pages do things. Before you build anything complicated you need three basic ways to get a result you can see: write a message to the developer console, change the page itself through the DOM, and ask the user a question with a dialog. This chapter walks through all three.
+
+## Writing output with console.log
+
+The quickest way to inspect a value is `console.log()`. Open a browser's developer tools and the message appears in the Console panel. You can pass several values separated by commas, and mix strings with numbers or objects. It is the workhorse of debugging because it never changes what the visitor sees.
+
+Because a preview does not always show developer tools, the demo below wraps `console.log()` so every call is also drawn into a visible panel. The idea is the same: call the function and the value shows up.
+
+## Reaching the page with the DOM
+
+The Document Object Model is a tree of objects representing the HTML on screen. `document.getElementById()` finds an element by its `id`, and assigning its `textContent` replaces the text inside it. That single pattern sits behind most interactive pages: find a node, then change it in response to something.
+
+For richer output you can draw with the `canvas` element or build shapes with SVG. Both give you graphical text instead of plain characters, but they still begin with locating an element first.
+
+## Asking the user with dialogs
+
+Three built-in functions open small modal windows. `alert()` shows a message with an OK button, `confirm()` asks a yes-or-no question and returns a boolean, and `prompt()` returns whatever the user typed, or `null` when they cancel. They are useful for quick experiments but they block the page and look plain, so finished applications usually replace them with custom markup. Embedded previews can suppress these dialogs, so the demo keeps its interaction inside the page.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>First steps</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px 18px;
+        font-family: system-ui, sans-serif;
+        color: #2b2536;
+        background: radial-gradient(circle at 20% 0%, #eef0ff, #f7f6fb 65%);
+      }
+      .card {
+        max-width: 480px;
+        margin: 0 auto;
+        padding: 22px;
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 20px 45px -30px rgba(43, 37, 54, 0.55);
+      }
+      h1 { margin: 0 0 4px; font-size: 1.15rem; }
+      .hint { margin: 0 0 16px; font-size: 0.82rem; color: #7b7288; }
+      .row { display: flex; flex-wrap: wrap; gap: 8px; }
+      button {
+        padding: 9px 12px;
+        border: 0;
+        border-radius: 10px;
+        background: #6d54e6;
+        color: #ffffff;
+        font: inherit;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button:hover { background: #5a41d2; }
+      .target {
+        margin: 16px 0 8px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: #f3efff;
+        font-size: 0.85rem;
+      }
+      canvas { width: 100%; max-width: 340px; border-radius: 10px; background: #faf8ff; }
+      .out {
+        margin: 14px 0 0;
+        min-height: 70px;
+        padding: 12px;
+        border-radius: 10px;
+        background: #211d2e;
+        color: #c8f7c5;
+        font-size: 0.78rem;
+        line-height: 1.5;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>JavaScript first steps</h1>
+      <p class="hint">Press the buttons and watch the dark output panel.</p>
+      <div class="row">
+        <button id="btnLog">console.log</button>
+        <button id="btnDom">Change DOM text</button>
+        <button id="btnCanvas">Draw on canvas</button>
+      </div>
+      <p id="target" class="target">This text is waiting to be changed.</p>
+      <canvas id="c" width="340" height="64"></canvas>
+      <pre id="out" class="out"></pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      var realLog = console.log.bind(console);
+      console.log = function () {
+        var parts = Array.prototype.slice.call(arguments);
+        out.textContent += "> " + parts.join(" ") + "\n";
+        realLog.apply(console, parts);
+      };
+      var count = 0;
+      document.getElementById("btnLog").addEventListener("click", function () {
+        count += 1;
+        console.log("Log call #" + count, "at", new Date().toLocaleTimeString());
+      });
+      document.getElementById("btnDom").addEventListener("click", function () {
+        document.getElementById("target").textContent =
+          "The DOM changed at " + new Date().toLocaleTimeString();
+        console.log("Updated the #target element");
+      });
+      document.getElementById("btnCanvas").addEventListener("click", function () {
+        var canvas = document.getElementById("c");
+        var ctx = canvas && canvas.getContext ? canvas.getContext("2d") : null;
+        if (!ctx) {
+          console.log("Canvas is unavailable here; the DOM text still works.");
+          return;
+        }
+        ctx.clearRect(0, 0, 340, 64);
+        ctx.fillStyle = "#6d54e6";
+        ctx.font = "bold 22px system-ui, sans-serif";
+        ctx.fillText("Hello from canvas!", 14, 40);
+        console.log("Drew graphical text on the canvas");
+      });
+      console.log("Ready. Try the three buttons.");
+    </script>
+  </body>
+</html>
+```

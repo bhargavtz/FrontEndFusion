@@ -1,0 +1,139 @@
+---
+title: Stacking Context
+description: Understand why z-index sometimes loses, how stacking contexts are created, and how to order overlapping layers predictably.
+chapter: 48
+category: "CSS"
+order: 148
+---
+
+# Stacking Context
+
+`z-index` only competes inside a stacking context. Two elements in different contexts never compare their numbers — the child of a context is painted as part of that context, no matter how large its `z-index` is. Most "z-index is broken" bugs are really "an ancestor quietly created a context and trapped me".
+
+## How paint order works
+
+Within a single stacking context, elements paint in this order:
+
+1. The background and borders of the context's own box.
+2. Descendants with negative `z-index`, most negative first.
+3. Block-level in-flow boxes.
+4. Floated boxes.
+5. Inline-level in-flow content.
+6. Positioned boxes with `z-index: auto` or `0`, in document order.
+7. Positive `z-index`, smallest first.
+
+Ties are broken by source order: the later element wins.
+
+## What creates a context
+
+The root element always does. After that, any of these starts a new one:
+
+- `position` other than `static` together with a `z-index` that is not `auto`.
+- `position: fixed` or `position: sticky`, even with `z-index: auto`.
+- `opacity` below `1`.
+- `transform`, `filter`, `backdrop-filter`, `perspective`, `clip-path`, or `mask` with a value other than `none`.
+- `isolation: isolate`, `contain: layout` or `paint`, `will-change` naming any of the above.
+- A flex or grid item with a `z-index` other than `auto`.
+
+That list is why a hover effect using `opacity: 0.99` can break a dropdown: the card becomes a context and its menu can no longer rise above the sibling that follows it. `isolation: isolate` is the deliberate version — it creates a context with no side effects, which is the right tool for component boundaries.
+
+In the demo, the middle card is rotated, so it owns a stacking context. Its badge asks for `z-index: 99` and still slides beneath the third card, which has `z-index: 3` in the parent context.
+
+```html
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    background:
+      linear-gradient(rgba(31, 58, 99, 0.06) 1px, transparent 1px) 0 0 / 28px 28px,
+      linear-gradient(90deg, rgba(31, 58, 99, 0.06) 1px, transparent 1px) 0 0 / 28px 28px,
+      radial-gradient(circle at 70% 10%, #f7faff, #e6edf8 70%);
+    font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  }
+  .stage {
+    position: relative;
+    width: min(560px, 92vw);
+    height: 330px;
+  }
+  .card {
+    position: absolute;
+    width: 250px;
+    padding: 18px 20px;
+    border-radius: 16px;
+    box-shadow: 0 26px 46px -30px rgba(17, 36, 66, 0.85);
+  }
+  .card h2 { margin: 0 0 4px; font-size: 0.95rem; }
+  .card p { margin: 0; font-size: 0.76rem; line-height: 1.55; opacity: 0.85; }
+  .a {
+    left: 0; top: 0;
+    z-index: 1;
+    background: #ffffff;
+    color: #1b3252;
+    border: 1px solid #dbe5f2;
+  }
+  /* transform creates a stacking context, so the badge is trapped here */
+  .b {
+    left: 92px; top: 78px;
+    z-index: 2;
+    background: linear-gradient(150deg, #eef4ff, #dbe8ff);
+    color: #1b3252;
+    border: 1px solid #c6d8f5;
+    transform: rotate(-2.5deg);
+  }
+  .badge {
+    position: absolute;
+    right: -26px;
+    top: 44px;
+    z-index: 99;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #ffd166;
+    color: #4a3200;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+  .c {
+    left: 250px; top: 156px;
+    z-index: 3;
+    background: linear-gradient(150deg, #1f3a63, #2f5687);
+    color: #ffffff;
+    border: 1px solid #16304f;
+  }
+  .c p { opacity: 0.78; }
+  .legend {
+    position: absolute;
+    left: 0; bottom: 0;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #6b7f9c;
+  }
+</style>
+
+<div class="stage">
+  <article class="card a">
+    <h2>z-index: 1</h2>
+    <p>Positioned, so the number applies in the root stacking context.</p>
+  </article>
+
+  <article class="card b">
+    <h2>z-index: 2</h2>
+    <p>Rotated, therefore a stacking context. Its badge cannot escape.</p>
+    <span class="badge">z-index: 99</span>
+  </article>
+
+  <article class="card c">
+    <h2>z-index: 3</h2>
+    <p>Paint order across contexts is decided by the ancestor, not the child.</p>
+  </article>
+
+  <span class="legend">same parent context · 1 &lt; 2 &lt; 3</span>
+</div>
+```
+
+The fix is structural, not numeric. Either move the badge out of the transformed card, or raise the whole card's `z-index` so the context itself sits above its sibling.

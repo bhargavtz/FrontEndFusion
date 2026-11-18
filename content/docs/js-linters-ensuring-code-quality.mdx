@@ -1,0 +1,83 @@
+---
+title: Linters - Ensuring code quality
+description: Use static analysis tools to catch suspicious syntax, style drift, and likely bugs before code runs.
+chapter: 102
+category: "JavaScript"
+order: 402
+---
+
+# Linters - Ensuring code quality
+
+A linter reads source code without executing it and flags patterns that are likely to be mistakes. Catching a missing brace or an accidental global during development is far cheaper than finding it in production. Linters also enforce a consistent style across a team, so reviews can focus on design instead of formatting.
+
+## The main tools
+
+**JSLint** was one of the first widely used linters. It is deliberately opinionated: it enforces a strict subset of the language and gives you relatively few knobs to turn. That rigidity is useful when you want a single, uncompromising standard.
+
+**JSHint** grew out of JSLint with a more configurable rule set. You can disable individual warnings, which makes it easier to adopt in a codebase with existing habits.
+
+**ESLint** is the modern default. Its rules are individually toggleable, it understands modern syntax through parsers, and plugins extend it with framework-specific checks and automatic fixes. JavaScript Code Style (JSCS) was a formatter-focused alternative that has largely been folded into ESLint. Most new projects should reach for ESLint and pair it with a formatter.
+
+## Integrating linting into a workflow
+
+A linter earns its keep when it runs automatically: in your editor as you type, as a pre-commit hook, and in continuous integration as a required check. Start with a small, recommended rule set and enable stricter rules gradually, otherwise the initial flood of warnings gets ignored. Treat rules about correctness, such as no-undef and no-unused-vars, as errors, and stylistic preferences as warnings.
+
+The demo implements a miniature linter with three simple rules: flag loose equality, flag `var` declarations, and flag lines that do not end with a semicolon. It scans the text in the editor and lists findings with line numbers.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mini linter</title>
+    <style>
+      body { margin: 0; padding: 24px 16px; font-family: system-ui, sans-serif;
+        color: #2b2b36; background: linear-gradient(135deg, #f5f0fa, #eef6f5 80%); }
+      .card { max-width: 660px; margin: 0 auto; padding: 22px; background: #fff;
+        border-radius: 18px; box-shadow: 0 20px 40px -28px rgba(45,40,75,.42); }
+      h1 { margin: 0 0 12px; font-size: 1.15rem; }
+      textarea { width: 100%; box-sizing: border-box; min-height: 120px; padding: 10px;
+        border: 1px solid #d9d8e6; border-radius: 9px; font-family: ui-monospace, monospace;
+        font-size: .78rem; line-height: 1.5; resize: vertical; }
+      button { margin: 10px 0 0; padding: 8px 12px; border: 0; border-radius: 9px;
+        color: #fff; background: #6b52a3; font: inherit; font-size: .78rem; cursor: pointer; }
+      pre { margin: 12px 0 0; padding: 12px; min-height: 90px; border-radius: 10px;
+        background: #20222e; color: #f0dce2; font-size: .76rem; line-height: 1.6;
+        white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Lint this snippet</h1>
+      <textarea id="code">var total = 0;
+if (total == 5) {
+  total = total + 1
+}
+console.log(total);</textarea>
+      <button id="run">Run linter</button>
+      <pre id="out">Press "Run linter" to scan the code.</pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      function lint(source) {
+        var issues = [];
+        source.split("\n").forEach(function (line, i) {
+          var number = i + 1;
+          if (/\bvar\s/.test(line)) issues.push(number + ": avoid 'var', use let or const");
+          if (/==[^=]/.test(line)) issues.push(number + ": use strict equality ===");
+          var trimmed = line.trim();
+          if (trimmed && !/[;{}]$/.test(trimmed)) issues.push(number + ": missing semicolon");
+        });
+        return issues;
+      }
+      document.getElementById("run").addEventListener("click", function () {
+        var issues = lint(document.getElementById("code").value);
+        out.textContent = issues.length
+          ? issues.join("\n") + "\n\n" + issues.length + " issue(s) found."
+          : "No issues found. Clean code!";
+      });
+    </script>
+  </body>
+</html>
+```

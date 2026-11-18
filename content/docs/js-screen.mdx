@@ -1,0 +1,85 @@
+---
+title: Screen
+description: Read display dimensions, available space, color depth, and viewport size.
+chapter: 58
+category: "JavaScript"
+order: 358
+---
+
+# Screen
+
+The `screen` object is part of the browser object model and describes the display the browser is running on. It is useful for adapting layout or gathering basic diagnostics, but it describes the physical monitor, not the browser window itself.
+
+## Screen dimensions
+
+`screen.width` and `screen.height` report the full display size in CSS pixels. On a multi-monitor setup these values refer to the screen containing the browser. `screen.availWidth` and `screen.availHeight` are often smaller, because they subtract system chrome such as a taskbar or menu bar.
+
+## Available area and color depth
+
+The available rectangle tells you how much space the operating system leaves for applications. Color capability is exposed through `screen.colorDepth`, the number of bits used per pixel, and `screen.pixelDepth`, which is usually the same. Older code checked these to decide which image format to serve, though today almost every screen supports truecolor.
+
+## Viewport versus screen
+
+Most layout work should use the viewport instead of the display. `window.innerWidth` and `window.innerHeight` give the size of the browsing area, including a scrollbar if one is present. `document.documentElement.clientWidth` excludes the scrollbar, and `window.devicePixelRatio` tells you how many physical pixels map to one CSS pixel on high-density displays. Feature detection matters here: in an unusual or sandboxed environment the `screen` object may be missing or return zeros, so guard your reads.
+
+The report below reads these properties live and refreshes when the preview is resized. Values reflect the preview frame, so treat them as an illustration of the API rather than your real monitor.
+
+```html
+<div class="sr-wrap">
+  <div class="sr-card">
+    <h2>Screen Report</h2>
+    <p class="sr-sub">Live values from the screen and window objects.</p>
+    <div id="grid" class="sr-grid"></div>
+    <pre id="out" class="sr-out"></pre>
+  </div>
+</div>
+<style>
+  .sr-wrap{font-family:system-ui,sans-serif;background:#f0f9ff;padding:18px;border-radius:14px;}
+  .sr-card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 6px 18px rgba(20,70,110,.08);}
+  .sr-card h2{margin:0 0 4px;font-size:18px;color:#0c4a6e;}
+  .sr-sub{margin:0 0 14px;color:#0369a1;font-size:13px;}
+  .sr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px;}
+  .sr-cell{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px;}
+  .sr-cell span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#64748b;}
+  .sr-cell strong{font-size:18px;color:#0f172a;}
+  .sr-out{background:#0f172a;color:#7dd3fc;padding:12px;border-radius:8px;font-size:12px;line-height:1.7;white-space:pre-wrap;margin:0;}
+</style>
+<script>
+  const grid = document.getElementById('grid');
+  const out = document.getElementById('out');
+  function safe(get, fallback){
+    try { const v = get(); return (v === undefined || v === null || v === 0) ? fallback : v; }
+    catch (e) { return fallback; }
+  }
+  function render(){
+    const hasScreen = typeof window.screen !== 'undefined';
+    const data = {
+      'Screen W': safe(function(){ return window.screen.width; }, 'n/a'),
+      'Screen H': safe(function(){ return window.screen.height; }, 'n/a'),
+      'Avail W': safe(function(){ return window.screen.availWidth; }, 'n/a'),
+      'Avail H': safe(function(){ return window.screen.availHeight; }, 'n/a'),
+      'Color depth': safe(function(){ return window.screen.colorDepth; }, 'n/a') + '-bit',
+      'Pixel ratio': safe(function(){ return window.devicePixelRatio; }, 1),
+      'Viewport W': window.innerWidth,
+      'Viewport H': window.innerHeight
+    };
+    grid.innerHTML = '';
+    Object.keys(data).forEach(function(key){
+      const cell = document.createElement('div');
+      cell.className = 'sr-cell';
+      const label = document.createElement('span');
+      label.textContent = key;
+      const value = document.createElement('strong');
+      value.textContent = data[key];
+      cell.appendChild(label);
+      cell.appendChild(value);
+      grid.appendChild(cell);
+    });
+    out.textContent = hasScreen
+      ? 'screen object detected. Viewport differs from the physical display.'
+      : 'screen object unavailable - showing safe fallback values.';
+  }
+  render();
+  window.addEventListener('resize', render);
+</script>
+```

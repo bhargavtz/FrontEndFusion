@@ -1,0 +1,195 @@
+---
+title: Cursor Styling
+description: Choose the right pointer for each interaction, and learn how pointer-events and caret-color change the way a control responds to the mouse and the keyboard.
+chapter: 31
+category: "CSS"
+order: 131
+---
+
+# Cursor Styling
+
+The mouse pointer is the cheapest feedback a page can give. Before a click lands, the cursor already tells the visitor whether something is a link, a drag handle, or a dead end. CSS exposes that hint through `cursor`, and two related properties let you switch interaction off entirely or recolour the text insertion bar.
+
+## Choosing a cursor value
+
+`cursor` accepts a long list of keywords. A handful cover almost every real interface:
+
+| Value | Reads as |
+| --- | --- |
+| `default` | Plain arrow, no affordance |
+| `pointer` | "This is clickable" |
+| `text` | "You can select here" |
+| `grab` / `grabbing` | Drag source, then mid-drag |
+| `move` | Free repositioning |
+| `help` | More information available |
+| `not-allowed` | Blocked action |
+| `zoom-in` / `zoom-out` | Image or map scaling |
+| `crosshair` | Precision picking |
+
+Reserve `pointer` for things that actually do something. Putting it on a plain paragraph, or on a card whose whole surface is a link but whose inner buttons are not, is worse than no hint at all — it trains people to click and be disappointed.
+
+## pointer-events and caret-color
+
+`pointer-events: none` makes an element invisible to the mouse. Clicks, hover, and drag all pass straight through to whatever sits underneath. The classic use is a decorative overlay — a gradient wash or a caption scrim laid over a photo — that would otherwise swallow clicks meant for the link below.
+
+Wrap the element in a container that owns the real behaviour. Set `pointer-events: none` on the overlay, then restore `pointer-events: auto` on any child that must stay interactive, such as a caption link. Without that second line the child inherits the dead state and nothing inside the overlay can be clicked.
+
+The same property is handy for temporarily disabling a whole region during an async action, and for icons inside a button so the click target is always the button itself.
+
+The other knob in this area is `caret-color`. It sets the colour of the blinking insertion bar in inputs, textareas, and contenteditable areas. It defaults to `currentColor`, which means it follows the text colour and is usually invisible against a tinted field. Give it the accent colour of the form and the field suddenly feels deliberate. `caret-color: transparent` hides the bar, which is occasionally useful for custom styled pickers but hostile in a normal text field — people lose track of where they are typing.
+
+## A complete example
+
+Each tile below advertises a different interaction, the disabled button refuses the mouse entirely, and the input carries the brand accent in its caret.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cursor playground</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 44px 20px;
+        font-family: system-ui, sans-serif;
+        background: linear-gradient(160deg, #eef2fb, #f8fafc 55%);
+        color: #16203a;
+      }
+
+      .panel {
+        max-width: 560px;
+        margin: 0 auto;
+        padding: 28px;
+        background: #fff;
+        border: 1px solid #e3e9f4;
+        border-radius: 22px;
+        box-shadow: 0 30px 60px -40px rgba(22, 32, 58, 0.5);
+      }
+
+      h1 {
+        margin: 0 0 4px;
+        font-size: 1.1rem;
+        letter-spacing: -0.01em;
+      }
+
+      p.lead {
+        margin: 0 0 20px;
+        font-size: 0.85rem;
+        color: #64728c;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 10px;
+        margin-bottom: 22px;
+      }
+
+      .tile {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        padding: 14px 12px;
+        border-radius: 13px;
+        background: #f5f8fd;
+        border: 1px solid #e6ecf7;
+        font-size: 0.78rem;
+        font-weight: 600;
+      }
+
+      .tile small {
+        font-weight: 500;
+        color: #7b8aa5;
+        font-size: 0.68rem;
+        letter-spacing: 0.04em;
+      }
+
+      .c-pointer { cursor: pointer; }
+      .c-grab { cursor: grab; }
+      .c-text { cursor: text; }
+      .c-help { cursor: help; }
+      .c-zoom { cursor: zoom-in; }
+      .c-cross { cursor: crosshair; }
+      .c-move { cursor: move; }
+      .c-none { cursor: not-allowed; background: #fdf5f5; border-color: #f6e0e0; }
+
+      .field {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        margin-bottom: 18px;
+        padding: 12px 14px;
+        font: inherit;
+        font-size: 0.9rem;
+        color: #16203a;
+        background: #f7faff;
+        border: 1px solid #d9e3f4;
+        border-radius: 12px;
+        caret-color: #4b6cf5;
+      }
+
+      .field:focus {
+        outline: 2px solid #cdd9fb;
+        outline-offset: 1px;
+      }
+
+      .stage {
+        position: relative;
+        padding: 20px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #4b6cf5, #7d5cf0);
+        text-align: center;
+      }
+
+      .wash {
+        position: absolute;
+        inset: 0;
+        border-radius: 14px;
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.35));
+        pointer-events: none;
+      }
+
+      .stage a {
+        position: relative;
+        color: #fff;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .stage a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="panel">
+      <h1>Cursor playground</h1>
+      <p class="lead">Hover each tile — the pointer is the affordance.</p>
+
+      <div class="grid">
+        <div class="tile c-pointer">Open file <small>pointer</small></div>
+        <div class="tile c-grab">Drag card <small>grab</small></div>
+        <div class="tile c-text">Select text <small>text</small></div>
+        <div class="tile c-help">What is this? <small>help</small></div>
+        <div class="tile c-zoom">Enlarge photo <small>zoom-in</small></div>
+        <div class="tile c-cross">Pick a pixel <small>crosshair</small></div>
+        <div class="tile c-move">Reposition <small>move</small></div>
+        <div class="tile c-none">Unavailable <small>not-allowed</small></div>
+      </div>
+
+      <input class="field" type="text" placeholder="Caret picks up the accent colour" />
+
+      <div class="stage">
+        <span class="wash"></span>
+        <a href="#">The dark scrim ignores clicks</a>
+      </div>
+    </section>
+  </body>
+</html>
+```
+
+The scrim is the part worth studying. It sits on top of the link, yet the link still receives every click, because the overlay opted out of hit-testing with `pointer-events: none` and never opted back in.

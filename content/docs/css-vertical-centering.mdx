@@ -1,0 +1,139 @@
+---
+title: Vertical Centering
+description: Compare six reliable ways to centre content vertically, from line-height to flexbox and pseudo-elements.
+chapter: 50
+category: "CSS"
+order: 150
+---
+
+# Vertical Centering
+
+Horizontal centring is one line: `margin-inline: auto`. Vertical centring has historically needed a trick, because `vertical-align` only applies to inline, inline-block, and table-cell boxes — setting it on a block does nothing.
+
+Six techniques still show up in real code. Each has a context where it is the simplest option, and a reason not to use it elsewhere.
+
+## The classic techniques
+
+**`line-height`** equals the container height for a single line of text. One declaration, no wrapper. It breaks the moment the text wraps or contains an icon, and any line with a different `font-size` drifts off centre.
+
+**`display: table` / `table-cell`** with `vertical-align: middle`. It works with unknown heights, wraps correctly, and predates flexbox, so it is the go-to for email templates. The cost is extra wrapper elements and a table layout algorithm.
+
+**Absolute positioning with a transform.** Put `top: 50%; left: 50%` and counter the element's own size with `translate(-50%, -50%)`. The transform works because percentages there refer to the element's own box. Works at any size, but the element leaves flow and can overlap siblings.
+
+**A pseudo-element with `height: 100%`** and `vertical-align: middle`. It creates an inline reference tall as the container, so the sibling inline-block centres against it. Still useful when you need centring inside an inline formatting context.
+
+## The modern answer
+
+**Flexbox** — `display: flex; align-items: center; justify-content: center` — centres along both axes, handles wrapping, and does not care about the child's size. **Grid** goes further: `display: grid; place-items: center` is the same idea in two properties, and it centres a child that overflows more gracefully.
+
+Both are safe defaults. Reach for the older methods only when the layout context demands it: a single line inside a fixed-height button, or an email client with partial flex support.
+
+```html
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 30px 18px;
+    background: radial-gradient(circle at 15% 10%, #fff7ee, #f6eadb 55%, #eddcc7);
+    font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+    color: #3b2f22;
+  }
+  .board {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    width: min(760px, 94vw);
+  }
+  .cell {
+    position: relative;
+    height: 132px;
+    padding: 10px;
+    background: #fffdf9;
+    border: 1px solid #ecdfcd;
+    border-radius: 14px;
+    box-shadow: 0 18px 32px -28px rgba(90, 62, 30, 0.8);
+    overflow: hidden;
+  }
+  .label {
+    position: absolute;
+    left: 12px;
+    top: 10px;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #a08b70;
+  }
+  .chip {
+    display: inline-block;
+    padding: 7px 15px;
+    border-radius: 999px;
+    background: linear-gradient(140deg, #b4562a, #d98a4e);
+    color: #fffaf4;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  /* 1 · line-height for one line of text */
+  .p1 { line-height: 132px; text-align: center; font-size: 0.9rem; font-weight: 600; color: #8a4a22; }
+
+  /* 2 · table layout */
+  .p2 { display: table; width: 100%; }
+  .p2 > div { display: table-cell; vertical-align: middle; text-align: center; }
+
+  /* 3 · absolute + transform */
+  .p3 .chip {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  /* 4 · flexbox */
+  .p4 { display: flex; align-items: center; justify-content: center; }
+
+  /* 5 · grid */
+  .p5 { display: grid; place-items: center; }
+
+  /* 6 · pseudo-element ghost */
+  .p6 { text-align: center; font-size: 0; }
+  .p6::before {
+    content: "";
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+  }
+  .p6 .chip { vertical-align: middle; font-size: 0.78rem; }
+</style>
+
+<div class="board">
+  <div class="cell p1">
+    <span class="label">line-height</span>
+    Centred text
+  </div>
+  <div class="cell p2">
+    <span class="label">table-cell</span>
+    <div><span class="chip">middle</span></div>
+  </div>
+  <div class="cell p3">
+    <span class="label">absolute + transform</span>
+    <span class="chip">translate</span>
+  </div>
+  <div class="cell p4">
+    <span class="label">flex</span>
+    <span class="chip">align-items</span>
+  </div>
+  <div class="cell p5">
+    <span class="label">grid</span>
+    <span class="chip">place-items</span>
+  </div>
+  <div class="cell p6">
+    <span class="label">pseudo-element</span>
+    <span class="chip">ghost</span>
+  </div>
+</div>
+```
+
+If a `transform` on the child is already used for animation, `translate(-50%, -50%)` will be overwritten by the animation. In that case use `inset: 0; margin: auto; width: fit-content; height: fit-content` with absolute positioning, or switch the parent to flex.

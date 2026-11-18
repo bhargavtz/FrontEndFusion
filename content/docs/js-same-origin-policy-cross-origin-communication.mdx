@@ -1,0 +1,100 @@
+---
+title: Same Origin Policy & Cross-Origin Communication
+description: Understand how the same-origin policy isolates documents and how to exchange data across origins safely with message passing.
+chapter: 96
+category: "JavaScript"
+order: 396
+---
+
+# Same Origin Policy & Cross-Origin Communication
+
+Browsers isolate documents by **origin**, the combination of scheme, host, and port. The same-origin policy stops a script on one origin from reading the content of a document on another. Without it, a hostile page could read your mail or bank data simply by opening it in an iframe.
+
+## Safe cross-origin communication with messages
+
+The supported way to talk between origins is `window.postMessage()`. The sender passes a message and a target origin; the receiving frame listens for the `message` event and inspects `event.origin` before trusting anything. Checking the origin is essential: accepting messages from `"*"` means any page can send you data. A careful receiver also validates the shape of `event.data`, because a legitimate origin might still be compromised.
+
+A typical handler looks like a small gate: ignore messages whose origin is not on an allowlist, ignore unknown message types, and only then act. Replies are sent back with `event.source.postMessage(...)`, using the exact origin that was received rather than a wildcard.
+
+## Ways around the restriction (and their trade-offs)
+
+Older techniques such as JSONP work by loading a script tag from another domain, but they execute remote code and cannot report errors cleanly. Server-side proxies move the cross-origin request to your backend, which avoids browser limits but adds infrastructure. CORS is the standard mechanism for letting one origin read another's resources: the server opts in with an `Access-Control-Allow-Origin` header. Note that a simple `fetch` to another origin is fine to *send*; CORS governs whether the response may be *read*.
+
+The demo simulates two frames on different origins. A mock message bus delivers payloads, and the receiver enforces an allowlist. Try sending from an untrusted origin to see the message rejected.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>postMessage simulation</title>
+    <style>
+      body { margin: 0; padding: 24px 16px; font-family: system-ui, sans-serif;
+        color: #2b2c3a; background: linear-gradient(135deg, #eef4fb, #f7f0fb 80%); }
+      .card { max-width: 620px; margin: 0 auto; padding: 22px; background: #fff;
+        border-radius: 18px; box-shadow: 0 20px 40px -28px rgba(50,40,80,.45); }
+      h1 { margin: 0 0 6px; font-size: 1.15rem; }
+      p.hint { margin: 0 0 16px; font-size: .82rem; color: #686a7c; }
+      .frames { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .frame { padding: 12px; border-radius: 11px; background: #f5f7fc; border: 1px solid #e2e6f2; }
+      .frame h2 { margin: 0 0 8px; font-size: .78rem; color: #4c5070; }
+      select, input, button { font: inherit; font-size: .8rem; }
+      select, input { width: 100%; box-sizing: border-box; padding: 7px 9px; margin-bottom: 8px;
+        border: 1px solid #d6dae8; border-radius: 8px; }
+      button { padding: 8px 11px; border: 0; border-radius: 8px; color: #fff;
+        background: #4a5bb6; cursor: pointer; }
+      .log { margin-top: 14px; padding: 12px; min-height: 84px; border-radius: 10px;
+        background: #1f2230; color: #cfe9d8; font-size: .76rem; line-height: 1.6;
+        white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Cross-origin message gate</h1>
+      <p class="hint">The receiver only accepts messages from the allowed origin.</p>
+      <div class="frames">
+        <div class="frame">
+          <h2>Sender frame</h2>
+          <select id="origin">
+            <option value="https://trusted.example">https://trusted.example</option>
+            <option value="https://evil.example">https://evil.example</option>
+          </select>
+          <input id="payload" value="hello from the other frame" />
+          <button id="send">postMessage()</button>
+        </div>
+        <div class="frame">
+          <h2>Receiver frame</h2>
+          <p style="margin:0;font-size:.78rem;color:#686a7c;">Allowlist: https://trusted.example</p>
+        </div>
+      </div>
+      <pre id="log" class="log">Waiting for messages...</pre>
+    </div>
+    <script>
+      var log = document.getElementById("log");
+      function write(line) { log.textContent += line + "\n"; }
+      var ALLOWED = "https://trusted.example";
+
+      // This stands in for the browser's message event in a real iframe.
+      function deliver(origin, data) {
+        var event = { origin: origin, data: data };
+        if (event.origin !== ALLOWED) {
+          write("BLOCKED from " + event.origin + " (origin not allowed)");
+          return;
+        }
+        if (!event.data || typeof event.data.text !== "string") {
+          write("BLOCKED: unexpected payload shape");
+          return;
+        }
+        write("ACCEPTED from " + event.origin + ": " + event.data.text);
+      }
+
+      document.getElementById("send").addEventListener("click", function () {
+        var origin = document.getElementById("origin").value;
+        var text = document.getElementById("payload").value;
+        deliver(origin, { type: "greeting", text: text });
+      });
+    </script>
+  </body>
+</html>
+```

@@ -1,0 +1,161 @@
+---
+title: Regular expressions
+description: Create patterns, apply flags, capture groups, and replace matches with a callback using regular expressions.
+chapter: 31
+category: "JavaScript"
+order: 331
+---
+
+# Regular expressions
+
+A regular expression is a compact language for describing text patterns. It can answer whether a string fits a shape, pull out pieces of it, or rewrite every match. JavaScript represents them with `RegExp` objects and with slash-delimited literals.
+
+## Creating and matching patterns
+
+A literal such as `/hello/i` is created when the code is parsed. Calling `new RegExp("hello", "i")` builds the same thing from strings at runtime, which is handy when the pattern comes from user input. The trailing `i` is a flag; others include `g` for a global search and `m` for multiline anchors.
+
+The `test()` method returns a boolean, ideal for validation. The `exec()` method returns a match object with details, or `null` when nothing matched. With the global flag, repeated `exec()` calls walk through every match in the string.
+
+## Flags, groups, and replacement
+
+Parentheses create capture groups. Each group's text appears in the match array by position, so a pattern for key and value pairs can be taken apart after a single match.
+
+`replace()` can accept a callback as its second argument. The function runs once per match and its return value becomes the replacement text, which allows logic based on what was found. Keep patterns specific: a broad expression that matches too much is a common source of confusing validation bugs.
+
+Be careful with user-supplied patterns. A pattern that can match an enormous range of input may take a long time to evaluate, and text pasted into a pattern should be escaped before it is compiled. For fixed validation rules, literal patterns are both quicker to write and easier to audit.
+
+## Demo: pattern inspector
+
+```html
+<div class="regex">
+  <h2>Pattern inspector</h2>
+  <p>Type in a field to test its pattern, then try the two transformations.</p>
+  <div class="field">
+    <label for="email">Email</label>
+    <input id="email" data-pattern="email" type="text" value="ada@example.com" />
+    <span class="status"></span>
+  </div>
+  <div class="field">
+    <label for="phone">Phone</label>
+    <input id="phone" data-pattern="phone" type="text" value="+1 555 123 4567" />
+    <span class="status"></span>
+  </div>
+  <div class="field">
+    <label for="hex">Hex colour</label>
+    <input id="hex" data-pattern="hex" type="text" value="#2f7fb5" />
+    <span class="status"></span>
+  </div>
+  <div class="regex__buttons">
+    <button id="highlight" type="button">Highlight matches</button>
+    <button id="extract" type="button">Extract groups</button>
+  </div>
+  <pre id="out" class="regex__out">Waiting for input.</pre>
+</div>
+
+<style>
+  body {
+    margin: 0;
+    padding: 2rem 1.25rem;
+    background: #eeeef7;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    color: #333352;
+  }
+  .regex {
+    max-width: 34rem;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 18px;
+    padding: 1.5rem;
+    box-shadow: 0 18px 40px -28px rgba(45, 45, 90, 0.6);
+  }
+  .regex h2 { margin: 0 0 0.4rem; font-size: 1.25rem; }
+  .regex p { margin: 0 0 1.1rem; color: #70709a; font-size: 0.88rem; }
+  .field { display: grid; grid-template-columns: 5.5rem 1fr 5rem; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; }
+  label { font-size: 0.82rem; color: #55557d; }
+  input {
+    font: inherit;
+    font-size: 0.85rem;
+    padding: 0.5rem 0.6rem;
+    border: 1px solid #d5d5e8;
+    border-radius: 8px;
+  }
+  .status { font-size: 0.72rem; text-align: right; color: #9a9ab5; }
+  .field.good .status { color: #1e8b62; }
+  .field.bad .status { color: #c24d55; }
+  .field.good input { border-color: #7bc4a5; }
+  .field.bad input { border-color: #e2a1a5; }
+  .regex__buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0; }
+  button {
+    font: inherit;
+    font-size: 0.8rem;
+    padding: 0.5rem 0.8rem;
+    border: 0;
+    border-radius: 9px;
+    background: #5b52b0;
+    color: #fff;
+    cursor: pointer;
+  }
+  #extract { background: #2f7f8c; }
+  button:hover { filter: brightness(1.08); }
+  .regex__out {
+    margin: 0;
+    min-height: 5rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: #22213d;
+    color: #dcd8ff;
+    border-radius: 10px;
+    padding: 0.85rem;
+    font-size: 0.78rem;
+    line-height: 1.6;
+  }
+</style>
+
+<script>
+  var patterns = {
+    email: /^[^ @]+@[^ @]+[.][^ @]+$/,
+    phone: /^[+-]?[0-9][0-9 -]{5,14}[0-9]$/,
+    hex: /^#([0-9a-f]{3}|[0-9a-f]{6})$/i
+  };
+
+  var out = document.getElementById("out");
+
+  function validate() {
+    var lines = [];
+    document.querySelectorAll("input[data-pattern]").forEach(function (input) {
+      var key = input.getAttribute("data-pattern");
+      var ok = patterns[key].test(input.value);
+      var field = input.closest(".field");
+      field.classList.toggle("good", ok);
+      field.classList.toggle("bad", !ok);
+      field.querySelector(".status").textContent = ok ? "match" : "no match";
+      lines.push(key + ": " + (ok ? "valid" : "invalid"));
+    });
+    out.textContent = lines.join("\n");
+  }
+
+  document.querySelectorAll("input[data-pattern]").forEach(function (input) {
+    input.addEventListener("input", validate);
+  });
+
+  document.getElementById("highlight").addEventListener("click", function () {
+    var text = "Mail ada@example.com or call +1 555 123 4567. The accent is #2f7fb5.";
+    var finder = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[.][A-Za-z]{2,}|#[0-9a-f]{6}/gi;
+    var marked = text.replace(finder, function (match) { return "[" + match + "]"; });
+    out.textContent = "replace() with a callback:\n" + marked;
+  });
+
+  document.getElementById("extract").addEventListener("click", function () {
+    var source = "alpha=12, beta=34, alpha=56";
+    var pair = /(alpha|beta)=([0-9]+)/g;
+    var match;
+    var lines = [];
+    while ((match = pair.exec(source)) !== null) {
+      lines.push("key " + match[1] + " -> value " + match[2]);
+    }
+    out.textContent = "exec() with capture groups:\n" + lines.join("\n");
+  });
+
+  validate();
+</script>
+```

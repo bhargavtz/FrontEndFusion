@@ -1,0 +1,252 @@
+---
+title: Selectors
+description: Target elements by type, class, attribute, state, and position, and combine those patterns into precise rules.
+chapter: 4
+category: "CSS"
+order: 104
+---
+
+# Selectors
+
+Selectors are the addressing system of CSS. A vague selector forces you to repeat workarounds; a precise one lets a single rule land exactly where it should. The tricky part is that several selector families look similar but behave very differently.
+
+## The core families
+
+- **Type selectors** match an element name, such as `p` or `button`.
+- **Class selectors** match every element carrying that class and are the workhorse of component styling.
+- **ID selectors** match one element. They are hard to reuse and carry heavy specificity, so reserve them for anchors or JavaScript hooks.
+- **Attribute selectors** match on an attribute or its value: `[disabled]`, `[type="email"]`, `[href^="https"]`, `[class~="tag"]`.
+- **Combinators** describe relationships. A space means any descendant, `>` means a direct child, `+` means the next sibling, and `~` means any later sibling.
+
+```css
+.field > input[type="text"]:focus {
+  outline: 2px solid #6b8cff;
+}
+```
+
+## State and position
+
+**Pseudo-classes** target a condition rather than a tag. `:hover`, `:focus`, and `:focus-within` react to interaction. Structural ones — `:first-child`, `:last-of-type`, `:nth-child(2n)`, `:only-child` — depend on where an element sits among its siblings. `:not()` inverts a condition, and `:checked` exposes checkbox and radio state, which unlocks pure-CSS switches through the adjacent sibling combinator.
+
+Two details worth memorising: `:last-of-type` looks at the element's tag, while `:last-child` only cares whether it is the final child of any kind. And `:in-range` only works on inputs that declare `min` and `max`.
+
+Range inputs can be restyled with `accent-color` for a quick win, or with `::-webkit-slider-thumb` and `::-moz-range-thumb` for full control.
+
+## A complete example
+
+The settings panel below uses an attribute selector for the text field, `:focus-within` on its wrapper, `:checked` with `+` for the switches, `:in-range` for the guest count, and `:last-of-type` to drop the final divider.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Booking settings</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 40px 20px;
+        font-family: system-ui, sans-serif;
+        background: #eef2f7;
+        color: #1b2431;
+      }
+
+      .panel {
+        max-width: 370px;
+        margin: 0 auto;
+        padding: 26px;
+        background: #ffffff;
+        border-radius: 18px;
+        box-shadow: 0 20px 40px -30px rgba(20, 30, 45, 0.6);
+      }
+
+      .panel h1 {
+        margin: 0 0 4px;
+        font-size: 1.2rem;
+      }
+
+      .panel > p {
+        margin: 0 0 20px;
+        font-size: 0.84rem;
+        color: #66748a;
+      }
+
+      .field {
+        padding: 2px;
+        border: 2px solid transparent;
+        border-radius: 12px;
+      }
+
+      .field:focus-within {
+        border-color: #c3d2ff;
+        background: #f4f7ff;
+      }
+
+      input[type="text"] {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px 12px;
+        border: 1px solid #d7dfea;
+        border-radius: 10px;
+        font: inherit;
+        font-size: 0.9rem;
+      }
+
+      input[type="text"]:focus {
+        outline: none;
+        border-color: #6b8cff;
+      }
+
+      .row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 13px 0;
+        border-bottom: 1px solid #eef1f6;
+        font-size: 0.88rem;
+      }
+
+      .field + .row {
+        margin-top: 18px;
+      }
+
+      .row:last-of-type {
+        border-bottom: 0;
+      }
+
+      /* The switch hides the native box and styles a sibling instead. */
+      .switch {
+        position: relative;
+        display: inline-flex;
+        flex-shrink: 0;
+      }
+
+      .switch input {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .track {
+        width: 42px;
+        height: 24px;
+        border-radius: 999px;
+        background: #cfd8e5;
+        transition: background 0.2s ease;
+      }
+
+      .track::after {
+        content: "";
+        display: block;
+        width: 18px;
+        height: 18px;
+        margin: 3px;
+        border-radius: 50%;
+        background: #ffffff;
+        transition: transform 0.2s ease;
+      }
+
+      .switch input:checked + .track {
+        background: #2f9e63;
+      }
+
+      .switch input:checked + .track::after {
+        transform: translateX(18px);
+      }
+
+      .switch input:focus-visible + .track {
+        outline: 2px solid #6b8cff;
+        outline-offset: 2px;
+      }
+
+      .guests {
+        width: 62px;
+        padding: 6px 8px;
+        border: 2px solid #d7dfea;
+        border-radius: 8px;
+        font: inherit;
+        font-size: 0.85rem;
+        text-align: center;
+      }
+
+      .guests:in-range {
+        border-color: #9fd9bb;
+        background: #f2fbf6;
+      }
+
+      .guests:out-of-range {
+        border-color: #f0a9a9;
+        background: #fdf3f3;
+      }
+
+      input[type="range"] {
+        width: 100%;
+        margin-top: 14px;
+        accent-color: #2f9e63;
+      }
+
+      .devices {
+        margin: 16px 0 0;
+        padding: 0;
+        list-style: none;
+        font-size: 0.82rem;
+        color: #4a5a72;
+      }
+
+      .devices li {
+        padding: 8px 0;
+        border-bottom: 1px solid #eef1f6;
+      }
+
+      .devices li:last-of-type {
+        border-bottom: 0;
+        color: #97a3b5;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="panel">
+      <h1>Booking preferences</h1>
+      <p>Applies to every future reservation.</p>
+
+      <div class="field">
+        <input type="text" placeholder="Contact email" />
+      </div>
+
+      <div class="row">
+        <span>Email reminders</span>
+        <label class="switch">
+          <input type="checkbox" checked />
+          <span class="track"></span>
+        </label>
+      </div>
+
+      <div class="row">
+        <span>Early check-in</span>
+        <label class="switch">
+          <input type="checkbox" />
+          <span class="track"></span>
+        </label>
+      </div>
+
+      <div class="row">
+        <span>Guests (1–5)</span>
+        <input class="guests" type="number" min="1" max="5" value="3" />
+      </div>
+
+      <input type="range" min="0" max="10" value="7" />
+
+      <ul class="devices">
+        <li>MacBook Pro · signed in</li>
+        <li>iPhone 15 · signed in</li>
+        <li>Old tablet · expired</li>
+      </ul>
+    </section>
+  </body>
+</html>
+```
+
+A short checklist before shipping a selector: can it be reused, is its specificity as low as it can be, and does it survive markup changes that should not affect it?

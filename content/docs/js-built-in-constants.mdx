@@ -1,0 +1,141 @@
+---
+title: Built-in Constants
+description: Explore JavaScript's special values, including null, undefined, NaN, Infinity and the numeric constants on Number.
+chapter: 3
+category: "JavaScript"
+order: 303
+---
+
+# Built-in Constants
+
+JavaScript has a handful of values that are not ordinary numbers or strings. They appear whenever a calculation fails, a value is missing, or a number grows beyond what the format can hold. Recognising them saves a lot of confused debugging.
+
+## null and undefined
+
+`undefined` means a variable has been declared but never given a value, or a function returned nothing. `null` is an intentional empty value that you assign yourself. They are loosely equal to each other but not strictly equal, so `null == undefined` is true while `null === undefined` is false. To test for either at once, use `value == null`.
+
+## NaN and isNaN
+
+`NaN` stands for "Not a Number" and is the result of an invalid numeric operation, such as subtracting a word from a number. It is sticky: once a calculation produces `NaN`, almost anything you do with it stays `NaN`. It is also the only value that is not equal to itself, so testing with `==` or `===` never works. Use `Number.isNaN()` or the older global `isNaN()` instead.
+
+Some operations that produce it include dividing zero by zero, multiplying a number by a non-numeric string, and parsing an empty string. Several Math functions return it too, for example `Math.sqrt(-1)` and `Math.acos(2)`.
+
+## Infinity and the Number constants
+
+Dividing a positive number by zero gives `Infinity`, and dividing by negative zero gives `-Infinity`. They behave like mathematical infinity in comparisons, so any finite number is smaller than `Infinity`.
+
+The `Number` object carries useful constants: `Number.MAX_VALUE`, `Number.MIN_VALUE`, `Number.MAX_SAFE_INTEGER`, and `Number.NaN`. The safe-integer limit matters because beyond it some whole numbers cannot be represented exactly.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Built-in constants</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px 18px;
+        font-family: system-ui, sans-serif;
+        color: #2a2738;
+        background: linear-gradient(150deg, #fdf1f6, #f4f2ff 70%);
+      }
+      .card {
+        max-width: 520px;
+        margin: 0 auto;
+        padding: 22px;
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 20px 42px -30px rgba(50, 30, 70, 0.55);
+      }
+      h1 { margin: 0 0 14px; font-size: 1.15rem; }
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      button {
+        padding: 9px;
+        border: 1px solid #e3d9f2;
+        border-radius: 10px;
+        background: #faf7ff;
+        color: #4b3a6b;
+        font: inherit;
+        font-size: 0.78rem;
+        cursor: pointer;
+      }
+      button:hover { background: #efe7ff; }
+      .out {
+        margin: 14px 0 0;
+        min-height: 120px;
+        padding: 12px;
+        border-radius: 10px;
+        background: #241d30;
+        color: #f1d9ff;
+        font-size: 0.78rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Special value inspector</h1>
+      <div class="grid">
+        <button data-expr="undefinedVar">An unset variable</button>
+        <button data-expr="nullValue">An explicit null</button>
+        <button data-expr="zeroOverZero">Zero divided by zero</button>
+        <button data-expr="oneOverZero">One divided by zero</button>
+        <button data-expr="badSqrt">Square root of -1</button>
+        <button data-expr="maxSafe">MAX_SAFE_INTEGER</button>
+        <button data-expr="isNaNTests">isNaN checks</button>
+        <button data-expr="looseEqual">null versus undefined</button>
+      </div>
+      <pre id="out" class="out">Choose an expression above to inspect it.</pre>
+    </div>
+    <script>
+      const out = document.getElementById("out");
+      let declaredButEmpty;
+      const results = {
+        undefinedVar: function () {
+          return "typeof declaredButEmpty -> " + typeof declaredButEmpty + "\nvalue -> " + declaredButEmpty;
+        },
+        nullValue: function () {
+          const empty = null;
+          return "value -> " + empty + "\ntypeof -> " + typeof empty + " (a quirk of the language)";
+        },
+        zeroOverZero: function () {
+          const x = 0 / 0;
+          return "0 / 0 -> " + x + "\nNumber.isNaN(x) -> " + Number.isNaN(x) +
+            "\nx === x -> " + (x === x);
+        },
+        oneOverZero: function () {
+          return "1 / 0 -> " + (1 / 0) + "\n-1 / 0 -> " + (-1 / 0) +
+            "\n10 > Number.MAX_VALUE -> " + (Number.MAX_VALUE < Infinity);
+        },
+        badSqrt: function () {
+          return "Math.sqrt(-1) -> " + Math.sqrt(-1) +
+            "\nMath.acos(2) -> " + Math.acos(2);
+        },
+        maxSafe: function () {
+          return "Number.MAX_SAFE_INTEGER -> " + Number.MAX_SAFE_INTEGER +
+            "\nNumber.MIN_VALUE -> " + Number.MIN_VALUE;
+        },
+        isNaNTests: function () {
+          const word = "hello" * 2;
+          return "'hello' * 2 -> " + word +
+            "\nNumber.isNaN(word) -> " + Number.isNaN(word) +
+            "\nglobal isNaN('12') -> " + isNaN("12");
+        },
+        looseEqual: function () {
+          return "null == undefined -> " + (null == undefined) +
+            "\nnull === undefined -> " + (null === undefined) +
+            "\nvalue == null tests for both";
+        }
+      };
+      document.querySelectorAll("button[data-expr]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          out.textContent = results[btn.dataset.expr]();
+        });
+      });
+    </script>
+  </body>
+</html>
+```

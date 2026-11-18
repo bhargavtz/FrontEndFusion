@@ -1,0 +1,160 @@
+---
+title: Comments
+description: Use CSS comments to label sections and explain intent, and learn the syntax rules that keep them from breaking a stylesheet.
+chapter: 3
+category: "CSS"
+order: 103
+---
+
+# Comments
+
+A comment is a note for humans that the browser skips entirely. CSS has exactly one comment syntax, and it is worth learning properly because a stray delimiter can silently swallow the next rule.
+
+## The only comment syntax
+
+Comments start with `/*` and end with `*/`. They can sit on their own line, trail a declaration, or span many lines.
+
+```css
+/* Section: card layout */
+
+.avatar {
+  border-radius: 50%; /* a circle, not a rounded square */
+}
+
+/*
+  The stats row uses flex so a longer number
+  cannot push the labels out of alignment.
+*/
+```
+
+Two traps catch beginners. First, `//` is not a CSS comment — it is invalid and will break the declaration that follows. Second, comments do not nest. Writing `/* outer /* inner */` ends the comment at the first `*/`, leaving the rest of the text as broken CSS.
+
+## When a comment earns its place
+
+Good comments answer *why*. The code already says *what*.
+
+- Label long files: banner comments for tokens, layout, components, and utilities make a thousand-line stylesheet navigable.
+- Explain a workaround, a browser quirk, or a magic number, with a link to the issue if one exists.
+- Mark temporary overrides so they can be found again, for example with a `TODO` or `FIXME` prefix.
+- Note the reason a value is unusual: an optical adjustment, a design token that intentionally breaks the scale.
+- Keep a `/*! ... */` banner for licence text — minifiers are expected to preserve that form.
+
+Comments that just rename the property (`/* set the colour */` above `color`) add noise. So does commenting out dead rules for months instead of deleting them; version control already remembers. If a block is disabled for a reason, say why and when it can return.
+
+## A complete example
+
+This profile card uses comments as section dividers and as a short explanation of one deliberate choice.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Profile card</title>
+    <style>
+      /* ---------- page shell ---------- */
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 32px 20px;
+        box-sizing: border-box;
+        font-family: system-ui, sans-serif;
+        background: radial-gradient(circle at 30% 10%, #efe8ff, #f6f4fb 60%);
+        color: #2b2536;
+      }
+
+      /* ---------- card ---------- */
+      .card {
+        width: 300px;
+        padding: 28px 24px;
+        text-align: center;
+        background: #ffffff;
+        border-radius: 24px;
+        box-shadow: 0 22px 46px -28px rgba(43, 37, 54, 0.5);
+      }
+
+      .avatar {
+        width: 78px;
+        height: 78px;
+        margin: 0 auto 14px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: linear-gradient(140deg, #b39bff, #7c5cf0);
+        color: #ffffff;
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+      }
+
+      .card h1 {
+        margin: 0;
+        font-size: 1.15rem;
+      }
+
+      .role {
+        margin: 6px 0 20px;
+        font-size: 0.82rem;
+        color: #7b7288;
+      }
+
+      .stats {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        padding-top: 18px;
+        border-top: 1px solid #efebf7;
+      }
+
+      .stats div {
+        flex: 1;
+      }
+
+      .stats strong {
+        display: block;
+        font-size: 1.05rem;
+      }
+
+      /* Small caps keep the three labels the same optical weight. */
+      .stats span {
+        font-size: 0.64rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #948ca1;
+      }
+
+      .follow {
+        width: 100%;
+        margin-top: 20px;
+        padding: 11px;
+        border: 0;
+        border-radius: 12px;
+        background: #2b2536;
+        color: #f6f4fb;
+        font: inherit;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <article class="card">
+      <div class="avatar">AR</div>
+      <h1>Ada Rivera</h1>
+      <p class="role">Design engineer</p>
+      <div class="stats">
+        <div><strong>48</strong><span>Posts</span></div>
+        <div><strong>1.2k</strong><span>Followers</span></div>
+        <div><strong>312</strong><span>Following</span></div>
+      </div>
+      <button class="follow">Follow</button>
+    </article>
+  </body>
+</html>
+```
+
+The comments here do three different jobs: they split the file into readable blocks, they justify a typographic choice, and they stay short enough that a reader still sees the code first.

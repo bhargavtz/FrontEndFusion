@@ -1,0 +1,114 @@
+---
+title: "Length Units"
+description: "Compare absolute and relative lengths, size type with rem and em, and build fluid layouts with viewport units and percentages."
+chapter: 20
+category: "CSS"
+order: 120
+---
+
+# Length Units
+
+A length is a number plus a unit, and the unit decides what the number is measured against. Choosing well means a layout survives zoom, user font settings, and a phone screen without a rewrite.
+
+## Absolute and relative units
+
+`px` is the familiar absolute unit: one CSS pixel, which is not a physical pixel on a high-density display. Other absolute units — `cm`, `mm`, `in`, `pt` — exist mainly for print. Absolute lengths do not respond to the user's preferred font size, so using them for body text is an accessibility risk.
+
+Relative units inherit their meaning from context. `%` resolves against a parent's dimension, and which dimension depends on the property: width percentages use the parent width, while vertical padding and margins also use the parent width, which explains some surprising results. `em` resolves against the current element's font size, so nested `em` values compound. `rem` always resolves against the root font size, making it predictable for spacing and type.
+
+## rem and em in practice
+
+Set the root size in `rem` or leave it alone, size body copy in `rem`, and let the browser's default remain a user preference rather than a fixed value. Use `rem` for component spacing so an entire UI scales when the root changes.
+
+Use `em` deliberately for values that should scale with their own component — padding inside a button that grows with its label, or a media-query-like breakpoint derived from text. The compounding behaviour is a feature there, and a bug when applied carelessly to nested lists.
+
+## Viewport units and percentages
+
+`vw` and `vh` are percentages of the viewport's width and height. `vmin` and `vmax` refer to the smaller and larger dimension, which is how you build a square that always fits: `width: 40vmin; height: 40vmin`. Viewport units are ideal for full-bleed hero sections, but mobile browser chrome can make `vh` jump; `dvh`, `svh`, and `lvh` address that by describing dynamic, small, and large viewport heights.
+
+Percentages are best for proportional relationships inside a known container: a progress bar at `72%`, or a two-column split. They fail silently when the parent has no defined size, so combine them with a container that has one.
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Length unit sampler</title>
+  <style>
+    * { box-sizing: border-box; }
+    html { font-size: 16px; }
+    body {
+      margin: 0;
+      padding: 1.5rem;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      background: #f4f7f4;
+      color: #1e2a22;
+    }
+    h2 { margin: 0 0 .25rem; font-size: 1.05rem; }
+    .lede { margin: 0 0 1.2rem; font-size: .84rem; color: #5d6f63; }
+    .panel {
+      padding: 1.25rem;
+      border-radius: 16px;
+      background: #fff;
+      border: 1px solid #dfe9e1;
+      box-shadow: 0 8px 22px rgba(30, 42, 34, .06);
+    }
+    .scale { display: flex; align-items: baseline; gap: .9rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .scale span { font-weight: 700; letter-spacing: -.02em; }
+    .r1 { font-size: 1rem; }
+    .r2 { font-size: 1.35rem; }
+    .r3 { font-size: 1.8rem; }
+    .r4 { font-size: 2.5rem; color: #2f7d5e; }
+    .bars { display: grid; gap: .55rem; margin-bottom: 1rem; }
+    .bar { height: .7rem; border-radius: 999px; background: #e8f0ea; overflow: hidden; }
+    .bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #74ad8a, #2f7d5e); }
+    .b1 { width: 32%; }
+    .b2 { width: 68%; }
+    .b3 { width: 91%; }
+    .square {
+      width: 8rem;
+      height: 8rem;
+      display: grid;
+      place-items: center;
+      border-radius: 18px;
+      background: linear-gradient(145deg, #e7f2eb, #cfe4d7);
+      border: 1px solid #bcd7c7;
+      font-family: ui-monospace, monospace;
+      font-size: .74rem;
+      color: #2f5d49;
+      text-align: center;
+      padding: 1rem;
+    }
+    .units { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; }
+    .legend { font-size: .78rem; line-height: 1.7; color: #5d6f63; }
+    .legend b { color: #2f7d5e; }
+  </style>
+</head>
+<body>
+  <h2>One sampler, four behaviours</h2>
+  <p class="lede">Top row: type in <code>rem</code>. Middle: widths in <code>%</code>. Right: a square sized in <code>rem</code>.</p>
+  <div class="panel">
+    <div class="scale">
+      <span class="r1">1rem</span>
+      <span class="r2">1.35rem</span>
+      <span class="r3">1.8rem</span>
+      <span class="r4">2.5rem</span>
+    </div>
+    <div class="bars">
+      <div class="bar"><i class="b1"></i></div>
+      <div class="bar"><i class="b2"></i></div>
+      <div class="bar"><i class="b3"></i></div>
+    </div>
+    <div class="units">
+      <div class="square">8rem × 8rem<br />scales with the root</div>
+      <p class="legend">
+        <b>rem</b> follows the root font size, so a user's larger default still works.<br />
+        <b>em</b> compounds with nested font sizes.<br />
+        <b>%</b> needs a sized parent.<br />
+        <b>vmin</b> fits both axes: try <code>40vmin</code> for a responsive square.
+      </p>
+    </div>
+  </div>
+</body>
+</html>
+```

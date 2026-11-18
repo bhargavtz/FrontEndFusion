@@ -1,0 +1,133 @@
+---
+title: Navigator Object
+description: Read browser and system details from the navigator object and present them as data.
+chapter: 47
+category: "JavaScript"
+order: 347
+---
+
+# Navigator Object
+
+The `navigator` object lives on `window` and describes the browser and device running the page. It is a read-only snapshot of facts such as the user agent string, preferred language, platform, and online state. Sites use it to tailor content, gather light analytics, or decide whether a feature is likely to exist.
+
+## Common properties
+
+`navigator.userAgent` returns the identification string browsers send to servers. `navigator.language` gives the user's preferred language, and `navigator.languages` lists the full preference order. `navigator.platform` names the underlying platform, though it is increasingly deprecated. `navigator.onLine` reports whether the browser believes it has a network connection, and `navigator.hardwareConcurrency` estimates the number of available CPU threads. `navigator.cookieEnabled` tells you whether cookies are accepted.
+
+```js
+const info = {
+  language: navigator.language,
+  online: navigator.onLine,
+  cookies: navigator.cookieEnabled
+};
+```
+
+Treat these values as hints, not guarantees. They can be spoofed, and the user agent string is deliberately frozen by some browsers to reduce fingerprinting.
+
+## Presenting the data
+
+Because not every property exists in every browser, read each one defensively and show a placeholder when it is missing. Serialising the result with `JSON.stringify()` turns the collection into a tidy, copyable block — a handy pattern for diagnostics panels. The `onLine` flag can also drive the `online` and `offline` window events, letting a page update a status badge as connectivity changes.
+
+The demo below assembles a browser profile into an object, renders it as JSON, and updates a live connection badge. Every field is feature-detected so the panel never breaks on an older or sandboxed browser.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Navigator profile</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 40px 18px;
+        font-family: system-ui, sans-serif;
+        background: #eef1f8;
+        color: #202a44;
+      }
+      .card {
+        max-width: 580px;
+        margin: 0 auto;
+        padding: 28px 30px 30px;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 26px 54px -40px rgba(32, 42, 68, 0.6);
+      }
+      h1 { margin: 0 0 6px; font-size: 1.25rem; }
+      p { margin: 0 0 18px; color: #677394; font-size: 0.9rem; }
+      .status {
+        display: inline-block; padding: 6px 12px; border-radius: 999px;
+        font-size: 0.78rem; font-weight: 600; margin-bottom: 16px;
+        background: #e3f7ec; color: #167348;
+      }
+      .status.off { background: #fdeaea; color: #a33232; }
+      .row { display: flex; gap: 8px; margin-bottom: 12px; }
+      button {
+        border: 0; border-radius: 10px; padding: 9px 14px; cursor: pointer;
+        font: inherit; font-size: 0.83rem; font-weight: 600;
+        background: #3b5bbf; color: #fff;
+      }
+      button.alt { background: #e7ecfb; color: #34509e; }
+      .out {
+        margin: 0; min-height: 220px; max-height: 320px; overflow: auto;
+        padding: 16px 18px; background: #151d36; color: #a7c0f5;
+        border-radius: 12px; font-size: 0.8rem; line-height: 1.7;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Browser profile</h1>
+      <p>A read-only snapshot from the navigator object, rendered as JSON.</p>
+      <span class="status" id="status">Connection: checking</span>
+      <div class="row">
+        <button id="refresh">Refresh data</button>
+        <button id="copy" class="alt">Copy JSON</button>
+      </div>
+      <pre id="out" class="out">Loading...</pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      var status = document.getElementById("status");
+      var snapshot;
+
+      function pick(value) { return value === undefined ? "n/a" : value; }
+      function build() {
+        return {
+          userAgent: pick(navigator.userAgent),
+          language: pick(navigator.language),
+          languages: pick(navigator.languages),
+          platform: pick(navigator.platform),
+          online: pick(navigator.onLine),
+          cookiesEnabled: pick(navigator.cookieEnabled),
+          hardwareConcurrency: pick(navigator.hardwareConcurrency),
+          vendor: pick(navigator.vendor)
+        };
+      }
+      function refresh() {
+        snapshot = build();
+        out.textContent = JSON.stringify(snapshot, null, 2);
+        var online = navigator.onLine !== false;
+        status.textContent = "Connection: " + (online ? "online" : "offline");
+        status.className = "status" + (online ? "" : " off");
+      }
+      window.addEventListener("online", refresh);
+      window.addEventListener("offline", refresh);
+      document.getElementById("refresh").onclick = refresh;
+      document.getElementById("copy").onclick = function () {
+        var text = JSON.stringify(snapshot, null, 2);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function () {
+            out.textContent = text + "\n\n(copied to clipboard)";
+          }).catch(function () { out.textContent = text + "\n\n(copy blocked)"; });
+        } else {
+          out.textContent = text + "\n\n(clipboard API unavailable)";
+        }
+      };
+      refresh();
+    </script>
+  </body>
+</html>
+```
+
+Running `JSON.stringify(value, null, 2)` pretty-prints the object with two-space indentation, which makes the diagnostic block easy to read.

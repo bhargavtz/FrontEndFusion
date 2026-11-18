@@ -1,0 +1,65 @@
+---
+title: AJAX
+description: Understand the AJAX request lifecycle using a local mock that never touches the network.
+chapter: 36
+category: "JavaScript"
+order: 336
+---
+
+# AJAX
+
+AJAX means fetching data and updating part of a page without a full reload. Historically this was done with `XMLHttpRequest`; today `fetch` is preferred, but the underlying idea is the same: send a request, wait for a response, then update the DOM. Because a live request needs a server, this chapter demonstrates the lifecycle with a local mock that resolves after a short delay. No network call is made, so the demo works offline in a sandbox.
+
+## The request lifecycle
+
+Every request moves through a few states: pending, success, or failure. With `XMLHttpRequest` you watch `readyState` and `status` inside `onreadystatechange`; with `fetch` you await a promise and check `response.ok`. Query parameters can be appended to the URL with `URLSearchParams`, and a POST request places data in the body with an appropriate `Content-Type` header. A `HEAD` request asks only for headers, which is a lightweight way to check whether a resource exists.
+
+## Preloaders and global events
+
+While a request is in flight, users need feedback. A preloader - a spinner or "Loading" label - is shown before the request and hidden in both the success and error paths. Forgetting the error path leaves the spinner stuck forever. Older AJAX code could listen for events such as `ajaxStart` and `ajaxStop` at a global level to manage one shared indicator for many simultaneous requests.
+
+The demo simulates a request for a list of questions. It shows a preloader, accepts a search string as a GET-style parameter, and prints the filtered results into a visible panel.
+
+```html
+<div style="background:#f8fafc;border-radius:16px;padding:20px;max-width:560px;font-family:system-ui,sans-serif;color:#0f172a;">
+  <h3 style="margin-top:0;">Mock AJAX request</h3>
+  <div style="display:flex;gap:8px;margin-bottom:12px;">
+    <input id="q" placeholder="Filter questions..." style="flex:1;padding:8px;border-radius:8px;border:1px solid #cbd5e1;">
+    <button id="send">Send request</button>
+  </div>
+  <div id="loader" style="display:none;color:#2563eb;font-size:13px;margin-bottom:8px;">Loading...</div>
+  <pre id="out" style="background:#0f172a;color:#e2e8f0;padding:12px;border-radius:10px;min-height:100px;white-space:pre-wrap;"></pre>
+</div>
+<script>
+  (function () {
+    var out = document.getElementById("out");
+    var loader = document.getElementById("loader");
+    var questions = [
+      "How do closures work?",
+      "What is event delegation?",
+      "When should I use a Map?",
+      "How does the event loop work?"
+    ];
+    function mockRequest(params) {
+      return new Promise(function (resolve, reject) {
+        loader.style.display = "block";
+        setTimeout(function () {
+          loader.style.display = "none";
+          if (!params) { reject(new Error("No parameters received")); return; }
+          var term = params.toLowerCase();
+          resolve(questions.filter(function (q) { return q.toLowerCase().indexOf(term) > -1; }));
+        }, 600);
+      });
+    }
+    document.getElementById("send").onclick = function () {
+      var term = document.getElementById("q").value.trim();
+      out.textContent = "Requesting with parameter: " + (term || "(none)");
+      mockRequest(term).then(function (data) {
+        out.textContent = "Status 200 OK\n" + (data.length ? data.map(function (q, i) { return (i + 1) + ". " + q; }).join("\n") : "No matches");
+      }).catch(function (err) {
+        out.textContent = "Request failed: " + err.message;
+      });
+    };
+  })();
+</script>
+```

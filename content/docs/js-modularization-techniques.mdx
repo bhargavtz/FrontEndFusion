@@ -1,0 +1,122 @@
+---
+title: Modularization Techniques
+description: Split code into maintainable units with ES modules, IIFEs, AMD, and CommonJS, and understand where each pattern fits.
+chapter: 73
+category: "JavaScript"
+order: 373
+---
+
+# Modularization Techniques
+
+As a script grows, keeping everything in one global scope becomes unmanageable. Modularization breaks code into units with clear inputs and outputs, each hiding its internals. Over time JavaScript has developed several ways to do this, from hand-built patterns to standardized syntax.
+
+## ES modules and the IIFE pattern
+
+ES modules are the standard today. A file becomes a module when it is loaded with `type="module"`. It has its own scope, and it can `export` values and `import` them elsewhere. Named exports expose several members, while a default export provides one primary value. Modules are static, which lets bundlers analyse and optimise them.
+
+Before modules existed, the immediately invoked function expression, or IIFE, provided privacy. You wrap code in a function that runs at once; variables inside stay private, and you return only the public API. This is the basis of the revealing module pattern and still appears in older code and in script tags that must run without a build step.
+
+## AMD and CommonJS
+
+AMD, used by loaders such as RequireJS, defines modules with a `define` call that lists dependencies and receives them as arguments. It loads modules asynchronously, which suited early browsers. CommonJS is the module system built into Node.js: `require` pulls in a module and `module.exports` publishes values. It is synchronous and remains common on the server and in tooling configuration.
+
+The demo builds two tiny modules at runtime using the IIFE and CommonJS ideas, then calls their methods so you can see how hidden state is exposed through a small public surface.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Modularization</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px 18px;
+        font-family: system-ui, sans-serif;
+        color: #2a2d38;
+        background: radial-gradient(circle at 80% 0%, #e7f3ec, #f6f7f9 60%);
+      }
+      .card {
+        max-width: 540px;
+        margin: 0 auto;
+        padding: 22px;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 20px 42px -30px rgba(30, 80, 50, 0.45);
+      }
+      h1 { margin: 0 0 14px; font-size: 1.15rem; }
+      .row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+      button {
+        padding: 8px 12px;
+        border: 1px solid #d5e8dc;
+        border-radius: 9px;
+        background: #f7fcf9;
+        color: #2f7a52;
+        font: inherit;
+        font-size: 0.8rem;
+        cursor: pointer;
+      }
+      pre {
+        margin: 0;
+        padding: 14px;
+        border-radius: 12px;
+        background: #17261e;
+        color: #c7efd6;
+        font-size: 0.78rem;
+        line-height: 1.65;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Module patterns at work</h1>
+      <div class="row">
+        <button id="iife">IIFE module</button>
+        <button id="cjs">CommonJS-style module</button>
+        <button id="both">Use both together</button>
+      </div>
+      <pre id="out"></pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      var Counter = (function () {
+        var count = 0;
+        function inc() { return ++count; }
+        function value() { return count; }
+        return { increment: inc, current: value };
+      })();
+
+      function defineCommonJS(factory) {
+        var module = { exports: {} };
+        factory(module, module.exports);
+        return module.exports;
+      }
+      var math = defineCommonJS(function (module, exports) {
+        var pi = 3.14159;
+        exports.circleArea = function (r) { return pi * r * r; };
+        exports.double = function (n) { return n * 2; };
+      });
+
+      document.getElementById("iife").addEventListener("click", function () {
+        out.textContent = "IIFE revealing module\nincrement() -> " + Counter.increment() +
+          "\ncurrent()   -> " + Counter.current() +
+          "\nDirect access to private 'count': " + (typeof window.count);
+      });
+      document.getElementById("cjs").addEventListener("click", function () {
+        out.textContent = "CommonJS-style module\ncircleArea(2) -> " + math.circleArea(2).toFixed(4) +
+          "\ndouble(7)     -> " + math.double(7) +
+          "\nPrivate 'pi' visible outside: " + (typeof window.pi);
+      });
+      document.getElementById("both").addEventListener("click", function () {
+        var n = Counter.increment();
+        out.textContent = "Composing modules\ncounter value      -> " + n +
+          "\ndoubled by math    -> " + math.double(n) +
+          "\nES modules use import / export instead of these wrappers.";
+      });
+      out.textContent = "Click a button to exercise a module pattern.";
+    </script>
+  </body>
+</html>
+```

@@ -1,0 +1,152 @@
+---
+title: Creational Design Patterns
+description: Build objects with factory functions, singletons, modules, prototypes, and abstract factories instead of scattering constructors everywhere.
+chapter: 65
+category: "JavaScript"
+order: 365
+---
+
+# Creational Design Patterns
+
+Creating objects is easy; creating them in a way that stays flexible as an application grows is harder. Creational patterns give you repeatable recipes for object construction. They hide the details of how an object is built and let you swap implementations without rewriting the code that uses them.
+
+## Factory functions
+
+A factory is simply a function that returns an object. Unlike a constructor called with `new`, a factory can decide which shape to return based on its arguments, and it can use composition by mixing in small behaviour objects. This avoids the rigid inheritance chains that constructors encourage.
+
+For example, a character factory can take a role and return a hero with a name, a health value, and a set of ability functions borrowed from a shared catalogue. Adding a new role means adding one more branch and one more ability set, not editing every call site.
+
+## Modules and singletons
+
+The module pattern uses an immediately invoked function to create a private scope, then returns only the public API. The revealing module pattern makes this clearer by defining private functions first and returning an object that exposes selected names. Private state cannot be reached from outside.
+
+A singleton is an object that is only ever created once. A module is a natural home for a singleton: the closure holds a single instance, and every caller receives the same reference. This works well for configuration, logging, or caches where duplicate instances would cause bugs.
+
+## Prototype and abstract factory patterns
+
+The prototype pattern creates new objects by cloning an existing template rather than building from scratch, which is cheap when setup is expensive. An abstract factory goes a step further: it returns a factory suited to a family of related products, such as light or dark UI themes, so callers never depend on concrete classes.
+
+The demo uses a hero factory with composition and a settings singleton. Buttons spawn character cards into a gallery and the log records each creation.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Creational patterns</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px 18px;
+        font-family: system-ui, sans-serif;
+        color: #2c2635;
+        background: radial-gradient(circle at 10% 0%, #f4ebff, #f7f5fb 60%);
+      }
+      .card {
+        max-width: 540px;
+        margin: 0 auto;
+        padding: 22px;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 20px 42px -30px rgba(70, 40, 100, 0.5);
+      }
+      h1 { margin: 0 0 14px; font-size: 1.15rem; }
+      .row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+      button {
+        padding: 8px 12px;
+        border: 1px solid #e6daf2;
+        border-radius: 9px;
+        background: #fbf7ff;
+        color: #6b3f9e;
+        font: inherit;
+        font-size: 0.8rem;
+        cursor: pointer;
+      }
+      .gallery { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+      .hero {
+        flex: 1 1 130px;
+        padding: 12px;
+        border-radius: 12px;
+        background: #faf6ff;
+        border: 1px solid #ece0f8;
+      }
+      .hero b { display: block; font-size: 0.9rem; }
+      .hero span { font-size: 0.75rem; color: #7a6b8c; }
+      pre {
+        margin: 0;
+        padding: 12px;
+        border-radius: 12px;
+        background: #241c2e;
+        color: #ecd9ff;
+        font-size: 0.78rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Hero factory &amp; settings singleton</h1>
+      <div class="row">
+        <button data-role="warrior">Forge warrior</button>
+        <button data-role="mage">Forge mage</button>
+        <button data-role="archer">Forge archer</button>
+        <button id="clear">Clear</button>
+      </div>
+      <div class="gallery" id="gallery"></div>
+      <pre id="out"></pre>
+    </div>
+    <script>
+      var abilities = {
+        warrior: function () { return "slashes with a sword"; },
+        mage: function () { return "casts a fireball"; },
+        archer: function () { return "fires a swift arrow"; }
+      };
+      function makeHero(role) {
+        return {
+          role: role,
+          health: role === "warrior" ? 120 : 80,
+          act: abilities[role]
+        };
+      }
+      var Settings = (function () {
+        var instance = null;
+        function create() {
+          return {
+            theme: "light",
+            created: 0,
+            label: function () { return "theme=" + this.theme + ", forged=" + this.created; }
+          };
+        }
+        return {
+          getInstance: function () {
+            if (!instance) instance = create();
+            return instance;
+          }
+        };
+      })();
+      var gallery = document.getElementById("gallery");
+      var out = document.getElementById("out");
+      var settings = Settings.getInstance();
+      var a = Settings.getInstance();
+      out.textContent = "Singleton shared: " + (settings === a) + "\n" + settings.label();
+      document.querySelectorAll("[data-role]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var hero = makeHero(btn.dataset.role);
+          settings.created++;
+          var el = document.createElement("div");
+          el.className = "hero";
+          el.innerHTML = "<b>" + hero.role + " (" + hero.health + " HP)</b><span>" + hero.act() + "</span>";
+          gallery.appendChild(el);
+          out.textContent = "Forged a " + hero.role + "\n" + settings.label();
+        });
+      });
+      document.getElementById("clear").addEventListener("click", function () {
+        gallery.innerHTML = "";
+        out.textContent = "Gallery cleared. Singleton persists: " + settings.label();
+      });
+    </script>
+  </body>
+</html>
+```

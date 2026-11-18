@@ -1,0 +1,116 @@
+---
+title: Conditions
+description: Choose between code paths at runtime with if/else chains, ternary expressions, switch statements, and short-circuit operators.
+chapter: 11
+category: "JavaScript"
+order: 311
+---
+
+# Conditions
+
+A program rarely runs along a single straight path. Conditions let JavaScript inspect a value and decide what to do next, which is how everything from form validation to game logic makes decisions.
+
+## If, else if, and else
+
+An `if` statement runs a block only when its expression is truthy. Add `else if` clauses to test further cases in order, and a final `else` to catch whatever did not match. Because clauses are checked top to bottom, put the most specific tests first; a broad test placed early will swallow the cases you meant to handle separately. Blocks are written with curly braces. A single statement may legally skip them, but keeping the braces prevents mistakes when you later add a second line.
+
+## Ternary expressions and switch
+
+When a choice fits on one line, the ternary operator `condition ? a : b` yields one of two values. It is an expression rather than a statement, so it can sit directly inside an assignment or a template literal. When you are comparing the same value against many possibilities, a `switch` statement reads more cleanly than a long chain. Each `case` matches using strict equality, and `break` stops execution from falling through into the next case. Include a `default` branch to handle unexpected input.
+
+## Short-circuiting with `&&` and `||`
+
+Logical operators do more than combine booleans: they return one of their operands. `&&` returns the first falsy operand, while `||` returns the first truthy one. Evaluation stops as soon as the result is known, a behavior called short-circuiting. That makes patterns such as `name || "Guest"` for defaults and `user && user.name` for safe access possible. The newer `??` operator also falls back, but only on `null` or `undefined`, so a value like zero is preserved.
+
+## Demo: grade checker
+
+The demo combines all three ideas: an if chain assigns a letter grade, a ternary decides pass or fail, and a switch adds a note for each band.
+
+```html
+<div class="wrap">
+  <div class="card">
+    <h2>Grade checker</h2>
+    <p class="hint">Enter a score from 0 to 100, then check the result.</p>
+    <div class="row">
+      <input id="score" type="number" min="0" max="100" value="82" />
+      <button id="check">Check grade</button>
+    </div>
+    <div class="badge" id="badge">—</div>
+    <pre class="out" id="out"></pre>
+  </div>
+</div>
+
+<style>
+  .wrap {
+    min-height: 70vh; display: grid; place-items: center;
+    padding: 2rem 1rem; background: #eef1fb;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+  .card {
+    width: min(100%, 26rem); background: #fff; border-radius: 18px;
+    padding: 1.75rem; box-shadow: 0 18px 40px -24px rgba(40, 50, 90, 0.55);
+  }
+  h2 { margin: 0 0 0.35rem; font-size: 1.2rem; color: #2a2f45; }
+  .hint { margin: 0 0 1.1rem; font-size: 0.85rem; color: #727996; }
+  .row { display: flex; gap: 0.6rem; }
+  input {
+    flex: 1; min-width: 0; padding: 0.6rem 0.75rem;
+    border: 1px solid #d7dcec; border-radius: 10px; font-size: 1rem;
+  }
+  button {
+    padding: 0.6rem 1rem; border: 0; border-radius: 10px;
+    background: #5b6ee1; color: #fff; font-weight: 600; cursor: pointer;
+  }
+  button:hover { background: #4a5ccd; }
+  .badge {
+    margin-top: 1.2rem; display: inline-block; padding: 0.35rem 0.9rem;
+    border-radius: 999px; background: #eef1fb; color: #5b6ee1;
+    font-size: 0.9rem; font-weight: 700;
+  }
+  .out {
+    margin: 1rem 0 0; padding: 0.9rem; border-radius: 12px;
+    background: #f6f7fd; color: #333a52; font-size: 0.85rem;
+    white-space: pre-wrap; min-height: 4rem;
+  }
+</style>
+
+<script>
+  function letterFor(score) {
+    if (score >= 90) return "A";
+    else if (score >= 80) return "B";
+    else if (score >= 70) return "C";
+    else if (score >= 60) return "D";
+    else return "F";
+  }
+
+  function noteFor(letter) {
+    switch (letter) {
+      case "A": return "Outstanding work.";
+      case "B": return "Solid performance.";
+      case "C": return "Getting there, keep going.";
+      case "D": return "Needs a bit more practice.";
+      default: return "Let's start with the basics.";
+    }
+  }
+
+  document.getElementById("check").addEventListener("click", function () {
+    var raw = document.getElementById("score").value;
+    var value = Number(raw);
+    var out = document.getElementById("out");
+    if (raw === "" || Number.isNaN(value) || value < 0 || value > 100) {
+      document.getElementById("badge").textContent = "?";
+      out.textContent = "Please enter a number between 0 and 100.";
+      return;
+    }
+    var letter = letterFor(value);
+    var status = value >= 60 ? "pass" : "fail";
+    document.getElementById("badge").textContent = letter + " · " + status;
+    out.textContent =
+      "Score: " + value + "\n" +
+      "Letter: " + letter + "\n" +
+      "Status: " + status + "\n" +
+      "Note: " + noteFor(letter) + "\n" +
+      "Guest fallback: " + ("" || "Guest");
+  });
+</script>
+```

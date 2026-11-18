@@ -1,0 +1,87 @@
+---
+title: Content Languages
+description: Declare page and element languages, handle mixed-language content, and understand regional URLs.
+chapter: 30
+category: "HTML"
+order: 40
+---
+
+# Content Languages
+
+The `lang` attribute tells the browser and assistive technology which human language a page or element uses.
+
+## Base document language
+
+```html
+<html lang="en">
+  <head>
+    <title>Language example</title>
+  </head>
+  <body>
+    <p>This paragraph is in English.</p>
+  </body>
+</html>
+```
+
+Use a BCP 47 language tag such as `en`, `en-GB`, `fr`, `de`, `hi`, or `zh-Hans`. The base language is inherited by descendants.
+
+## Element language
+
+Override the language on a specific element when the content changes language:
+
+```html
+<p lang="en">The French word for hello is <span lang="fr">bonjour</span>.</p>
+<p lang="de">Das ist ein deutscher Satz.</p>
+```
+
+This helps screen readers switch pronunciation rules.
+
+## Elements with multiple languages
+
+Use nested `lang` attributes for mixed passages:
+
+```html
+<article lang="en">
+  <h2>A bilingual note</h2>
+  <p>Welcome to the studio.</p>
+  <p lang="es">Bienvenido al estudio.</p>
+  <p lang="en">Both versions carry the same meaning.</p>
+</article>
+```
+
+Do not wrap the whole document in one language if large sections use another. Mark each section correctly.
+
+## Regional URLs
+
+Language and region can be reflected in the URL structure:
+
+```text
+/en/docs
+/en-gb/docs
+/fr/docs
+/es-mx/docs
+```
+
+Keep the URL and the `lang` attribute consistent. If the content is in French, the page should declare `lang="fr"` even if the URL uses a different pattern.
+
+## Attributes with different languages
+
+Some attributes contain human-readable text. The `lang` attribute does not automatically apply to attributes, but you can use `lang` on the element to signal the language of its text alternatives.
+
+```html
+<img
+  src="/images/bonjour.svg"
+  alt="Bonjour"
+  lang="fr"
+/>
+```
+
+For `title` and `aria-label`, keep the language consistent with the surrounding content. If a tooltip is in another language, mark the element appropriately or avoid mixing languages in the same attribute.
+
+## Accessibility checklist
+
+1. Set `lang` on the `html` element.
+2. Mark inline language changes.
+3. Use valid language tags.
+4. Keep URLs and content language aligned.
+5. Test pronunciation with a screen reader when possible.

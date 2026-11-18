@@ -1,0 +1,126 @@
+---
+title: BOM (Browser Object Model)
+description: Explore the Browser Object Model through the window object and its live properties and methods.
+chapter: 48
+category: "JavaScript"
+order: 348
+---
+
+# BOM (Browser Object Model)
+
+The Browser Object Model is the hierarchy of objects the browser exposes to JavaScript. At the top sits `window`, the global object in a browser. Everything else — the document, the location bar, history, the screen, and the console — hangs off it. Where the DOM models the page's content, the BOM models the browser window and the environment around the page.
+
+## Window properties
+
+`window.innerWidth` and `window.innerHeight` report the size of the viewport in pixels, including a scrollbar if one is present. `window.outerWidth` and `window.outerHeight` describe the whole browser window. `window.devicePixelRatio` tells you how many physical pixels map to one CSS pixel, which matters on high-density screens. `window.location` holds the current URL, `window.history` the navigation list, and `window.screen` details about the display. Because `window` is global, these are often used without the prefix: `innerWidth` means the same thing.
+
+```js
+const size = window.innerWidth + " x " + window.innerHeight;
+const ratio = window.devicePixelRatio;
+```
+
+The `resize` event fires whenever the viewport changes, so a listener there can keep a readout current.
+
+## Window methods
+
+The BOM also supplies methods such as `alert()`, `prompt()`, `scrollTo()`, `setTimeout()`, and `open()`. Blocking dialogs are avoided in most modern interfaces, and sandboxed frames often disable them, so a visible in-page notice is a safer teaching tool. Timing methods like `setInterval()` and `setTimeout()` return an id you can cancel, and `requestAnimationFrame()` smooths visual updates.
+
+The demo is a window monitor. It tracks the viewport size live, shows environment details, and uses a custom notice box instead of a blocking `alert()`. It works entirely offline and degrades gracefully when a property is missing.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BOM monitor</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 40px 18px;
+        font-family: system-ui, sans-serif;
+        background: #edf4f7;
+        color: #183542;
+      }
+      .card {
+        max-width: 580px;
+        margin: 0 auto;
+        padding: 28px 30px 30px;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 26px 54px -40px rgba(24, 53, 66, 0.6);
+      }
+      h1 { margin: 0 0 6px; font-size: 1.25rem; }
+      p { margin: 0 0 18px; color: #64818d; font-size: 0.9rem; }
+      .grid {
+        display: grid; grid-template-columns: repeat(2, 1fr);
+        gap: 10px; margin-bottom: 16px;
+      }
+      .tile {
+        padding: 14px 16px; background: #f3f9fb;
+        border-radius: 12px; border: 1px solid #e0eef2;
+      }
+      .tile span { display: block; font-size: 0.74rem; color: #71909c; }
+      .tile strong { font-size: 1.05rem; color: #17627a; }
+      .row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+      button {
+        border: 0; border-radius: 10px; padding: 9px 14px; cursor: pointer;
+        font: inherit; font-size: 0.83rem; font-weight: 600;
+        background: #187a95; color: #fff;
+      }
+      .out {
+        margin: 0; min-height: 44px; padding: 12px 14px;
+        background: #142b35; color: #9fd3e2;
+        border-radius: 10px; font-size: 0.8rem; line-height: 1.7;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Window monitor</h1>
+      <p>Resize the preview pane and watch the numbers update in real time.</p>
+      <div class="grid">
+        <div class="tile"><span>Viewport width</span><strong id="w">-</strong></div>
+        <div class="tile"><span>Viewport height</span><strong id="h">-</strong></div>
+        <div class="tile"><span>Pixel ratio</span><strong id="r">-</strong></div>
+        <div class="tile"><span>Resize count</span><strong id="n">0</strong></div>
+      </div>
+      <div class="row">
+        <button id="info">Show window info</button>
+        <button id="scroll">Scroll to top</button>
+      </div>
+      <pre id="out" class="out">Waiting for a button press.</pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      var resizes = 0;
+      function updateSize() {
+        document.getElementById("w").textContent = window.innerWidth + " px";
+        document.getElementById("h").textContent = window.innerHeight + " px";
+        document.getElementById("r").textContent = window.devicePixelRatio || 1;
+        document.getElementById("n").textContent = resizes;
+      }
+      window.addEventListener("resize", function () { resizes++; updateSize(); });
+      updateSize();
+
+      document.getElementById("info").onclick = function () {
+        var lines = [
+          "inner size: " + window.innerWidth + " x " + window.innerHeight,
+          "outer size: " + (window.outerWidth || "n/a") + " x " + (window.outerHeight || "n/a"),
+          "location: " + String(window.location.href).slice(0, 60),
+          "frames in window: " + window.length,
+          "screen: " + ((window.screen && window.screen.width) || "n/a") +
+            " x " + ((window.screen && window.screen.height) || "n/a")
+        ];
+        out.textContent = lines.join("\n");
+      };
+      document.getElementById("scroll").onclick = function () {
+        try { window.scrollTo(0, 0); out.textContent = "Called window.scrollTo(0, 0)."; }
+        catch (e) { out.textContent = "Scroll method blocked in this frame."; }
+      };
+    </script>
+  </body>
+</html>
+```
+
+The tile values come straight from `window`, so there is no measurement or polling loop beyond the single `resize` listener.

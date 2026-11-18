@@ -1,0 +1,95 @@
+---
+title: WeakSet
+description: Track object membership without preventing garbage collection using a WeakSet.
+chapter: 77
+category: "JavaScript"
+order: 377
+---
+
+# WeakSet
+
+A `WeakSet` is a collection of unique objects held weakly. It answers one question efficiently: have I seen this object before? Because it accepts only object values, not primitive strings or numbers, and because its members do not keep those objects alive, it is a good fit for bookkeeping that should not extend the lifetime of the things it tracks.
+
+## Creating and adding members
+
+You build one with `new WeakSet()`. The `add` method inserts an object and returns the set, and adding the same object twice has no effect. `has` checks membership, returning a boolean, while `delete` removes an object. A weak set has no `size` and cannot be iterated, since any member could be collected between two operations. This is a deliberate trade: you give up enumeration in exchange for automatic memory cleanup.
+
+## Marking items as reviewed
+
+The demo keeps a set of cards that have been reviewed. Each card is represented by its own object; clicking "Mark reviewed" adds that object to the set and updates a live count based on `has` checks. A "Reset" button deletes the object from the set so you can watch membership change. Notice that the stored flag lives outside the card object itself, which keeps the card's own data untouched while still letting the set answer questions about it.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WeakSet demo</title>
+    <style>
+      body { margin: 0; padding: 24px 18px; font-family: system-ui, sans-serif; color: #26343d; background: linear-gradient(135deg, #faf5ff, #ecfeff 75%); }
+      .card { max-width: 470px; margin: 0 auto; padding: 22px; background: #fff; border-radius: 20px; box-shadow: 0 18px 40px -28px rgba(60,40,90,.45); }
+      h1 { margin: 0 0 4px; font-size: 1.1rem; }
+      p.sub { margin: 0 0 14px; font-size: .8rem; color: #6b7280; }
+      .item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; margin-bottom: 8px; border: 1px solid #e9e0f5; border-radius: 12px; }
+      .item.seen { background: #f0fdf4; border-color: #bbf7d0; }
+      .name { font-size: .85rem; }
+      .badge { font-size: .7rem; color: #64748b; margin-left: 6px; }
+      button { padding: 6px 11px; border: 0; border-radius: 9px; background: #7c3aed; color: #fff; font: inherit; font-size: .76rem; cursor: pointer; }
+      .seen button { background: #64748b; }
+      pre { margin: 14px 0 0; padding: 12px; border-radius: 10px; background: #1e1b2e; color: #ddd6fe; font-size: .76rem; line-height: 1.55; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Review tracker</h1>
+      <p class="sub">Objects are marked as seen in a WeakSet.</p>
+      <div id="list"></div>
+      <pre id="out">No items reviewed yet.</pre>
+    </div>
+    <script>
+      var reviewed = new WeakSet();
+      var out = document.getElementById("out");
+      var items = [
+        { label: "Design tokens" },
+        { label: "Color palette" },
+        { label: "Typography scale" }
+      ];
+      function refresh() {
+        var seenCount = 0;
+        items.forEach(function (item) { if (reviewed.has(item)) seenCount += 1; });
+        out.textContent = "has() checks -> " + seenCount + " of " + items.length + " reviewed\n" +
+          "size property -> " + reviewed.size + " (WeakSet has no size)\n" +
+          "member type   -> objects only";
+      }
+      items.forEach(function (item) {
+        var row = document.createElement("div");
+        row.className = "item";
+        var name = document.createElement("span");
+        name.className = "name";
+        name.textContent = item.label;
+        var badge = document.createElement("span");
+        badge.className = "badge";
+        name.appendChild(badge);
+        var btn = document.createElement("button");
+        btn.textContent = "Mark reviewed";
+        btn.addEventListener("click", function () {
+          if (reviewed.has(item)) {
+            reviewed.delete(item);
+            btn.textContent = "Mark reviewed";
+          } else {
+            reviewed.add(item);
+            btn.textContent = "Undo";
+          }
+          row.classList.toggle("seen", reviewed.has(item));
+          badge.textContent = reviewed.has(item) ? "✓ seen" : "";
+          refresh();
+        });
+        row.appendChild(name);
+        row.appendChild(btn);
+        document.getElementById("list").appendChild(row);
+      });
+      refresh();
+    </script>
+  </body>
+</html>
+```

@@ -1,0 +1,83 @@
+---
+title: Escape Sequences
+description: Represent special characters inside strings and regular expressions with backslash escapes.
+chapter: 78
+category: "JavaScript"
+order: 378
+---
+
+# Escape Sequences
+
+An escape sequence is a backslash followed by characters that stand in for something hard to type literally. Strings use them to embed a newline, a tab, a quote that would otherwise end the string, or a Unicode character by code point. Regular expressions use the same backslash machinery for special characters such as a literal dot or a digit class.
+
+## Common string escapes
+
+The familiar escapes include `\\n` for a newline, `\\t` for a tab, `\\r` for a carriage return, `\\\\` for a literal backslash, and `\\"` or `\\'` for quotes inside matching quotes. You can also write a character by its code with `\\xHH` for two hex digits or `\\uHHHH` for four. Modern JavaScript additionally supports code-point escapes wrapped in braces for characters outside the basic plane.
+
+## Escapes in patterns
+
+Inside a regular expression, `\\d` matches any digit, `\\s` matches whitespace, and `\\.` matches a literal period rather than the "any character" wildcard. The same sequence can mean different things in a string versus a regex because the string is parsed first. That is why a pattern built from a string sometimes needs a double backslash: one level is consumed by the string, the other reaches the regex engine.
+
+The demo shows paired results for several escapes. Each row presents the literal source form next to the actual rendered value, so you can see exactly what each backslash produces.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Escape sequences</title>
+    <style>
+      body { margin: 0; padding: 24px 18px; font-family: system-ui, sans-serif; color: #243138; background: linear-gradient(135deg, #f1f5f9, #fce7f3 75%); }
+      .card { max-width: 500px; margin: 0 auto; padding: 22px; background: #fff; border-radius: 20px; box-shadow: 0 18px 40px -28px rgba(50,50,80,.4); }
+      h1 { margin: 0 0 4px; font-size: 1.1rem; }
+      p.sub { margin: 0 0 14px; font-size: .8rem; color: #64748b; }
+      table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+      th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid #eef2f7; vertical-align: top; }
+      th { color: #475569; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; }
+      code { background: #f1f5f9; padding: 2px 5px; border-radius: 6px; color: #b91c1c; }
+      .rendered { white-space: pre-wrap; color: #0f766e; }
+      .regex { margin-top: 16px; padding: 12px; background: #0f172a; color: #93c5fd; border-radius: 10px; font-size: .76rem; line-height: 1.6; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>What does that backslash do?</h1>
+      <p class="sub">Source form on the left, rendered value on the right.</p>
+      <table>
+        <thead><tr><th>Sequence</th><th>Rendered</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <div id="regex" class="regex"></div>
+    </div>
+    <script>
+      var examples = [
+        { label: "\\n newline", value: "first line\nsecond line" },
+        { label: "\\t tab", value: "colA\tcolB" },
+        { label: "\\\" quote", value: "She said \"hello\"" },
+        { label: "\\\\ backslash", value: "C:\\temp\\file" },
+        { label: "\\u2764 heart", value: "I \u2764 JS" }
+      ];
+      var tbody = document.getElementById("rows");
+      examples.forEach(function (ex) {
+        var tr = document.createElement("tr");
+        var a = document.createElement("td");
+        var code = document.createElement("code");
+        code.textContent = ex.label;
+        a.appendChild(code);
+        var b = document.createElement("td");
+        b.className = "rendered";
+        b.textContent = ex.value;
+        tr.appendChild(a);
+        tr.appendChild(b);
+        tbody.appendChild(tr);
+      });
+      var pattern = new RegExp("\\d+", "g");
+      var found = "room 42 and 7 doors".match(pattern);
+      document.getElementById("regex").textContent =
+        "RegExp(\"\\\\d+\") matches digits -> " + found.join(", ") + "\n" +
+        "Use \\\\. to match a literal dot, not any character.";
+    </script>
+  </body>
+</html>
+```

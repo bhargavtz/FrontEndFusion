@@ -1,0 +1,155 @@
+---
+title: JavaScript Variables
+description: Declare, name and update variables, then group related values in arrays and objects.
+chapter: 2
+category: "JavaScript"
+order: 302
+---
+
+# JavaScript Variables
+
+A variable is a named place to keep a value so you can use it again. Almost every line of useful JavaScript reads a variable, changes one, or combines several. Getting comfortable with declarations early makes everything else easier.
+
+## Declaring and naming variables
+
+You create a variable with `var`, `let`, or `const`. Modern code prefers `let` for values that will change and `const` for values that will not. A declaration can stop at the name, giving the variable the special value `undefined`, or it can include an equals sign to assign an initial value right away.
+
+Names are case-sensitive and may contain letters, digits, underscores, and dollar signs, but cannot start with a digit. Choose names that describe the data, such as `userName` or `totalPrice`, because you will read them far more often than you write them.
+
+## Using and updating values
+
+Once declared, a variable is used simply by writing its name. Assigning a new value replaces the old one. With `let` this is allowed; with `const` it raises an error, which is exactly why `const` is a good default. Variables respect scope: a name declared inside a function is not visible outside it.
+
+```js
+let score = 0;
+score = score + 10;
+const player = "Ada";
+```
+
+## Arrays and objects
+
+When values belong together, containers beat a long list of separate names. An array is an ordered list accessed by numeric index starting at zero. An object stores named properties, read with dot notation or with brackets when the key is dynamic. Both can be nested inside each other to model real data.
+
+```js
+const colors = ["violet", "teal", "amber"];
+const user = { name: "Ada", age: 27 };
+colors[0];      // "violet"
+user.name;      // "Ada"
+```
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Variables</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px 18px;
+        font-family: system-ui, sans-serif;
+        color: #20303a;
+        background: linear-gradient(135deg, #e8fbf5, #f3f6ff 70%);
+      }
+      .card {
+        max-width: 480px;
+        margin: 0 auto;
+        padding: 22px;
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px -30px rgba(20, 60, 50, 0.6);
+      }
+      h1 { margin: 0 0 14px; font-size: 1.15rem; }
+      .field { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+      label { flex: 0 0 92px; font-size: 0.8rem; color: #52666d; }
+      input {
+        flex: 1;
+        min-width: 0;
+        padding: 9px 10px;
+        border: 1px solid #cfe3dc;
+        border-radius: 10px;
+        font: inherit;
+        font-size: 0.85rem;
+      }
+      button {
+        width: 100%;
+        padding: 10px;
+        border: 0;
+        border-radius: 10px;
+        background: #12846a;
+        color: #ffffff;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+      .tag { padding: 5px 9px; border-radius: 999px; background: #e7f7f1; font-size: 0.75rem; }
+      pre {
+        margin: 14px 0 0;
+        padding: 12px;
+        border-radius: 10px;
+        background: #14231f;
+        color: #b8f0d8;
+        font-size: 0.78rem;
+        line-height: 1.55;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Profile builder</h1>
+      <div class="field">
+        <label for="name">Name</label>
+        <input id="name" value="Ada" />
+      </div>
+      <div class="field">
+        <label for="city">City</label>
+        <input id="city" value="Lisbon" />
+      </div>
+      <div class="field">
+        <label for="skill">Add skill</label>
+        <input id="skill" placeholder="e.g. Jazz piano" />
+      </div>
+      <button id="build">Build profile</button>
+      <div id="tags" class="tags"></div>
+      <pre id="out">Fill in the fields and press Build profile.</pre>
+    </div>
+    <script>
+      const out = document.getElementById("out");
+      const skills = ["JavaScript", "Design"];
+      let builds = 0;
+      const app = { version: 1.0 };
+
+      document.getElementById("build").addEventListener("click", function () {
+        builds += 1;
+        const name = document.getElementById("name").value || "Anonymous";
+        const city = document.getElementById("city").value || "Unknown";
+        const extra = document.getElementById("skill").value.trim();
+        if (extra) {
+          skills.push(extra);
+          document.getElementById("skill").value = "";
+        }
+        const person = { name: name, city: city, skills: skills.slice() };
+
+        const box = document.getElementById("tags");
+        box.innerHTML = "";
+        person.skills.forEach(function (s) {
+          const chip = document.createElement("span");
+          chip.className = "tag";
+          chip.textContent = s;
+          box.appendChild(chip);
+        });
+
+        out.textContent =
+          "Build #" + builds + " (const app v" + app.version + ")\n" +
+          "let name   = " + JSON.stringify(person.name) + "\n" +
+          "let city   = " + JSON.stringify(person.city) + "\n" +
+          "array      = [" + person.skills.join(", ") + "]\n" +
+          "object key = person.name -> " + person.name;
+      });
+    </script>
+  </body>
+</html>
+```

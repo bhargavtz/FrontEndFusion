@@ -1,0 +1,77 @@
+---
+title: Async functions (async/await)
+description: Write readable asynchronous code with async functions and the await keyword.
+chapter: 81
+category: "JavaScript"
+order: 381
+---
+
+# Async functions (async/await)
+
+An `async` function is one declared with the `async` keyword. It always returns a promise, and inside it you can pause with `await`, which waits for a promise to settle and then resumes the function with the resolved value. The result is asynchronous code that reads top to bottom, without the nested callbacks that promises alone can encourage.
+
+## Await and operator precedence
+
+The `await` operator unwraps a promise, so `await somePromise` produces the value rather than the promise itself. It only has meaning inside an `async` function or at the top level of a module. If you await a non-promise, the value is passed through unchanged. Errors thrown while awaiting are caught with a normal `try` and `catch` block, which is one of the biggest readability wins over chained `catch` handlers.
+
+## Sequential versus parallel work
+
+Awaiting inside a loop runs each operation one after another, which is correct when steps depend on each other. When tasks are independent, start them all and then await the combined promise with `Promise.all` so they overlap. The demo uses a small local delay helper to compare both approaches: sequential awaits add their wait times together, while the parallel version finishes in roughly the time of the slowest step.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>async / await</title>
+    <style>
+      body { margin: 0; padding: 24px 18px; font-family: system-ui, sans-serif; color: #26333d; background: linear-gradient(135deg, #fffbeb, #eef2ff 75%); }
+      .card { max-width: 480px; margin: 0 auto; padding: 22px; background: #fff; border-radius: 20px; box-shadow: 0 18px 40px -28px rgba(70,60,30,.45); }
+      h1 { margin: 0 0 4px; font-size: 1.1rem; }
+      p.sub { margin: 0 0 14px; font-size: .8rem; color: #64748b; }
+      .row { display: flex; gap: 8px; margin-bottom: 12px; }
+      button { padding: 9px 13px; border: 0; border-radius: 10px; background: #d97706; color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+      button.alt { background: #4f46e5; }
+      pre { margin: 0; padding: 12px; border-radius: 10px; background: #1c1917; color: #fde68a; font-size: .76rem; line-height: 1.6; white-space: pre-wrap; min-height: 140px; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Sequential vs parallel</h1>
+      <p class="sub">Three independent tasks, each taking 500 ms.</p>
+      <div class="row">
+        <button id="seq">Run sequentially</button>
+        <button id="par" class="alt">Run in parallel</button>
+      </div>
+      <pre id="out">Choose a mode to start the tasks.</pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      function step(n) {
+        return new Promise(function (resolve) {
+          window.setTimeout(function () { resolve("task " + n + " done"); }, 500);
+        });
+      }
+      async function sequential() {
+        var lines = ["Sequential run:"];
+        var start = Date.now();
+        for (var i = 1; i <= 3; i++) {
+          lines.push("await -> " + await step(i));
+          out.textContent = lines.join("\n");
+        }
+        lines.push("total -> " + (Date.now() - start) + " ms");
+        out.textContent = lines.join("\n");
+      }
+      async function parallel() {
+        var start = Date.now();
+        var results = await Promise.all([step(1), step(2), step(3)]);
+        out.textContent = "Parallel run:\n" + results.map(function (r) { return "await all -> " + r; }).join("\n") +
+          "\ntotal -> " + (Date.now() - start) + " ms";
+      }
+      document.getElementById("seq").addEventListener("click", sequential);
+      document.getElementById("par").addEventListener("click", parallel);
+    </script>
+  </body>
+</html>
+```

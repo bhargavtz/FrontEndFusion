@@ -1,0 +1,175 @@
+---
+title: Performance
+description: Keep animation on the compositor with transform and opacity, avoid layout thrashing, and use will-change and content-visibility with care.
+chapter: 56
+category: "CSS"
+order: 156
+---
+
+# Performance
+
+CSS can slow a page down in two different ways: it can make the browser do expensive work on every frame, or it can make the browser redo layout when nothing visible changed. Both are avoidable, and the fixes are usually smaller than the bug.
+
+## Animate the cheap properties
+
+The browser renders a frame in stages: style, layout, paint, composite. Animating `width`, `height`, `top`, `left`, or `margin` forces layout and paint on every frame. Animating `transform` and `opacity` usually skips straight to the compositor, where a separate thread can handle it even while the main thread is busy.
+
+```css
+.card:hover {
+  transform: translateY(-4px) scale(1.01);
+  transition: transform 180ms ease-out, opacity 180ms ease-out;
+}
+```
+
+The visual result is identical to nudging `margin-top`, but the cost is a fraction. Use `translate` and `scale` if you prefer, but keep the animated property list short.
+
+## Reduce the work per frame
+
+Layout thrashing is reading a geometry value and writing a style in the same loop. Each read after a write forces the browser to flush pending layout, so a loop of ten reads becomes ten full layouts.
+
+```js
+/* thrashing: layout forced on every iteration */
+for (const el of items) {
+  el.style.width = el.offsetWidth + 10 + "px";
+}
+```
+
+Batch the reads first, then the writes. In pure CSS the equivalent mistake is animating a property that changes the size of ancestors, which ripples layout through the whole subtree.
+
+A related hint controls compositor promotion. `will-change: transform` tells the browser to promote an element ahead of time. Used on a handful of elements that genuinely animate, it removes a first-frame stutter. Applied to everything, it consumes memory and can make rendering slower. Add it on hover or via a class that is set just before the animation starts, and never ship it globally.
+
+The last lever defers work entirely. `content-visibility: auto` lets the browser skip rendering for content outside the viewport, and `contain-intrinsic-size` supplies a placeholder height so scrollbars stay stable. Long feeds and documentation pages benefit most.
+
+```css
+.section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 320px;
+}
+```
+
+## A complete example
+
+The dashboard below animates only `transform` and `opacity`, promotes the tiles ahead of the hover transition with `will-change`, keeps the pulse dot on the compositor, and skips rendering of an off-screen block.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Compositor-friendly dashboard</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 40px 20px;
+        font-family: system-ui, sans-serif;
+        background: #f4f6fb;
+        color: #1a2233;
+      }
+
+      .board {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+        max-width: 680px;
+        margin: 0 auto;
+      }
+
+      .tile {
+        padding: 18px;
+        border-radius: 16px;
+        background: #ffffff;
+        border: 1px solid #e4e9f2;
+        box-shadow: 0 14px 30px -24px rgba(20, 32, 60, 0.55);
+        transition: transform 180ms ease-out, box-shadow 180ms ease-out;
+        will-change: transform;
+      }
+
+      .tile:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 22px 38px -22px rgba(20, 32, 60, 0.45);
+      }
+
+      .tile h2 {
+        margin: 0 0 4px;
+        font-size: 0.7rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #7b879c;
+      }
+
+      .tile strong {
+        font-size: 1.6rem;
+        letter-spacing: -0.02em;
+      }
+
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 10px;
+        font-size: 0.74rem;
+        color: #4d7a5c;
+      }
+
+      .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #38a169;
+        animation: pulse 1600ms ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.5); opacity: 0.5; }
+      }
+
+      .archive {
+        max-width: 680px;
+        margin: 18px auto 0;
+        padding: 18px;
+        border-radius: 16px;
+        background: #eaeff9;
+        border: 1px solid #dbe3f1;
+        font-size: 0.78rem;
+        color: #55617a;
+        content-visibility: auto;
+        contain-intrinsic-size: auto 120px;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .tile { transition: none; }
+        .dot { animation: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="board">
+      <section class="tile">
+        <h2>Requests</h2>
+        <strong>12.4k</strong>
+        <p class="row"><span class="dot"></span> up 4.1% today</p>
+      </section>
+
+      <section class="tile">
+        <h2>Latency</h2>
+        <strong>84 ms</strong>
+        <p class="row"><span class="dot"></span> p95 within budget</p>
+      </section>
+
+      <section class="tile">
+        <h2>Payload</h2>
+        <strong>38 kb</strong>
+        <p class="row"><span class="dot"></span> after compression</p>
+      </section>
+    </div>
+
+    <section class="archive">
+      Archived reports render lazily once this block scrolls near the viewport.
+    </section>
+  </body>
+</html>
+```
+
+Hover a tile: it lifts without a single layout pass. The pulse keeps moving without repainting the card behind it. Those two effects, plus honest measurements in the browser's performance panel, cover most of what CSS performance work actually is.

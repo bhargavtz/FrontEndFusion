@@ -1,0 +1,102 @@
+---
+title: 3D Transforms
+description: Add depth with perspective, rotate on three axes, build a 3D cube, and control which faces stay visible.
+chapter: 29
+category: "CSS"
+order: 129
+---
+
+# 3D Transforms
+
+3D transforms extend the transform system with a depth axis. The page is still flat, but elements can be rotated and translated through an imaginary Z axis that points toward the viewer.
+
+## Perspective
+
+Without `perspective`, a rotated element looks like it was flattened. Perspective defines the viewing distance: smaller values exaggerate depth, larger values flatten it.
+
+```css
+.scene {
+  perspective: 800px;
+  perspective-origin: 50% 50%;
+}
+```
+
+`perspective` must be set on the parent, not on the rotating element. The alternative is the `perspective()` transform function, applied directly in the child's transform list. Set `transform-style: preserve-3d` on a parent whose children need to keep their own depth relations — otherwise the children are flattened into the parent's plane.
+
+## Rotating on each axis
+
+`rotateX(angle)` tips an element forward or back, `rotateY(angle)` spins it left or right, and `rotateZ(angle)` is the same as the 2D `rotate()`. `translateZ(distance)` pushes an element toward the viewer, and `translate3d(x, y, z)` combines all three.
+
+`backface-visibility: hidden` hides the reverse side of an element. It is essential for card-flip effects and for hiding the inner faces of a cube as they turn away, saving you from mirrored text.
+
+For 3D text, apply a rotation to a text container and add a layered shadow with `text-shadow` offsets, or stack multiple copies with decreasing opacity to fake extrusion.
+
+## Demo: a rotating cube
+
+```html
+<div class="scene">
+  <div class="cube">
+    <div class="cube__face cube__face--front">front</div>
+    <div class="cube__face cube__face--back">back</div>
+    <div class="cube__face cube__face--right">right</div>
+    <div class="cube__face cube__face--left">left</div>
+    <div class="cube__face cube__face--top">top</div>
+    <div class="cube__face cube__face--bottom">bottom</div>
+  </div>
+</div>
+
+<style>
+  body {
+    margin: 0;
+    min-height: 70vh;
+    display: grid;
+    place-items: center;
+    background: radial-gradient(circle at 50% 40%, #26324a, #0a0f1a 72%);
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    overflow: hidden;
+  }
+  .scene {
+    perspective: 760px;
+    perspective-origin: 50% 45%;
+    width: 11rem;
+    height: 11rem;
+  }
+  .cube {
+    position: relative;
+    width: 11rem;
+    height: 11rem;
+    transform-style: preserve-3d;
+    transform: rotateX(-22deg) rotateY(-32deg);
+    animation: turn 16s linear infinite;
+  }
+  .cube__face {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(125, 211, 252, 0.55);
+    border-radius: 10px;
+    color: #e0f2fe;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    backface-visibility: hidden;
+    box-shadow: inset 0 0 28px rgba(56, 189, 248, 0.28);
+  }
+  .cube__face--front  { background: rgba(14, 165, 233, 0.32); transform: translateZ(5.5rem); }
+  .cube__face--back   { background: rgba(99, 102, 241, 0.3);  transform: rotateY(180deg) translateZ(5.5rem); }
+  .cube__face--right  { background: rgba(45, 212, 191, 0.28); transform: rotateY(90deg) translateZ(5.5rem); }
+  .cube__face--left   { background: rgba(167, 139, 250, 0.3); transform: rotateY(-90deg) translateZ(5.5rem); }
+  .cube__face--top    { background: rgba(148, 233, 255, 0.26); transform: rotateX(90deg) translateZ(5.5rem); }
+  .cube__face--bottom { background: rgba(30, 64, 175, 0.32);  transform: rotateX(-90deg) translateZ(5.5rem); }
+  @keyframes turn {
+    from { transform: rotateX(-22deg) rotateY(-32deg); }
+    to   { transform: rotateX(-22deg) rotateY(328deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cube { animation: none; }
+  }
+</style>
+```
+
+Every face is 11rem square and pushed out by half that distance (`5.5rem`) after its rotation, so the six faces meet at the edges. `preserve-3d` keeps those translations in the cube's own coordinate space instead of collapsing them onto one plane, and `backface-visibility` hides the faces pointing away from the viewer.

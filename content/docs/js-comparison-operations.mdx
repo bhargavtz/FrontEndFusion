@@ -1,0 +1,131 @@
+---
+title: Comparison Operations
+description: Understand loose and strict equality, type conversion, logical operators and short-circuiting in JavaScript comparisons.
+chapter: 10
+category: "JavaScript"
+order: 310
+---
+
+# Comparison Operations
+
+Comparisons are the decisions of a program. They decide which branch runs, whether a loop continues, and whether a value is valid. JavaScript has two families of equality plus a set of logical operators, and knowing how they coerce types will save you from surprising results.
+
+## Equality: loose versus strict
+
+Strict equality, `===`, compares both value and type and does no conversion. Loose equality, `==`, converts operands to a common type first, which leads to rules such as `null == undefined` being true while `null === undefined` is false, and `[] == false` being true because the empty array becomes an empty string and then zero. Prefer strict equality unless you deliberately want coercion.
+
+`NaN` is special: it is not equal to anything, including itself. Use `Number.isNaN()` or `Object.is()` to detect it. `Object.is()` also distinguishes positive and negative zero, which `===` treats as equal. Inequality is the mirror image: `!=` and `!==` negate the corresponding equality check.
+
+## Relational and logical operators
+
+Relational operators include `<`, `<=`, `>`, and `>=`. When both operands are strings they compare lexicographically by character codes; otherwise JavaScript tries to convert them to numbers. The logical operators `&&`, `||`, and `!` work with booleans, but they also accept any value.
+
+## Short-circuiting and coercion
+
+The `&&` and `||` operators short-circuit: `&&` stops at the first falsy value, `||` at the first truthy one. Crucially, they return the operand itself, not a boolean. That makes patterns like `name || "Guest"` a compact fallback. Falsy values include `false`, `0`, an empty string, `null`, `undefined`, and `NaN`.
+
+Grouping several statements with parentheses controls the order of evaluation. At a lower level, each boolean can be treated as a bit, allowing a small integer to pack several on-or-off flags — a technique called a bit field.
+
+The lab below evaluates a list of expressions so you can see coercion in action.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Comparison operations</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px 18px;
+        font-family: system-ui, sans-serif;
+        color: #2a2833;
+        background: linear-gradient(140deg, #f2f0ff, #fdf3f4 72%);
+      }
+      .card {
+        max-width: 580px;
+        margin: 0 auto;
+        padding: 22px;
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 20px 42px -30px rgba(60, 40, 80, 0.5);
+      }
+      h1 { margin: 0 0 6px; font-size: 1.15rem; }
+      .hint { margin: 0 0 14px; font-size: 0.8rem; color: #7c7488; }
+      .row { display: flex; flex-wrap: wrap; gap: 7px; }
+      button {
+        padding: 7px 10px;
+        border: 1px solid #e0d8f2;
+        border-radius: 9px;
+        background: #faf8ff;
+        color: #5b4585;
+        font: inherit;
+        font-size: 0.74rem;
+        cursor: pointer;
+      }
+      button:hover { background: #efe9ff; }
+      pre {
+        margin: 14px 0 0;
+        min-height: 150px;
+        padding: 12px;
+        border-radius: 10px;
+        background: #221c2d;
+        color: #e3d5ff;
+        font-size: 0.78rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Comparison lab</h1>
+      <p class="hint">Each button prints an expression and its result.</p>
+      <div class="row">
+        <button data-expr="eq">1 == "1"</button>
+        <button data-expr="strict">1 === "1"</button>
+        <button data-expr="nulls">null == undefined</button>
+        <button data-expr="nan">NaN === NaN</button>
+        <button data-expr="empty">[] == false</button>
+        <button data-expr="and">0 && 5</button>
+        <button data-expr="or">"" || "guest"</button>
+        <button data-expr="relational">"10" > "2"</button>
+        <button data-expr="not">!0 and !!"hi"</button>
+        <button data-expr="bits">bit field flags</button>
+      </div>
+      <pre id="out">Choose an expression to evaluate it.</pre>
+    </div>
+    <script>
+      const out = document.getElementById("out");
+      const cases = {
+        eq: function () { return "1 == \"1\"  -> " + (1 == "1") + "  (string converted to number)"; },
+        strict: function () { return "1 === \"1\" -> " + (1 === "1") + "  (types differ)"; },
+        nulls: function () {
+          return "null == undefined  -> " + (null == undefined) + "\n" +
+            "null === undefined -> " + (null === undefined);
+        },
+        nan: function () {
+          return "NaN === NaN          -> " + (NaN === NaN) + "\n" +
+            "Number.isNaN(NaN)    -> " + Number.isNaN(NaN);
+        },
+        empty: function () { return "[] == false -> " + ([] == false) + "  (empty array -> empty string -> 0)"; },
+        and: function () { return "0 && 5   -> " + (0 && 5) + "   (short-circuits at the falsy 0)"; },
+        or: function () { return "\"\" || \"guest\" -> " + ("" || "guest") + "  (returns the first truthy operand)"; },
+        relational: function () { return "\"10\" > \"2\" -> " + ("10" > "2") + "  (string comparison, not numeric)"; },
+        not: function () { return "!0  -> " + (!0) + "\n!!\"hi\" -> " + (!!"hi") + "  (double negation gives a boolean)"; },
+        bits: function () {
+          const READ = 1, WRITE = 2, EXEC = 4;
+          const flags = READ | EXEC;
+          return "flags = READ | EXEC -> " + flags + "\n" +
+            "can read?  -> " + Boolean(flags & READ) + "\n" +
+            "can write? -> " + Boolean(flags & WRITE);
+        }
+      };
+      document.querySelectorAll("button[data-expr]").forEach(function (btn) {
+        btn.addEventListener("click", function () { out.textContent = cases[btn.dataset.expr](); });
+      });
+    </script>
+  </body>
+</html>
+```

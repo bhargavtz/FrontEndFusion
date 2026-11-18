@@ -1,0 +1,76 @@
+---
+title: Label Element
+description: Associate text with form controls using for and id, or by wrapping the control.
+chapter: 22
+category: "HTML"
+order: 32
+---
+
+# Label Element
+
+A `label` gives a form control an accessible name. Clicking or tapping the label also focuses or toggles the control.
+
+## Basic use
+
+Use the `for` attribute and match it to the control's `id`.
+
+```html
+<label for="email">Email address</label>
+<input id="email" name="email" type="email" autocomplete="email" />
+```
+
+The association matters for screen readers and for the click target. Always prefer a visible label over a placeholder.
+
+## Wrapping the control
+
+A label can also wrap its control. In that case, `for` is optional.
+
+```html
+<label>
+  Subscribe to the newsletter
+  <input type="checkbox" name="subscribe" />
+</label>
+```
+
+Wrapping is convenient for checkboxes and radio buttons because the whole label becomes clickable.
+
+## Labels for radio buttons
+
+```html
+<fieldset>
+  <legend>Contact method</legend>
+  <label><input type="radio" name="contact" value="email" /> Email</label>
+  <label><input type="radio" name="contact" value="phone" /> Phone</label>
+</fieldset>
+```
+
+Each radio button needs its own label. The `legend` names the group.
+
+## Labels and accessibility
+
+- Every input needs an accessible name.
+- Do not use a placeholder as the only label; it disappears when the user types.
+- Do not put interactive elements inside a label.
+- Keep the label text close to the control.
+- Use `aria-describedby` for extra instructions, not for the label itself.
+
+```html
+<label for="password">Password</label>
+<input
+  id="password"
+  name="password"
+  type="password"
+  aria-describedby="password-help"
+/>
+<p id="password-help">Use at least 12 characters.</p>
+```
+
+## Common mistake
+
+```html
+<!-- The label points to an id that does not exist -->
+<label for="username">Username</label>
+<input id="user-name" name="username" />
+```
+
+The mismatch breaks the association. Check the spelling of both values.

@@ -1,0 +1,109 @@
+---
+title: Sectioning Elements
+description: Structure a page with nav, article, main, header, footer, and section.
+chapter: 20
+category: "HTML"
+order: 30
+---
+
+# Sectioning Elements
+
+HTML5 introduced elements that describe the role of a region instead of using generic divs everywhere.
+
+## Nav element
+
+`nav` contains major navigation links. Not every group of links needs a `nav`; use it for the primary site navigation, a table of contents, or pagination.
+
+```html
+<nav aria-label="Primary">
+  <ul>
+    <li><a href="/docs/html-getting-started">HTML</a></li>
+    <li><a href="/docs">Guides</a></li>
+    <li><a href="/snippets">Snippets</a></li>
+  </ul>
+</nav>
+```
+
+## Article element
+
+`article` is a self-contained composition that could be syndicated on its own: a blog post, a news story, a forum post, or a product card.
+
+```html
+<article>
+  <header>
+    <h2>Why semantic HTML still matters</h2>
+    <p>Published <time datetime="2026-11-17">17 November 2026</time></p>
+  </header>
+  <p>Semantic elements make content easier to navigate and understand.</p>
+</article>
+```
+
+## Main element
+
+`main` wraps the primary content of the page. Use it once per page and do not nest it inside `header`, `footer`, `nav`, or `aside`.
+
+```html
+<header>Site header</header>
+<main id="main-content">
+  <h1>Page title</h1>
+  <p>The unique content of this page.</p>
+</main>
+<footer>Site footer</footer>
+```
+
+A skip link can target `main` so keyboard users bypass repeated navigation.
+
+## Header element
+
+`header` introduces a page or a section. It often contains a heading, a logo, and a short summary.
+
+```html
+<header>
+  <p class="eyebrow">Field notes</p>
+  <h1>Building a small library</h1>
+  <p>What I learned from shipping a static site.</p>
+</header>
+```
+
+## Footer element
+
+`footer` closes a page or a section. It can contain copyright, related links, or author information.
+
+```html
+<footer>
+  <p>© 2026 FrontEndFusion</p>
+  <nav aria-label="Footer">
+    <a href="/docs">Docs</a>
+    <a href="/docs/html-getting-started">HTML</a>
+  </nav>
+</footer>
+```
+
+## Section element
+
+`section` groups thematically related content. It should usually have a heading.
+
+```html
+<section aria-labelledby="schedule-heading">
+  <h2 id="schedule-heading">Schedule</h2>
+  <p>Doors open at 09:00 and the first talk starts at 09:30.</p>
+</section>
+```
+
+If a block has no heading and no distinct theme, a `div` is more appropriate.
+
+## A complete page outline
+
+```html
+<header>…</header>
+<nav aria-label="Primary">…</nav>
+<main>
+  <article>
+    <header>…</header>
+    <section aria-labelledby="part-one">…</section>
+    <section aria-labelledby="part-two">…</section>
+    <footer>…</footer>
+  </article>
+</main>
+<footer>…</footer>
+```

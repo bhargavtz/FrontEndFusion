@@ -1,6 +1,9 @@
 # Content authoring (MDX)
 
-All guides and snippets live in `content/` as `.mdx` files. The typed content
+All guides and snippets live in `content/` as `.mdx` files. The 41 HTML reference chapters use the `html-` prefix and the `HTML`
+category. The 56 CSS reference chapters use the `css-` prefix and the `CSS` category.
+The 101 JavaScript reference chapters use the `js-` prefix and the
+`JavaScript` category. The typed content
 layer in `src/lib/content.ts` reads them at build time, so no separate data
 arrays need to be maintained.
 
@@ -21,7 +24,7 @@ order: 1
 Body content goes here.
 ```
 
-- `category` must be `Learning Path` or `Reference`.
+- `category` must be `Learning Path`, `HTML`, `CSS`, `JavaScript`, or `Reference`.
 - `order` controls the previous/next navigation and the docs listing.
 - The leading `# Title` is stripped by the page header, so keep exactly one.
 

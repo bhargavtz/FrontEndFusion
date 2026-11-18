@@ -1,0 +1,85 @@
+---
+title: Data Attributes
+description: Attach machine-readable data to elements for JavaScript and CSS without inventing non-standard attributes.
+chapter: 11
+category: "HTML"
+order: 21
+---
+
+# Data Attributes
+
+Custom `data-*` attributes store extra information on an element. They are valid HTML and do not affect rendering.
+
+## Naming rules
+
+- Start with `data-`.
+- Use only lowercase letters, digits, and hyphens after the prefix.
+- Do not use uppercase letters in the attribute name.
+- Keep the value as a string, even when it looks numeric.
+
+```html
+<article
+  data-stock="12"
+  data-category="outdoor"
+  data-featured="true"
+>
+  <h2>Trail backpack</h2>
+</article>
+```
+
+## Reading data with JavaScript
+
+The `dataset` property exposes each `data-*` attribute. Hyphenated names become camelCase keys.
+
+```html
+<button data-action="toggle" data-target="#panel">Show details</button>
+<div id="panel" hidden>Shipping is free over $50.</div>
+
+<script>
+  const button = document.querySelector("[data-action='toggle']");
+  button.addEventListener("click", () => {
+    const panel = document.querySelector(button.dataset.target);
+    panel.hidden = !panel.hidden;
+    button.textContent = panel.hidden ? "Show details" : "Hide details";
+  });
+</script>
+```
+
+`data-featured="true"` becomes `element.dataset.featured === "true"`. Convert booleans and numbers explicitly.
+
+## Using data attributes in CSS
+
+Attribute selectors can style elements based on data values:
+
+```html
+<style>
+  .badge[data-state="open"] { background: #dcfce7; color: #166534; }
+  .badge[data-state="closed"] { background: #fee2e2; color: #991b1b; }
+</style>
+
+<p class="badge" data-state="open">Open now</p>
+<p class="badge" data-state="closed">Closed</p>
+```
+
+## Older browser support
+
+Very old browsers did not recognise custom attributes. The historical workaround was `getAttribute("data-stock")`, which still works today. Modern browsers support `dataset` everywhere that matters.
+
+## When not to use data attributes
+
+- Do not store secrets; they are visible in the page source.
+- Do not duplicate content that is already in the text.
+- Do not use them instead of proper ARIA state such as `aria-expanded`.
+- Do not create thousands of attributes for large datasets; use JSON and JavaScript instead.
+
+## Practical pattern
+
+Data attributes are a good fit for small configuration values:
+
+```html
+<div class="counter" data-start="0" data-step="5">
+  <button type="button" data-direction="down">−</button>
+  <output>0</output>
+  <button type="button" data-direction="up">+</button>
+</div>
+```

@@ -1,0 +1,127 @@
+---
+title: Forms
+description: Submit data, choose a method and target, upload files, and group related fields.
+chapter: 18
+category: "HTML"
+order: 28
+---
+
+# Forms
+
+A form collects data and sends it to a server. The `form` element wraps the controls and declares where and how the data travels.
+
+## Submitting
+
+```html
+<form action="/subscribe" method="post">
+  <label for="email">Email</label>
+  <input id="email" name="email" type="email" required />
+  <button type="submit">Subscribe</button>
+</form>
+```
+
+- `action` is the URL that receives the data.
+- `method="get"` puts the data in the query string. Use it for searches and filters.
+- `method="post"` sends the data in the request body. Use it for changes and anything sensitive.
+- Every control that should be submitted needs a `name`.
+
+If `action` is omitted, the form submits to the current URL.
+
+## Target attribute
+
+`target` decides where the response opens:
+
+```html
+<form action="/search" method="get" target="_blank">
+  <label for="q">Search</label>
+  <input id="q" name="q" type="search" />
+  <button type="submit">Open results</button>
+</form>
+```
+
+Common values are `_self` (default), `_blank`, `_parent`, and `_top`, or the name of an `iframe`.
+
+## Uploading files
+
+File uploads require `method="post"` and `enctype="multipart/form-data"`.
+
+```html
+<form action="/upload" method="post" enctype="multipart/form-data">
+  <label for="photo">Profile photo</label>
+  <input id="photo" name="photo" type="file" accept="image/*" />
+  <button type="submit">Upload</button>
+</form>
+```
+
+Without the correct `enctype`, the server receives only the filename, not the file contents.
+
+## Grouping fields
+
+Use `fieldset` and `legend` to group related controls. The legend names the group for assistive technology.
+
+```html
+<form action="#" method="post">
+  <fieldset>
+    <legend>Shipping address</legend>
+    <p>
+      <label for="street">Street</label>
+      <input id="street" name="street" autocomplete="street-address" />
+    </p>
+    <p>
+      <label for="city">City</label>
+      <input id="city" name="city" autocomplete="address-level2" />
+    </p>
+  </fieldset>
+
+  <fieldset>
+    <legend>Contact preference</legend>
+    <label><input type="radio" name="contact" value="email" checked /> Email</label>
+    <label><input type="radio" name="contact" value="phone" /> Phone</label>
+  </fieldset>
+
+  <button type="submit">Save</button>
+</form>
+```
+
+## Client-side validation
+
+```html
+<form action="#" method="post">
+  <label for="username">Username</label>
+  <input
+    id="username"
+    name="username"
+    required
+    minlength="3"
+    pattern="[A-Za-z0-9_]+"
+    title="Letters, digits, and underscores"
+  />
+  <button type="submit">Continue</button>
+</form>
+```
+
+The browser blocks submission and shows a message when a constraint fails. Always repeat the checks on the server.
+
+## Form events
+
+```html
+<form
+  action="#"
+  onsubmit="event.preventDefault(); this.querySelector('output').textContent = 'Saved locally';"
+>
+  <label for="note">Note</label>
+  <input id="note" name="note" />
+  <button type="submit">Save</button>
+  <output></output>
+</form>
+```
+
+`submit` fires when the form is submitted. Call `preventDefault()` when you want to handle the data with JavaScript instead of a full page navigation.
+
+## Checklist
+
+1. Give every control a label.
+2. Give every submitted control a `name`.
+3. Use the correct `method` and `enctype`.
+4. Group related controls with `fieldset` and `legend`.
+5. Validate on the server.

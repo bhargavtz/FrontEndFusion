@@ -4,7 +4,7 @@ import matter from "gray-matter";
 
 const CONTENT_ROOT = path.join(process.cwd(), "content");
 
-export type DocCategory = "Learning Path" | "Reference";
+export type DocCategory = "Learning Path" | "HTML" | "CSS" | "JavaScript" | "Reference";
 
 export type Doc = {
   slug: string;
@@ -60,7 +60,16 @@ export const docs: Doc[] = readCollection<Doc>("docs", (data, body, slug) => ({
   slug,
   title: asString(data.title, slug),
   description: asString(data.description),
-  category: data.category === "Reference" ? "Reference" : "Learning Path",
+  category:
+    data.category === "Reference"
+      ? "Reference"
+      : data.category === "HTML"
+        ? "HTML"
+        : data.category === "CSS"
+          ? "CSS"
+          : data.category === "JavaScript"
+            ? "JavaScript"
+            : "Learning Path",
   order: typeof data.order === "number" ? data.order : 0,
   body,
 }));

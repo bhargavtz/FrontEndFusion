@@ -1,0 +1,77 @@
+---
+title: Progress Element
+description: Show task completion with progress, style it, and provide a fallback for older browsers.
+chapter: 26
+category: "HTML"
+order: 36
+---
+
+# Progress Element
+
+The `progress` element represents the completion of a task. Use it when the value changes over time.
+
+## Basic progress
+
+```html
+<label for="upload">Uploading…</label>
+<progress id="upload" value="42" max="100">42%</progress>
+```
+
+- `value` is the current amount.
+- `max` is the total amount. It defaults to `1`.
+- The text inside the element is fallback content for browsers that do not support `progress`.
+
+Without a `value`, the element shows an indeterminate progress bar:
+
+```html
+<p>Checking for updates…</p>
+<progress></progress>
+```
+
+## Changing the colour
+
+Browsers style `progress` differently. For consistent results, use vendor pseudo-elements or a custom element.
+
+```html
+<progress class="bar" value="65" max="100">65%</progress>
+
+<style>
+  .bar {
+    width: 100%;
+    height: 14px;
+    border: 0;
+    border-radius: 999px;
+    overflow: hidden;
+    background: #e2e8f0;
+  }
+  .bar::-webkit-progress-bar { background: #e2e8f0; }
+  .bar::-webkit-progress-value { background: #0f766e; }
+  .bar::-moz-progress-bar { background: #0f766e; }
+</style>
+```
+
+If you need a fully custom look, use a `div` with `role="progressbar"` and the appropriate ARIA attributes. Keep the native element when possible.
+
+## HTML fallback
+
+```html
+<progress value="30" max="100">
+  <span>30% complete</span>
+</progress>
+```
+
+The fallback text is shown only by browsers that cannot render the element. It is not a substitute for a visible label.
+
+## Accessibility
+
+- Give the progress bar an accessible name with a label or `aria-label`.
+- Use `aria-valuetext` when the raw number is not meaningful.
+- Announce completion once, not on every small update.
+- Do not use `progress` for a static score; use text or a meter.
+
+```html
+<label for="steps">Profile setup</label>
+<progress id="steps" value="3" max="5" aria-valuetext="3 of 5 steps complete">
+  3 of 5
+</progress>
+```

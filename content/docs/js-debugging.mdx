@@ -1,0 +1,98 @@
+---
+title: Debugging
+description: Use breakpoints, the console, stepping, and property watchers to track down why code behaves unexpectedly.
+chapter: 99
+category: "JavaScript"
+order: 399
+---
+
+# Debugging
+
+Debugging is the practice of turning a vague symptom into a concrete cause. The fastest path is usually to form a hypothesis, then observe the program at the exact moment the hypothesis can be confirmed or discarded. Modern browsers give you several tools for that.
+
+## Breakpoints and stepping
+
+A breakpoint pauses execution on a chosen line so you can inspect variables in the current scope. You can set a plain line breakpoint, a conditional breakpoint that fires only when an expression is true, or a breakpoint on a DOM mutation such as an element being removed. When paused, **step over** runs the next line, **step into** follows a function call, and **step out** returns to the caller. Watching the call stack explains how execution reached the pause.
+
+For a function you cannot easily locate, `debugger;` placed in the source acts as a manual breakpoint. `debug(fn)` in the console breaks whenever that function is called. Removing these before shipping avoids accidental pauses in production.
+
+## Console, watchers, and the inspector
+
+The console is more than `log()`: `console.trace()` shows the call stack, `console.table()` lays out arrays, and `console.time()` measures a block. To find out *what* changed a property, redefine it with a getter and setter that logs on every write and then calls the original value. The Elements inspector lets you edit the live DOM and see styles or listeners attached to a node, which is ideal for layout bugs.
+
+The demo uses a getter/setter spy to watch a property and a step log that walks through a small function one operation at a time.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Debugging helpers</title>
+    <style>
+      body { margin: 0; padding: 24px 16px; font-family: system-ui, sans-serif;
+        color: #2b2b36; background: linear-gradient(135deg, #eef1fa, #fdf3ee 80%); }
+      .card { max-width: 640px; margin: 0 auto; padding: 22px; background: #fff;
+        border-radius: 18px; box-shadow: 0 20px 40px -28px rgba(40,40,80,.42); }
+      h1 { margin: 0 0 12px; font-size: 1.15rem; }
+      .row { display: flex; flex-wrap: wrap; gap: 8px; }
+      button { padding: 8px 11px; border: 0; border-radius: 9px; color: #fff;
+        background: #3f6bb5; font: inherit; font-size: .76rem; cursor: pointer; }
+      pre { margin: 14px 0 0; padding: 12px; min-height: 170px; border-radius: 10px;
+        background: #20232f; color: #d8e3ff; font-size: .76rem; line-height: 1.65;
+        white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Watch a property, step through code</h1>
+      <div class="row">
+        <button id="change">Change watched value</button>
+        <button id="step">Run one step</button>
+        <button id="clear">Clear log</button>
+      </div>
+      <pre id="out">Debug log appears here.</pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      function log(line) { out.textContent += line + "\n"; }
+
+      var state = { score: 0 };
+      var scoreValue = state.score;
+      Object.defineProperty(state, "score", {
+        get: function () {
+          log("GET score -> " + scoreValue);
+          return scoreValue;
+        },
+        set: function (value) {
+          log("SET score: " + scoreValue + " -> " + value);
+          scoreValue = value;
+        }
+      });
+
+      var steps = [
+        function () { return 2 + 3; },
+        function (v) { return v * 4; },
+        function (v) { return v - 1; }
+      ];
+      var index = 0;
+      var carried;
+
+      document.getElementById("change").addEventListener("click", function () {
+        state.score += 1;
+        var current = state.score;
+        log("score is now " + current);
+      });
+      document.getElementById("step").addEventListener("click", function () {
+        if (index >= steps.length) { log("Program finished."); return; }
+        carried = index === 0 ? steps[index]() : steps[index](carried);
+        log("step " + (index + 1) + " of " + steps.length + " -> " + carried);
+        index += 1;
+      });
+      document.getElementById("clear").addEventListener("click", function () {
+        out.textContent = "Debug log cleared.";
+      });
+    </script>
+  </body>
+</html>
+```

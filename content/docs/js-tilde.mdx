@@ -1,0 +1,99 @@
+---
+title: Tilde ~
+description: Use the bitwise NOT operator and its double-tilde form to truncate numbers and coerce values to integers.
+chapter: 86
+category: "JavaScript"
+order: 386
+---
+
+# Tilde ~
+
+The tilde `~` is the bitwise NOT operator. It converts its operand to a signed 32-bit integer, flips every bit, and returns the result as a number. For whole numbers the effect is compact and predictable: `~5` is `-6`, `~0` is `-1`, and `~-2` is `1`. The general rule is `~x === -(x + 1)` for values that fit in 32 bits.
+
+## The double tilde
+
+Applying the operator twice cancels the flip: `~~x === x` for integers in range. Because the first conversion throws away any fractional part, `~~` is a quick way to truncate a number toward zero. It behaves like `Math.trunc()` for values inside the 32-bit range, and unlike `parseInt()` it does not try to read a number from the start of a string — it coerces the whole value first. Values outside that range wrap around, so very large numbers give surprising answers.
+
+## Coercion, decimals and shorthands
+
+Operands are converted with the same rules as other bitwise operators: strings become numbers, `null` becomes `0`, booleans become `0` or `1`, and anything that cannot be converted becomes `0`. That is why `~~"42"` is `42`, `~~true` is `1`, and `~~"abc"` is `0`. A classic shorthand test is `~text.indexOf(needle)`, which is `0` (falsy) when the item is found and nonzero when it is missing — though `includes()` is clearer in modern code. For decimals, `~~3.9` is `3` and `~~-3.9` is `-3`, truncating toward zero rather than rounding.
+
+The demo converts whatever you type and offers preset buttons that reveal the edge cases.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tilde converter</title>
+    <style>
+      body { margin: 0; padding: 24px 16px; font-family: system-ui, sans-serif; color: #2b2b33; background: linear-gradient(135deg, #f4eefb, #eef7f9 80%); }
+      .card { max-width: 540px; margin: 0 auto; padding: 22px; background: #fff; border-radius: 20px; box-shadow: 0 20px 42px -30px rgba(60, 30, 90, .45); }
+      h1 { margin: 0 0 6px; font-size: 1.15rem; }
+      .lead { margin: 0 0 14px; font-size: .84rem; color: #6a6178; }
+      .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+      input { flex: 1 1 150px; padding: 9px 11px; border: 1px solid #d8cfe6; border-radius: 10px; font: inherit; font-size: .85rem; }
+      button { padding: 8px 11px; border: 0; border-radius: 9px; background: #6b4fa8; color: #fff; font: inherit; font-size: .76rem; cursor: pointer; }
+      button:hover { background: #553c8a; }
+      button.chip { background: #ede7f6; color: #4b3a70; }
+      button.chip:hover { background: #ded2f0; }
+      .chips { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px; }
+      pre { margin: 14px 0 0; min-height: 180px; padding: 12px; border-radius: 11px; background: #222033; color: #e8dcff; font-size: .76rem; line-height: 1.65; white-space: pre-wrap; }
+      .k { color: #b9a4e0; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Tilde converter</h1>
+      <p class="lead">Type a value, then watch the bitwise conversions update.</p>
+      <div class="row">
+        <input id="val" value="3.9" aria-label="value to convert" />
+        <button id="go">Convert</button>
+      </div>
+      <div class="chips" id="chips">
+        <button class="chip" data-val="0">0</button>
+        <button class="chip" data-val="-2">-2</button>
+        <button class="chip" data-val="true">true</button>
+        <button class="chip" data-val="null">null</button>
+        <button class="chip" data-val="abc">"abc"</button>
+        <button class="chip" data-val="2147483648">2^31</button>
+      </div>
+      <pre id="out"></pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      var input = document.getElementById("val");
+
+      function show(rows) {
+        out.innerHTML = rows.map(function (r) {
+          return "<span class='k'>" + r[0] + "</span>  " + r[1];
+        }).join("\n");
+      }
+
+      function convert(raw) {
+        var n = Number(raw);
+        var text = String(raw);
+        show([
+          ["input      ", JSON.stringify(raw)],
+          ["Number()   ", String(n)],
+          ["~input     ", String(~raw)],
+          ["~~input    ", String(~~raw)],
+          ["~(x + 1)?? ", "expected ~x = -(x + 1) = " + (-(n + 1))],
+          ["Math.trunc ", String(Math.trunc(n))],
+          ["~indexOf(9)", String(~text.indexOf("9")) + "  (0 means found, -1 means missing)"]
+        ]);
+      }
+
+      document.getElementById("go").addEventListener("click", function () { convert(input.value); });
+      document.getElementById("chips").addEventListener("click", function (e) {
+        var btn = e.target.closest("button[data-val]");
+        if (!btn) return;
+        input.value = btn.dataset.val === "abc" ? "abc" : btn.dataset.val;
+        convert(input.value);
+      });
+      convert(input.value);
+    </script>
+  </body>
+</html>
+```

@@ -1,0 +1,90 @@
+---
+title: ".postMessage() and MessageEvent"
+description: Send data between browsing contexts with postMessage and respond through message events.
+chapter: 75
+category: "JavaScript"
+order: 375
+---
+
+# .postMessage() and MessageEvent
+
+Scripts running in different windows, frames, or workers cannot usually reach into one another directly. The `postMessage` method provides a safe channel: you call it on a target window and it delivers a `MessageEvent` to that window's listeners. The payload is structured-cloned, so objects and arrays survive the trip without sharing memory.
+
+## Sending and receiving
+
+A call to `postMessage` takes the data to send and a `targetOrigin` string. Using an explicit origin rather than the wildcard is the safe choice in production, because it prevents a malicious page from receiving your data. On the other side, `addEventListener("message", handler)` receives an event whose `data` holds the payload, `origin` identifies the sender, and `source` points at the sending window.
+
+## A loopback conversation
+
+The demo posts a message to the current window, which is a legitimate browsing context, so both halves of the API run for real without a server. Try typing a note and pressing send: the message handler echoes it back, then a delayed reply arrives as a second event. In a full application the same pattern connects a parent page and an embedded frame, with an origin check added before trusting `event.data`.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>postMessage demo</title>
+    <style>
+      body { margin: 0; padding: 24px 18px; font-family: system-ui, sans-serif; color: #22333b; background: linear-gradient(135deg, #eef7ff, #f0fdf4 70%); }
+      .card { max-width: 470px; margin: 0 auto; padding: 22px; background: #fff; border-radius: 20px; box-shadow: 0 18px 40px -28px rgba(20,70,90,.5); }
+      h1 { margin: 0 0 4px; font-size: 1.1rem; }
+      p.sub { margin: 0 0 14px; font-size: .8rem; color: #64748b; }
+      .row { display: flex; gap: 8px; }
+      input { flex: 1; min-width: 0; padding: 9px 11px; border: 1px solid #cbe3e6; border-radius: 10px; font: inherit; font-size: .85rem; }
+      button { padding: 9px 14px; border: 0; border-radius: 10px; background: #0e7490; color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+      .feed { margin-top: 14px; display: flex; flex-direction: column; gap: 7px; }
+      .msg { padding: 9px 11px; border-radius: 10px; font-size: .8rem; line-height: 1.4; }
+      .out { background: #e6f6fb; color: #075985; align-self: flex-end; }
+      .in { background: #eef7ef; color: #25634a; }
+      .tag { font-weight: 700; margin-right: 6px; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Loopback messenger</h1>
+      <p class="sub">Messages travel through postMessage and arrive as MessageEvents.</p>
+      <div class="row">
+        <input id="text" value="Hello from the page" />
+        <button id="send">Send</button>
+      </div>
+      <div id="feed" class="feed"></div>
+    </div>
+    <script>
+      var feed = document.getElementById("feed");
+      function bubble(text, kind) {
+        var el = document.createElement("div");
+        el.className = "msg " + kind;
+        var tag = document.createElement("span");
+        tag.className = "tag";
+        tag.textContent = kind === "out" ? "SENT" : "RECEIVED";
+        el.appendChild(tag);
+        el.appendChild(document.createTextNode(text));
+        feed.appendChild(el);
+      }
+      function supportsMessages() {
+        return typeof window.postMessage === "function" && typeof MessageEvent === "function";
+      }
+      window.addEventListener("message", function (event) {
+        var payload = event.data || {};
+        if (!payload || payload.channel !== "demo") return;
+        bubble(payload.text, "in");
+        if (payload.kind === "note") {
+          window.setTimeout(function () {
+            window.postMessage({ channel: "demo", kind: "reply", text: "Got it: " + payload.text }, "*");
+          }, 500);
+        }
+      });
+      document.getElementById("send").addEventListener("click", function () {
+        var text = document.getElementById("text").value.trim() || "(empty)";
+        if (!supportsMessages()) {
+          bubble("postMessage is not available here.", "in");
+          return;
+        }
+        window.postMessage({ channel: "demo", kind: "note", text: text }, "*");
+        bubble(text, "out");
+      });
+    </script>
+  </body>
+</html>
+```

@@ -1,0 +1,205 @@
+---
+title: Custom Properties (Variables)
+description: Declare reusable values with custom properties, let them cascade into components, handle invalid values with fallbacks, and re-theme a page from one block.
+chapter: 37
+category: "CSS"
+order: 137
+---
+
+# Custom Properties (Variables)
+
+A custom property is a name you invent, prefixed with two dashes, whose value is inherited like any other inherited property. That last part is the whole design: `--accent` set on `:root` reaches every element below, and redefining it on one subtree changes only that subtree.
+
+```css
+:root {
+  --ink: #16203a;
+  --surface: #ffffff;
+  --radius: 14px;
+  --pad: 1.25rem;
+}
+```
+
+Nothing is reserved. A custom property can hold a colour, a length, a shadow list, a font stack, or even a fragment of a gradient.
+
+## Declaring, using, and cascading
+
+`var(--name)` substitutes the value at computed-value time.
+
+```css
+.card {
+  padding: var(--pad);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: var(--radius);
+}
+```
+
+Custom properties are case-sensitive, so `--Ink` and `--ink` are different names. Keeping everything lowercase avoids a category of silent bug.
+
+Because the values inherit, a theme is just a second declaration block. Override the tokens on a `body`, a `section`, or a single card, and every descendant picks them up immediately.
+
+```css
+[data-theme="warm"] {
+  --surface: #fdf8f0;
+  --ink: #33291c;
+  --accent: #c1703a;
+}
+```
+
+This is why custom properties beat preprocessor variables. A Sass variable is resolved at build time and produces one static value; a custom property survives into the browser and can respond to state, media queries, or a class swap.
+
+## Fallbacks, invalid values, and media queries
+
+Two separate safety nets exist.
+
+The fallback argument is the quick one:
+
+```css
+border: 1px solid var(--line, #e3e9f4);
+```
+
+If `--line` is unset, `#e3e9f4` is used. Fallbacks can nest: `var(--brand, var(--accent, navy))`.
+
+The subtler rule is *invalid at computed-value time*. If `--gap: 12vw` is used in `padding: var(--gap) 0` and something later sets `--gap: red`, the whole declaration is discarded — it does not fall back to the previous value, and it does not become `0`. The property simply drops to its inherited or initial value. Because of that, keep a plain declaration before the variable one when the value is load-bearing:
+
+```css
+.card { padding: 1.25rem; padding: var(--pad); }
+```
+
+Older engines ignore the second line and keep the first.
+
+The last trap is the media query. Writing `@media (min-width: var(--bp))` looks reasonable, and it does not work — media feature values must be known before custom properties are resolved. What does work is re-declaring tokens *inside* the query, which is usually what you actually wanted:
+
+```css
+:root { --pad: 1rem; --cols: 1; }
+@media (min-width: 720px) {
+  :root { --pad: 2rem; --cols: 3; }
+}
+```
+
+Now every component that reads `--pad` breathes wider on big screens without a single duplicated layout rule.
+
+## A complete example
+
+One card, two themes, and a media query that grows the internal spacing. Flip the `data-theme` attribute in dev tools to see the whole component recolour at once.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Theme tokens</title>
+    <style>
+      :root {
+        --bg: #eef2fa;
+        --surface: #ffffff;
+        --ink: #16203a;
+        --muted: #6b7a94;
+        --line: #e5ebf6;
+        --accent: #4b6cf5;
+        --accent-soft: #e8edff;
+        --radius: 18px;
+        --pad: 1.1rem;
+      }
+
+      [data-theme="warm"] {
+        --bg: #f7efe4;
+        --surface: #fffaf2;
+        --ink: #33291c;
+        --muted: #8b7a63;
+        --line: #ecdfcc;
+        --accent: #c1703a;
+        --accent-soft: #f8e7d6;
+      }
+
+      @media (min-width: 640px) {
+        :root { --pad: 1.7rem; }
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 40px 20px;
+        font-family: system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+      }
+
+      .card {
+        width: min(340px, 100%);
+        padding: var(--pad);
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: 0 28px 55px -40px rgba(22, 32, 58, 0.6);
+      }
+
+      .pill {
+        display: inline-block;
+        margin-bottom: 14px;
+        padding: 5px 11px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      h2 {
+        margin: 0 0 8px;
+        font-size: 1.2rem;
+        letter-spacing: -0.01em;
+      }
+
+      p {
+        margin: 0 0 18px;
+        font-size: 0.87rem;
+        line-height: 1.6;
+        color: var(--muted);
+      }
+
+      .meter {
+        height: 7px;
+        border-radius: 999px;
+        background: var(--line);
+        overflow: hidden;
+        margin-bottom: 8px;
+      }
+
+      .meter span {
+        display: block;
+        width: 68%;
+        height: 100%;
+        border-radius: inherit;
+        background: var(--accent);
+      }
+
+      .row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.72rem;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <section class="card">
+      <span class="pill">Storage</span>
+      <h2>Workspace usage</h2>
+      <p>
+        Padding, radius, borders, and every colour on this card come from tokens.
+        The panel is themed by four overrides on one attribute.
+      </p>
+      <div class="meter"><span></span></div>
+      <div class="row"><span>6.8 GB used</span><span>10 GB</span></div>
+    </section>
+  </body>
+</html>
+```
+
+Swap `data-theme="warm"` onto the `body` and the background, card surface, text, borders, badge, and meter all move together. No rule was duplicated — only the tokens changed.

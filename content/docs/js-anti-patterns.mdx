@@ -1,0 +1,85 @@
+---
+title: Anti-patterns
+description: Spot recurring JavaScript mistakes such as chained variable assignments and learn the clearer, safer alternative.
+chapter: 103
+category: "JavaScript"
+order: 403
+---
+
+# Anti-patterns
+
+An anti-pattern is a solution that looks reasonable but tends to create bugs or confusion. Learning to recognize them helps you both avoid writing them and clean them up when you inherit code. JavaScript's flexible syntax offers several ways to shoot yourself in the foot.
+
+## Chained assignments in variable declarations
+
+One classic trap is chaining assignments inside a single declaration, for example writing `var a = b = c = 0;`. It looks like it declares three locals, but only `a` is actually declared. The names `b` and `c` become assignments to whatever `b` and `c` resolve to, which in non-strict code means properties on the global object. The result is accidental shared state that any part of the page can read or overwrite.
+
+The problem is worse with objects. Chaining `var first = second = {};` gives both names the *same* object, so mutating one silently changes the other. Declaring each variable explicitly avoids both issues: `let a = 0, b = 0, c = 0;` makes the intent obvious and keeps everything in local scope.
+
+Strict mode turns the chained version into a `ReferenceError` because assigning to an undeclared name is forbidden. That is a good thing, though relying on strict mode alone is not a substitute for clear declarations.
+
+## Why clarity beats cleverness
+
+Chained declarations save a few keystrokes but cost a lot of readability. A reader has to remember which names were declared and which leaked. Other common anti-patterns share this theme: comparing with loose equality, using `eval` for data, ignoring return values from array methods that are non-mutating, and adding properties to built-in prototypes. In each case, a slightly longer but explicit version is almost always better.
+
+The demo runs both forms and reports whether a global variable was created, then shows that the chained object form shares a single reference.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Anti-pattern detector</title>
+    <style>
+      body { margin: 0; padding: 24px 16px; font-family: system-ui, sans-serif;
+        color: #2b2b36; background: linear-gradient(135deg, #fdf3f0, #eef2fb 80%); }
+      .card { max-width: 640px; margin: 0 auto; padding: 22px; background: #fff;
+        border-radius: 18px; box-shadow: 0 20px 40px -28px rgba(50,40,70,.42); }
+      h1 { margin: 0 0 12px; font-size: 1.15rem; }
+      button { padding: 8px 11px; border: 0; border-radius: 9px; color: #fff;
+        background: #b55757; font: inherit; font-size: .78rem; cursor: pointer; }
+      pre { margin: 14px 0 0; padding: 12px; min-height: 130px; border-radius: 10px;
+        background: #20222d; color: #ffe0d8; font-size: .76rem; line-height: 1.65;
+        white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>The chained assignment trap</h1>
+      <button id="run">Compare both styles</button>
+      <pre id="out">Press the button to inspect the results.</pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      var lines = [];
+      function log(line) { lines.push(line); out.textContent = lines.join("\n"); }
+
+      document.getElementById("run").addEventListener("click", function () {
+        lines.length = 0;
+
+        function chained() {
+          var a = leakyB = leakyC = 0;
+          return a;
+        }
+        function explicit() {
+          var a = 0, b = 0, c = 0;
+          return a + b + c;
+        }
+
+        chained();
+        log("After chained assignment:");
+        log("  typeof leakyB  -> " + typeof leakyB);
+        log("  leakyB in window -> " + ("leakyB" in window));
+        log("  explicit() total -> " + explicit());
+
+        var one = sharedA = sharedB = {};
+        one.tag = "changed";
+        log("\nShared object reference:");
+        log("  sharedB.tag -> " + sharedB.tag);
+        log("  same object -> " + (one === sharedB));
+      });
+    </script>
+  </body>
+</html>
+```

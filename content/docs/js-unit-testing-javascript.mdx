@@ -1,0 +1,90 @@
+---
+title: Unit Testing JavaScript
+description: Write focused assertions and small test cases, and understand how tools such as Mocha, Chai, and Sinon fit together.
+chapter: 100
+category: "JavaScript"
+order: 400
+---
+
+# Unit Testing JavaScript
+
+A unit test checks one small piece of logic in isolation: a function, given known inputs, should produce a known output. Good tests are fast, deterministic, and describe behavior rather than implementation. When they fail, they tell you exactly what broke.
+
+## Assertions and a simple test runner
+
+At the heart of every test is an **assertion**, a statement that throws if reality differs from expectation. A minimal helper compares an actual and expected value and reports the difference. From there you can build a tiny runner that registers named tests, executes each one inside a `try`/`catch`, and tallies passes and failures. That is essentially what larger frameworks automate.
+
+Common assertion styles include strict equality, deep equality for objects and arrays, and checking that a function throws. Prefer strict comparisons so type mistakes are not hidden, and always assert on a meaningful observable result rather than on an internal variable.
+
+## The wider tooling ecosystem
+
+Frameworks such as **Mocha** organize tests into suites and hooks like `beforeEach`. **Chai** provides expressive assertion styles such as `expect(value).to.equal(other)`. **Sinon** offers spies, stubs, and fake timers so you can verify that a callback was called or control the passage of time. **Proxyquire** replaces a module's dependencies during a test, which is useful when a unit talks to a database or network.
+
+For promise-returning code, either return the promise from the test or use `async`/`await` so the runner knows when the assertion actually happens. Forgetting to do this produces tests that pass while the async work is still pending.
+
+The demo implements a compact assertion library and test runner and deliberately includes one failing test so you can see the report format.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mini test runner</title>
+    <style>
+      body { margin: 0; padding: 24px 16px; font-family: system-ui, sans-serif;
+        color: #2b2b36; background: linear-gradient(135deg, #edf5f6, #f7f0fb 80%); }
+      .card { max-width: 640px; margin: 0 auto; padding: 22px; background: #fff;
+        border-radius: 18px; box-shadow: 0 20px 40px -28px rgba(40,50,70,.42); }
+      h1 { margin: 0 0 6px; font-size: 1.15rem; }
+      p.hint { margin: 0 0 14px; font-size: .82rem; color: #6c6f7d; }
+      pre { margin: 0; padding: 12px; min-height: 200px; border-radius: 10px;
+        background: #20232f; color: #dbe6d8; font-size: .76rem; line-height: 1.65;
+        white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Tiny unit test runner</h1>
+      <p class="hint">Four tests, one intentionally failing, reported in a readable log.</p>
+      <pre id="out">Running suite...</pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      var lines = [];
+      function log(line) { lines.push(line); out.textContent = lines.join("\n"); }
+
+      function assertEqual(actual, expected) {
+        if (actual !== expected) {
+          throw new Error("expected " + expected + " but got " + actual);
+        }
+      }
+      function assertThrows(fn) {
+        var threw = false;
+        try { fn(); } catch (err) { threw = true; }
+        if (!threw) throw new Error("expected the function to throw");
+      }
+
+      var tests = [
+        ["sum adds two numbers", function () { assertEqual(sum(2, 3), 5); }],
+        ["sum handles zero", function () { assertEqual(sum(0, 0), 0); }],
+        ["divide rejects zero", function () { assertThrows(function () { divide(1, 0); }); }],
+        ["divide returns a quotient", function () { assertEqual(divide(9, 2), 4); }]
+      ];
+      function sum(a, b) { return a + b; }
+      function divide(a, b) {
+        if (b === 0) throw new RangeError("cannot divide by zero");
+        return a / b;
+      }
+
+      lines.length = 0;
+      var passed = 0;
+      tests.forEach(function (entry, i) {
+        try { entry[1](); log("PASS  " + entry[0]); passed += 1; }
+        catch (err) { log("FAIL  " + entry[0] + " -> " + err.message); }
+      });
+      log("\n" + passed + "/" + tests.length + " passing, " + (tests.length - passed) + " failing.");
+    </script>
+  </body>
+</html>
+```

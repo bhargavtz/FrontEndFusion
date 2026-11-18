@@ -1,0 +1,149 @@
+---
+title: Internet Explorer Hacks
+description: Recognise the star hack, underscore hack, filter gradients, and -ms-high-contrast, then replace them with modern feature queries.
+chapter: 55
+category: "CSS"
+order: 155
+---
+
+# Internet Explorer Hacks
+
+For roughly a decade, supporting Internet Explorer meant writing CSS that was partly a message to one specific engine. The tricks worked, they were widely copied, and most of them are now actively harmful. This chapter is a short field guide so you can recognise them in old code — and replace them instead of propagating them.
+
+## The inline-block era
+
+IE6 and IE7 had a broken understanding of `display: inline-block` on elements that were natively block-level. The community fix was to combine two declarations: force the element to have layout, then convince it to sit inline.
+
+```css
+.badge {
+  display: inline-block;
+  *display: inline; /* star hack: IE7 and below only */
+  *zoom: 1;         /* triggers hasLayout */
+}
+```
+
+The asterisk prefix was invisible to compliant browsers, so the rule applied only in IE. A sibling trick used an underscore (`_height: 1%`) for IE6 alone, and a trailing `\9` (`color: red\9`) targeted IE8 and older. All three rely on parser bugs, which means a CSS minifier is entitled to drop or mangle them, and no validator will help you when one silently stops working.
+
+Gradients had their own dialect: `filter: progid:DXImageTransform.Microsoft.gradient(...)` with a `startColorstr` in `#AARRGGBB` order. That syntax has nothing to do with the CSS gradient specification, breaks `border-radius`, and cannot be combined with modern color functions.
+
+## The high-contrast hack
+
+Windows High Contrast Mode ignored background images and many colors, so authors used a proprietary media query to detect it:
+
+```css
+@media screen and (-ms-high-contrast: active) {
+  .card { border: 1px solid WindowText; }
+}
+```
+
+The modern equivalent is a standard media query, and it covers more than IE ever did:
+
+```css
+@media (forced-colors: active) {
+  .card {
+    border: 1px solid CanvasText;
+  }
+}
+```
+
+`forced-colors` also exposes system color keywords — `Canvas`, `CanvasText`, `Highlight`, `LinkText` — which the user's theme maps to real, accessible colors.
+
+## Why to leave them behind
+
+- **They target engines that no longer exist.** IE11 left support years ago; every current browser parses the standard syntax.
+- **They bypass the cascade.** A hack that only one engine sees is invisible to your tests, your linters, and your teammates.
+- **They break tooling.** PostCSS, minifiers, and autoprefixing pipelines assume valid syntax.
+- **They carry a cost forever.** Every hack you keep is a comment someone must decode and a rule that can never be safely deleted without archaeology.
+
+If you inherit them, delete them in a dedicated commit, verify in a modern browser, and keep a short note explaining what the hack was protecting. Feature queries cover nearly every real case.
+
+That replacement is also a good demonstration of what the old hacks were reaching for. The badge below is styled once, with a `forced-colors` block that hardens it for users running a high-contrast theme. No engine-specific branching.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Modern status badge</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        background: #101725;
+        color: #e7ecf6;
+      }
+
+      .status {
+        width: min(340px, 100%);
+        padding: 22px;
+        border-radius: 18px;
+        background: linear-gradient(160deg, #1b2437, #141b2a);
+        border: 1px solid #2a3550;
+        box-shadow: 0 26px 50px -30px #000000;
+      }
+
+      .status h1 {
+        margin: 0 0 4px;
+        font-size: 0.95rem;
+        letter-spacing: 0.01em;
+      }
+
+      .status p {
+        margin: 0 0 16px;
+        font-size: 0.76rem;
+        color: #97a4bd;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: #16301f;
+        color: #7ee0a1;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .badge::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+
+      @media (forced-colors: active) {
+        .status {
+          background: Canvas;
+          border: 1px solid CanvasText;
+          box-shadow: none;
+        }
+
+        .badge {
+          background: Canvas;
+          color: CanvasText;
+          border: 1px solid CanvasText;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="status">
+      <h1>Build pipeline</h1>
+      <p>Last run finished 3 minutes ago.</p>
+      <span class="badge">All checks passed</span>
+    </section>
+  </body>
+</html>
+```
+
+Same intent as the 2012 hack, one standard syntax, and a fallback that behaves correctly when the theme flips.

@@ -1,0 +1,124 @@
+---
+title: Datatypes in JavaScript
+description: Identify values with typeof, refine the check with Object.prototype.toString, and inspect constructor names.
+chapter: 6
+category: "JavaScript"
+order: 306
+---
+
+# Datatypes in JavaScript
+
+JavaScript values fall into a small set of types: primitives such as number, string, boolean, `undefined`, `null`, `symbol`, and `bigint`, plus the catch-all object type. Because variables are not declared with a type, you often need to ask what a value actually is at runtime.
+
+## Checking types with typeof
+
+The `typeof` operator returns a string naming the type. It is the first tool to reach for, but it has two famous quirks: `typeof null` returns `"object"`, and `typeof` an array also returns `"object"`. Functions return `"function"` even though they are objects underneath.
+
+```js
+typeof 42;        // "number"
+typeof "hi";      // "string"
+typeof [];        // "object"
+typeof null;      // "object" (a historical quirk)
+```
+
+## Finding a class or constructor name
+
+When `typeof` is too vague, `Object.prototype.toString.call(value)` returns a tag such as `"[object Array]"` or `"[object Date]"`. It distinguishes arrays, dates, regular expressions, and plain objects reliably, which makes it a favourite for type-checking utilities.
+
+Every object also inherits a `constructor` property. Reading `value.constructor.name` gives the name of the function that built it, for example `"Array"` or `"Object"`. This is handy for a quick look, but it can be changed or missing on objects created without a prototype, so prefer the tag approach for serious validation. Remember that primitives can appear to have constructors too, because JavaScript briefly wraps them in an object when you read the property.
+
+Taken together, these three techniques cover most situations: reach for `typeof` first, use the `Object.prototype.toString` tag when you need to tell objects apart, and glance at the constructor name when you only need a readable label. The demo lets you choose a value and see all three checks side by side. Try an array and a null to spot the quirks described above.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Datatypes</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px 18px;
+        font-family: system-ui, sans-serif;
+        color: #2a2833;
+        background: radial-gradient(circle at 15% 0%, #fdeef4, #f4f4fb 65%);
+      }
+      .card {
+        max-width: 520px;
+        margin: 0 auto;
+        padding: 22px;
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 20px 42px -30px rgba(50, 30, 70, 0.5);
+      }
+      h1 { margin: 0 0 14px; font-size: 1.15rem; }
+      .row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+      button {
+        padding: 8px 11px;
+        border: 1px solid #eadbe8;
+        border-radius: 9px;
+        background: #fdf8fc;
+        color: #6a3b60;
+        font: inherit;
+        font-size: 0.78rem;
+        cursor: pointer;
+      }
+      button.active { background: #a83b7e; color: #ffffff; border-color: #a83b7e; }
+      pre {
+        margin: 0;
+        padding: 14px;
+        border-radius: 12px;
+        background: #251a23;
+        color: #ffd9f0;
+        font-size: 0.8rem;
+        line-height: 1.65;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Type detective</h1>
+      <div class="row">
+        <button class="probe active" data-kind="number">42</button>
+        <button class="probe" data-kind="string">"hello"</button>
+        <button class="probe" data-kind="array">[1, 2]</button>
+        <button class="probe" data-kind="date">new Date()</button>
+        <button class="probe" data-kind="null">null</button>
+        <button class="probe" data-kind="boolean">true</button>
+      </div>
+      <pre id="out"></pre>
+    </div>
+    <script>
+      const out = document.getElementById("out");
+      const samples = {
+        number: 42,
+        string: "hello",
+        array: [1, 2],
+        date: new Date(),
+        null: null,
+        boolean: true
+      };
+      function describe(key) {
+        const value = samples[key];
+        const tag = Object.prototype.toString.call(value);
+        const ctor = value != null && value.constructor ? value.constructor.name : "none";
+        out.textContent =
+          "Sample: " + key + "\n" +
+          "typeof value        -> " + typeof value + "\n" +
+          "toString tag        -> " + tag + "\n" +
+          "constructor.name    -> " + ctor;
+      }
+      document.querySelectorAll(".probe").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          document.querySelectorAll(".probe").forEach(function (b) { b.classList.remove("active"); });
+          btn.classList.add("active");
+          describe(btn.dataset.kind);
+        });
+      });
+      describe("number");
+    </script>
+  </body>
+</html>
+```

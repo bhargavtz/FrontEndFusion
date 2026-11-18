@@ -1,0 +1,153 @@
+---
+title: The Box Model
+description: See how content, padding, border, and margin stack around every element, and why box-sizing changes the width you actually get.
+chapter: 7
+category: "CSS"
+order: 107
+---
+
+# The Box Model
+
+Every element on a page is a rectangle built from four concentric layers. Layout bugs usually come from forgetting that one of those layers was added to the size you asked for.
+
+## The four layers
+
+From the inside out:
+
+1. **Content** — the text, image, or child elements. `width` and `height` describe this area by default.
+2. **Padding** — space inside the border, sharing the element's background.
+3. **Border** — the visible edge, drawn between padding and margin.
+4. **Margin** — space outside the border, always transparent.
+
+```css
+.card {
+  width: 300px;
+  padding: 20px;
+  border: 4px solid #dbe4ff;
+  margin: 16px;
+}
+```
+
+With the default `box-sizing: content-box`, that card occupies 348 pixels horizontally: 300 content, 40 padding, 8 border. The margin then pushes neighbours away without being part of the box itself.
+
+## box-sizing changes the arithmetic
+
+Setting `box-sizing: border-box` makes the declared width include padding and border. The same rule above now produces a 300-pixel box with 252 pixels of content. This is why most projects start with:
+
+```css
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+```
+
+Percentages resolve against the containing block, so a `width: 100%` box with padding overflows its parent unless it is border-box. `min-width`, `max-width`, `min-height`, and `max-height` constrain the box after sizing and are useful for responsive images and modals. When content is larger than the box, `overflow` decides whether it clips, scrolls, or spills.
+
+## A complete example
+
+Both cards below declare `width: 200px`. Only the box model differs, so the blue card ends up 56 pixels wider and its content sits higher.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Box model comparison</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 40px 20px;
+        font-family: system-ui, sans-serif;
+        background: #f3f7fb;
+        color: #202a3a;
+      }
+
+      .wrap {
+        max-width: 360px;
+        margin: 0 auto;
+        display: grid;
+        gap: 20px;
+      }
+
+      .panel {
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 18px 34px -28px rgba(32, 42, 58, 0.55);
+        overflow: hidden;
+      }
+
+      .panel h2 {
+        margin: 0;
+        padding: 12px 18px;
+        background: #eef3fa;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #5b6a83;
+      }
+
+      .demo {
+        width: 200px;
+        padding: 20px;
+        margin: 18px auto;
+        border: 8px solid;
+        font-size: 0.8rem;
+        line-height: 1.4;
+        text-align: center;
+      }
+
+      .demo--content {
+        box-sizing: content-box;
+        border-color: #7ba4ff;
+        background: #e5edff;
+        color: #23407a;
+      }
+
+      .demo--border {
+        box-sizing: border-box;
+        border-color: #3fcf9a;
+        background: #e2f8ef;
+        color: #145a42;
+      }
+
+      .meta {
+        margin: 0 18px 16px;
+        font-size: 0.72rem;
+        color: #7b8798;
+        text-align: center;
+      }
+
+      .meta code {
+        background: #f1f4f9;
+        padding: 2px 5px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <section class="panel">
+        <h2>content-box</h2>
+        <div class="demo demo--content">
+          width 200<br />padding 20<br />border 8
+        </div>
+        <p class="meta">Rendered width <code>256px</code></p>
+      </section>
+
+      <section class="panel">
+        <h2>border-box</h2>
+        <div class="demo demo--border">
+          width 200<br />padding 20<br />border 8
+        </div>
+        <p class="meta">Rendered width <code>200px</code></p>
+      </section>
+    </div>
+  </body>
+</html>
+```
+
+A quick way to debug a stubborn layout is to add a temporary outline to every element. Outlines do not affect layout, so they reveal the real boxes without shifting anything.

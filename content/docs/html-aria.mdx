@@ -1,0 +1,202 @@
+---
+title: ARIA
+description: Use ARIA roles, states, and properties to improve accessibility without breaking native semantics.
+chapter: 41
+category: "HTML"
+order: 51
+---
+
+# ARIA
+
+ARIA (Accessible Rich Internet Applications) adds accessibility information that HTML alone cannot express. It is most useful for custom widgets and live updates.
+
+## The first rule of ARIA
+
+Use native HTML first. A `<button>` already has a role, keyboard behaviour, and focus handling. Adding `role="button"` to a `div` recreates a fraction of that behaviour and usually introduces bugs.
+
+```html
+<!-- Prefer this -->
+<button type="button">Save draft</button>
+
+<!-- Over this -->
+<div role="button" tabindex="0">Save draft</div>
+```
+
+ARIA changes what assistive technology announces. It does not add keyboard behaviour, focus management, or visual affordances.
+
+## Landmark roles
+
+Landmarks describe the major regions of a page.
+
+```html
+<header role="banner">Site header</header>
+<nav role="navigation" aria-label="Primary">…</nav>
+<main role="main">
+  <article>…</article>
+</main>
+<aside role="complementary">Related links</aside>
+<footer role="contentinfo">Site footer</footer>
+```
+
+Native elements already map to these roles, so the explicit roles are usually unnecessary. They are shown here for clarity.
+
+## A tab interface
+
+```html
+<div class="tabs">
+  <div role="tablist" aria-label="Recipe sections">
+    <button role="tab" aria-selected="true" aria-controls="ingredients" id="tab-ingredients">
+      Ingredients
+    </button>
+    <button role="tab" aria-selected="false" aria-controls="method" id="tab-method" tabindex="-1">
+      Method
+    </button>
+  </div>
+  <div role="tabpanel" id="ingredients" aria-labelledby="tab-ingredients">
+    <p>Flour, water, salt, yeast.</p>
+  </div>
+  <div role="tabpanel" id="method" aria-labelledby="tab-method" hidden>
+    <p>Mix, rest, fold, bake.</p>
+  </div>
+</div>
+```
+
+A real tab widget also needs arrow-key navigation and focus management. The roles alone do not provide them.
+
+## Live regions
+
+Live regions announce changes without moving focus.
+
+```html
+<p role="status" aria-live="polite">Saved 2 seconds ago</p>
+<p role="alert">Your session will expire in one minute.</p>
+```
+
+- `role="status"` is polite: it waits for a pause.
+- `role="alert"` is assertive: it interrupts.
+- `role="log"` is for a sequence of messages, such as a chat log.
+
+Use assertive announcements sparingly.
+
+## A switch
+
+```html
+<button role="switch" aria-checked="false" aria-label="Dark mode">
+  Dark mode
+</button>
+```
+
+The button needs JavaScript to toggle `aria-checked` and the visual state.
+
+## A progress bar
+
+```html
+<div
+  role="progressbar"
+  aria-valuenow="64"
+  aria-valuemin="0"
+  aria-valuemax="100"
+  aria-label="Upload progress"
+>
+  64%
+</div>
+```
+
+If the value is not a simple number, add `aria-valuetext`.
+
+## A tooltip
+
+```html
+<button aria-describedby="tip">Help</button>
+<span role="tooltip" id="tip">Opens the help centre in a new tab.</span>
+```
+
+The tooltip must be shown on focus as well as hover.
+
+## Common ARIA mistakes
+
+- Adding a role without adding keyboard support.
+- Using `aria-hidden="true"` on focusable content.
+- Using `aria-label` when visible text already names the control.
+- Setting `aria-checked` on a native checkbox; the checked state is already exposed.
+- Hiding content with `display: none` and expecting a live region to announce it.
+
+## All ARIA roles
+
+The table lists the roles covered by this reference. “Native” means the role is usually provided by an HTML element.
+
+| Role | Type | Use |
+| --- | --- | --- |
+| `alert` | Live region | Important message announced immediately |
+| `alertdialog` | Widget | Dialog that requires a response |
+| `application` | Structure | Custom app region with its own keyboard model |
+| `article` | Structure | Self-contained composition |
+| `banner` | Landmark | Site header |
+| `button` | Widget | Clickable action |
+| `cell` | Structure | Cell in a grid or table |
+| `checkbox` | Widget | Binary choice |
+| `columnheader` | Structure | Header for a column |
+| `combobox` | Widget | Input with a popup list |
+| `complementary` | Landmark | Supporting content |
+| `contentinfo` | Landmark | Site footer |
+| `definition` | Structure | Term definition |
+| `dialog` | Widget | Modal or non-modal dialog |
+| `directory` | Structure | List of references |
+| `document` | Structure | Document content in an application |
+| `form` | Landmark | Form region |
+| `grid` | Widget | Interactive table |
+| `gridcell` | Structure | Cell in a grid |
+| `group` | Structure | Related controls |
+| `heading` | Structure | Heading with `aria-level` |
+| `img` | Structure | Image |
+| `link` | Widget | Hyperlink |
+| `list` | Structure | List |
+| `listbox` | Widget | List of selectable options |
+| `listitem` | Structure | Item in a list |
+| `log` | Live region | Sequential messages |
+| `main` | Landmark | Primary content |
+| `marquee` | Live region | Continuously updating content |
+| `math` | Structure | Mathematical expression |
+| `menu` | Widget | Menu of commands |
+| `menubar` | Widget | Horizontal menu |
+| `menuitem` | Widget | Item in a menu |
+| `menuitemcheckbox` | Widget | Checkable menu item |
+| `menuitemradio` | Widget | Radio-style menu item |
+| `navigation` | Landmark | Navigation links |
+| `note` | Structure | Parenthetical note |
+| `option` | Widget | Option in a listbox |
+| `presentation` | Structure | Removes semantics |
+| `progressbar` | Widget | Progress indicator |
+| `radio` | Widget | Single choice in a group |
+| `radiogroup` | Widget | Group of radio buttons |
+| `region` | Landmark | Named section |
+| `row` | Structure | Row in a table or grid |
+| `rowgroup` | Structure | Group of rows |
+| `rowheader` | Structure | Header for a row |
+| `scrollbar` | Widget | Scroll control |
+| `search` | Landmark | Search region |
+| `searchbox` | Widget | Search input |
+| `separator` | Structure | Divider |
+| `slider` | Widget | Value from a range |
+| `spinbutton` | Widget | Numeric stepper |
+| `status` | Live region | Polite status message |
+| `switch` | Widget | On/off control |
+| `tab` | Widget | Tab in a tablist |
+| `table` | Structure | Table |
+| `tablist` | Widget | Set of tabs |
+| `tabpanel` | Structure | Panel controlled by a tab |
+| `textbox` | Widget | Text input |
+| `timer` | Live region | Elapsed or remaining time |
+| `toolbar` | Structure | Group of controls |
+| `tooltip` | Structure | Contextual hint |
+| `tree` | Widget | Hierarchical list |
+| `treegrid` | Widget | Grid with expandable rows |
+| `treeitem` | Widget | Item in a tree |
+
+## Testing checklist
+
+1. Navigate the page with Tab and arrow keys.
+2. Check roles and states in the accessibility tree.
+3. Confirm every custom widget has a keyboard model.
+4. Announce dynamic updates with a live region.
+5. Remove ARIA that duplicates native semantics.

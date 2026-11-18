@@ -1,0 +1,97 @@
+---
+title: "Cascading and Specificity"
+description: "Work out which rule wins, score selector weight, and use the cascade deliberately instead of fighting it with overrides."
+chapter: 17
+category: "CSS"
+order: 117
+---
+
+# Cascading and Specificity
+
+When two rules set the same property on the same element, something has to win. The cascade is the arbitration process, and specificity is only one of its inputs. Debugging "why is this colour wrong" is usually a matter of walking the same checklist the browser walks.
+
+## Counting specificity
+
+Specificity is a three-part score: IDs, then classes (including attribute selectors and pseudo-classes), then type selectors and pseudo-elements. Write it as `(0, 2, 1)` for `.card .title:hover`. The universal selector `*` and combinators add nothing. `:where()` contributes zero, while `:is()` takes the weight of its heaviest argument.
+
+Compare the parts left to right; a single ID beats any number of classes. Inline `style` attributes outrank every selector and are often treated as a fourth column. Because specificity is a score rather than a sequence, order only matters when two rules tie.
+
+## The cascade order
+
+Before specificity is consulted, the browser sorts declarations by origin and importance: user-agent styles, then user styles, then author styles, with `!important` declarations reversing that order. Within the author origin, layers declared with `@layer` decide first — later layers beat earlier ones regardless of selector weight. Only then does specificity apply, and finally source order breaks the remaining ties.
+
+That ordering explains why `!important` is a trap: it leaps over the layer system, the cascade, and most of your intentions. It is defensible for third-party overrides, print rules, and utility classes that must survive any context. Everywhere else it starts an arms race.
+
+## A worked example
+
+A card with `class="note card raised"` and an inline colour declaration will ignore all three class-based rules for `color`. Remove the inline style, and the rule with three classes wins over the two-class and one-class rules even though it appears earlier in the file.
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Specificity ladder</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 26px;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      background: #f3f2f7;
+      color: #232134;
+    }
+    h2 { margin: 0 0 4px; font-size: 1.05rem; }
+    .lede { margin: 0 0 18px; font-size: .84rem; color: #65617a; }
+    .row { display: flex; flex-wrap: wrap; gap: 14px; }
+    .note {
+      flex: 1 1 170px;
+      padding: 16px;
+      border-radius: 14px;
+      background: #fff;
+      border: 1px solid #e2e0ea;
+      font-size: .82rem;
+      line-height: 1.55;
+    }
+    .note strong { display: block; margin-bottom: 4px; font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; }
+
+    /* (0,1,0) */
+    .card { color: #6b6880; }
+
+    /* (0,2,0) */
+    .note.card { color: #7a4fa3; }
+
+    /* (0,3,0) */
+    .note.card.raised { color: #2f6b5a; }
+
+    /* (0,1,0) but wins over everything above */
+    .urgent { color: #b23b3b !important; }
+
+    .footer {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: #232134;
+      color: #e8e6f2;
+      font-family: ui-monospace, monospace;
+      font-size: .76rem;
+      line-height: 1.7;
+    }
+    .footer b { color: #a9e2c8; }
+  </style>
+</head>
+<body>
+  <h2>Specificity ladder</h2>
+  <p class="lede">Same markup shape, different selector weight. The winning colour is the one you see.</p>
+  <div class="row">
+    <div class="card note">Base <strong>(0,1,0)</strong>One class sets the colour.</div>
+    <div class="card note">Two classes <strong>(0,2,0)</strong><code>.note.card</code> outranks a single class.</div>
+    <div class="card note raised">Three classes <strong>(0,3,0)</strong>Highest score in the group.</div>
+    <div class="card note urgent">Important <strong>!important</strong>Jumps the whole ladder.</div>
+  </div>
+  <div class="footer">
+    Inline styles would beat every rule here. <b>@layer</b> would beat them all before specificity is even counted.
+  </div>
+</body>
+</html>
+```

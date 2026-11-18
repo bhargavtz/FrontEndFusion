@@ -1,0 +1,130 @@
+---
+title: Filter Property
+description: Apply blur, drop-shadow, color shifts, and brightness adjustments to elements, alone or combined.
+chapter: 30
+category: "CSS"
+order: 130
+---
+
+# Filter Property
+
+`filter` applies graphic effects to an element's rendered pixels, including its children, borders, and backgrounds. One declaration can desaturate a thumbnail, blur a backdrop, or push a whole panel into a duotone.
+
+## The common functions
+
+`blur(radius)` softens edges. It takes a length; `0` is a no-op. Blur spreads beyond the element's border box in some browsers, so a container with `overflow: hidden` prevents bleed.
+
+`drop-shadow(x y blur color)` follows the alpha shape of the element rather than its rectangular box, which is what makes it ideal for PNG cutouts, icons, and CSS-drawn blobs. It differs from `box-shadow` in exactly that way.
+
+`hue-rotate(angle)` rotates colors around the hue wheel. It is a cheap way to produce a second colorway from one asset, though it shifts every color in the element.
+
+`grayscale(amount)` goes from `0` to `1`, or a percentage. `sepia()` warms an image into a vintage tone. `brightness()`, `contrast()`, and `saturate()` take a factor where `1` is unchanged. `invert()` flips colors and is frequently used for dark-mode image treatments — `invert(1)` on a black icon yields white.
+
+## Combining filters
+
+Multiple functions are space-separated in one declaration and apply in order, left to right:
+
+```css
+.hero {
+  filter: grayscale(0.7) contrast(1.1) brightness(1.05);
+}
+```
+
+Order changes the result. Filters are also computationally heavier than a transform, so animate `opacity` or `transform` when you can, and avoid filtering large areas during scrolling. A filter on an element creates a containing block for fixed descendants, like `transform` does.
+
+CSS also offers `backdrop-filter`, which filters whatever sits behind the element — the basis of frosted glass panels.
+
+## Demo: filter swatches
+
+```html
+<section class="board">
+  <h1>One gradient, seven treatments</h1>
+  <div class="grid">
+    <figure class="chip"><div class="swatch"></div><figcaption>none</figcaption></figure>
+    <figure class="chip"><div class="swatch s-blur"></div><figcaption>blur(3px)</figcaption></figure>
+    <figure class="chip"><div class="swatch s-gray"></div><figcaption>grayscale(1)</figcaption></figure>
+    <figure class="chip"><div class="swatch s-hue"></div><figcaption>hue-rotate(140deg)</figcaption></figure>
+    <figure class="chip"><div class="swatch s-invert"></div><figcaption>invert(1)</figcaption></figure>
+    <figure class="chip"><div class="swatch s-bright"></div><figcaption>brightness(1.45)</figcaption></figure>
+    <figure class="chip"><div class="swatch s-multi"></div><figcaption>combined</figcaption></figure>
+  </div>
+  <div class="glow">
+    <span class="glow__orb"></span>
+    <p>drop-shadow follows the shape, not the box</p>
+  </div>
+</section>
+
+<style>
+  body {
+    margin: 0;
+    padding: 2rem 1.25rem;
+    background: #f5f3ef;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    color: #2f2c27;
+  }
+  .board {
+    max-width: 42rem;
+    margin: 0 auto;
+  }
+  .board h1 {
+    margin: 0 0 1.25rem;
+    font-family: ui-serif, Georgia, serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+    gap: 0.85rem;
+  }
+  .chip {
+    margin: 0;
+    padding: 0.5rem;
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e7e2d8;
+  }
+  .swatch {
+    height: 4.5rem;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #f97316, #db2777 55%, #4f46e5);
+  }
+  .s-blur   { filter: blur(3px); }
+  .s-gray   { filter: grayscale(1); }
+  .s-hue    { filter: hue-rotate(140deg); }
+  .s-invert { filter: invert(1); }
+  .s-bright { filter: brightness(1.45) saturate(1.2); }
+  .s-multi  { filter: grayscale(0.4) sepia(0.5) contrast(1.15) drop-shadow(0 4px 6px rgba(80, 50, 20, 0.35)); }
+  .chip figcaption {
+    margin-top: 0.45rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.65rem;
+    color: #7c7468;
+    text-align: center;
+  }
+  .glow {
+    margin-top: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: 14px;
+    background: #fffdf9;
+    border: 1px solid #e7e2d8;
+  }
+  .glow__orb {
+    flex: none;
+    width: 2.75rem;
+    height: 2.75rem;
+    background: linear-gradient(140deg, #fbbf24, #ef4444);
+    border-radius: 46% 54% 58% 42%;
+    filter: drop-shadow(0 8px 10px rgba(180, 80, 20, 0.45));
+  }
+  .glow p {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: #6f675b;
+  }
+</style>
+```

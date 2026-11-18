@@ -1,195 +1,78 @@
 # FrontEndFusion
 
-**A Next.js learning hub for HTML, CSS, and modern frontend development.**
+**One website for learning everything about frontend development — from HTML fundamentals to AI-powered engineering.**
 
-FrontEndFusion combines interactive demos, copy-paste form snippets, and a full
-guide library in one structured app. All site content lives in typed data
-modules, so pages are generated from a single source of truth instead of
-hand-maintained HTML.
+Learn it, understand the code, preview the result, experiment, and build real projects.
 
-## ✨ What's inside
+## What's inside
 
-- **6 interactive project demos** — responsive navbar, landing page, Flexbox,
-  CSS Grid, animations, and a dark-mode toggle.
-- **An interactive WebGL visual lab** — a live `GradientASCII` light field from
-  React Bits powers the hero and a playground where you can swap shapes,
-  palettes, and density.
-- **GSAP text reveals** — the hero subtitle uses the React Bits `SplitText`
-  component for a staggered word animation.
-- **3 copy-paste form snippets** — login, contact, and newsletter, each with
-  working client-side interactions.
-- **9 in-app guides** — HTML, CSS, responsive design, advanced CSS, best
-  practices, accessibility, SEO, JavaScript, and a CSS cheat sheet.
-- **Dark and light themes** with system-preference detection, `localStorage`
-  persistence, and no flash on first paint.
-- **Accessible by default** — semantic landmarks, skip link, labelled controls,
-  visible focus states, and reduced-motion support.
+- **Curriculum** — 10 domains and 56 technology pages (HTML, CSS, JavaScript, TypeScript, Tailwind, React, Next.js,
+  Vue, Angular, Svelte, Astro, shadcn/ui, Radix, Motion, Git, Vite, testing, state management, security,
+  AI coding agents, MCP, …). Every page follows one template: what it is, why it exists, how it works, examples,
+  best practices, mistakes, performance, interview questions, exercises, projects, official docs.
+- **207 in-depth lessons** — 41 HTML, 56 CSS and 101 JavaScript chapters plus reference guides, written in MDX.
+- **Code playground** — CodeMirror editor, syntax highlighting, live preview in an isolated sandbox, console output,
+  copy code / copy selection, reset, step-by-step explanations. HTML, CSS, JS, TS and React run in the browser;
+  anything that cannot is labelled.
+- **AI learning assistant** — knows the current topic and your selected code; 13 tasks (explain, find bugs, convert JS→TS,
+  CSS→Tailwind, generate exercises, …). Provider-independent: Anthropic Claude or any OpenAI-compatible endpoint, using your own key.
+- **9 roadmaps** — HTML, CSS, JavaScript, TypeScript, React, Next.js, Frontend, Advanced Frontend, AI-Powered Frontend.
+- **17 project briefs** (beginner → advanced) plus 6 interactive full-page demos.
+- **Practice** — exercises and interview questions for every technology.
+- **Global search** (⌘K / Ctrl+K), light/dark themes, local progress tracking, 3 form snippets, a 720-entry book library.
 
-## 🛠 Tech stack
+See [`docs/PRODUCT.md`](docs/PRODUCT.md) for the audit, sitemap, navigation, design system, architecture, test results and known limitations.
 
-- [Next.js 16](https://nextjs.org/) (App Router, Cache Components)
-- React 19 and TypeScript
-- Tailwind CSS 4
-- `next-mdx-remote` + `remark-gfm` for MDX guides
-- `gray-matter` for typed frontmatter
-- [GSAP](https://gsap.com/) + `@gsap/react` for the hero `SplitText` reveal
-- `next/font` — Geist (body), Space Grotesk (display), Instrument Serif
-  (editorial accents), and Geist Mono (code)
+## Tech stack
 
-## 🚀 Run locally
+Next.js 16 (App Router, static export) · React 19 · TypeScript · Tailwind CSS 4 · MDX (`next-mdx-remote`) ·
+CodeMirror 6 · `@anthropic-ai/sdk` (lazy-loaded, optional) · `next/font`.
+
+## Run locally
 
 ```bash
 npm install
-npm run dev
+npm run dev      # http://localhost:3000
+npm run build    # static export + type check
+npm run lint
+npx tsx scripts/validate-content.ts   # verify curriculum references
 ```
 
-Open <http://localhost:3000>.
-
-| Command | Description |
-| --- | --- |
-| `npm run dev` | Start the development server |
-| `npm run build` | Production build |
-| `npm start` | Serve the production build |
-| `npm run lint` | Run ESLint |
-
-## 🗂 Project structure
+## Structure
 
 ```text
-FrontEndFusion/
-├── README.md
-├── CLAUDE.md
-├── LICENSE
-├── SECURITY.md
-├── content/
-│   ├── docs/              # MDX guide sources (9 files)
-│   ├── snippets/          # MDX snippet docs with live previews
-│   └── README.md          # MDX authoring guide
-├── public/
-├── src/
-│   ├── app/
-│   │   ├── (site)/        # Hub, docs, library, and snippets (shared header/footer)
-│   │   │   ├── page.tsx
-│   │   │   ├── docs/
-│   │   │   ├── library/
-│   │   │   └── snippets/
-│   │   ├── projects/      # Standalone interactive demo routes
-│   │   ├── globals.css    # Theme tokens and shared component styles
-│   │   └── layout.tsx     # Root layout, metadata, theme bootstrap
-│   ├── components/
-│   │   ├── projects/      # Interactive demo components
-│   │   ├── snippets/      # Form demo components
-│   │   ├── library/       # Book list search and filters
-│   │   ├── react-bits/    # Upstream React Bits components (GradientASCII)
-│   │   └── mdx/           # MDX renderer, code blocks, preview, source loader
-│   │   └── ...            # Header, footer, cards, table
-│   ├── data/              # 9 typed datasets — 42 keys
-│   └── lib/               # Markdown and icon helpers
-└── package.json
+content/docs/*.mdx      lessons (one file per slug)
+content/snippets/*.mdx  snippet docs
+src/data/               curriculum.ts, technologies/, roadmaps.ts, project-briefs.ts, + existing datasets
+src/app/(site)/         learn, technologies, roadmaps, practice, projects, ai, docs, snippets, library, resources
+src/app/projects/       standalone interactive demos (no site chrome)
+src/components/         playground/, assistant/, mdx/, header, footer, …
+src/lib/                learn.ts (lessons + search index), sandbox.ts, highlight.tsx, ai/, progress.ts
+src/styles/platform.css layout, navigation, playground, assistant styles
+docs/PRODUCT.md         product and architecture decisions
 ```
 
-## 🧩 Content model — 9 datasets, 42 keys
+## Adding content
 
-Every page reads from `src/data`. The exported `siteData` object in
-`src/data/index.ts` is the single entry point.
+**A technology** — add an entry to a file in `src/data/technologies/`. Fill only sections you can write well;
+empty sections are not rendered. Add `examples` (with `language`, `code`, `explanation`) to get a runnable playground.
+Set `guidePrefix`/`guides` to attach lessons, `related`/`prerequisites` to link pages.
 
-| # | Dataset | File | Keys |
-| --- | --- | --- | --- |
-| 1 | Navigation | `navigation.ts` | `label`, `href` |
-| 2 | Hero | `hero.ts` | `title`, `subtitle`, `actions` |
-| 3 | Features | `features.ts` | `icon`, `title`, `detail` |
-| 4 | Projects | `projects.ts` | `slug`, `title`, `description`, `tags`, `level` |
-| 5 | Snippets | `snippets.ts` | `slug`, `title`, `description`, `tags`, `icon` |
-| 6 | Resources | `resources.ts` | `title`, `href`, `icon`, `tint` |
-| 7 | Learning path | `learning-path.ts` | `slug`, `title`, `description`, `icon`, `level` |
-| 8 | Docs | `docs.ts` | `slug`, `title`, `description`, `category` |
-| 9 | Books | `books.ts` | `slug`, `title`, `author`, `year`, `description`, `takeaways`, `topic`, `level`, `tags`, `href`, `source` |
+**A lesson** — create `content/docs/<slug>.mdx` with `title`, `description`, `category`, `order`; attach it to a
+technology; run `npx tsx scripts/validate-content.ts`.
 
-Guide bodies live in `content/docs/<slug>.mdx`. The typed content layer in
-`src/lib/content.ts` discovers files automatically and reads their frontmatter,
-so `src/data/docs.ts` is only a thin re-export.
+**A roadmap / project brief** — add to `src/data/roadmaps.ts` / `src/data/project-briefs.ts`. A brief with a `starter`
+(single-file HTML) gets a runnable solution.
 
-## 🧭 Routes
+**An AI provider** — implement `AIProvider` (`src/lib/ai/types.ts`) and register it in `src/lib/ai/providers/index.ts`.
 
-| Route | Description |
-| --- | --- |
-| `/` | Hub with a WebGL visual lab, features, projects, snippets, resources, and learning path |
-| `/docs` | Full guide library |
-| `/library` | Free programming book library with search and topic/level filters |
-| `/library/[slug]` | Book info page with summary, takeaways, and the external link |
-| `/docs/[slug]` | Rendered guide with table of contents and prev/next navigation |
-| `/snippets/[slug]` | Interactive form demo |
-| `/projects/responsive-navbar` | Responsive navbar demo |
-| `/projects/landing-page` | Landing page demo |
-| `/projects/flexbox-layout` | Flexbox showcase |
-| `/projects/css-grid` | CSS Grid showcase |
-| `/projects/animations` | CSS animation showcase |
-| `/projects/dark-mode` | Scoped dark-mode toggle demo |
+## Privacy and security notes
 
-## ➕ Adding content
+- Code in the playground runs in an iframe with `sandbox="allow-scripts"` and no `allow-same-origin`; it cannot reach this site's data.
+- The AI assistant has no backend. Your API key stays in your browser (`sessionStorage` unless you opt to remember it)
+  and goes only to the provider you choose. Use a key with a spend limit.
+- Progress is stored in `localStorage` on your device. There are no accounts.
 
-**A new guide**
+## License
 
-1. Add `content/docs/my-guide.mdx` with `title`, `description`, `category`,
-   and `order` frontmatter.
-2. Optionally add it to `learningPath` in `src/data/learning-path.ts`.
-3. Run `npm run build` — the slug and metadata are discovered automatically.
-
-**A new project**
-
-1. Add an entry to `src/data/projects.ts`.
-2. Create `src/app/projects/<slug>/page.tsx`.
-3. Put interactive UI in `src/components/projects/` and keep the page a server
-   component so it can export metadata.
-
-**A new snippet**
-
-1. Add an entry to `src/data/snippets.ts`.
-2. Build the client component in `src/components/snippets/`.
-3. Register it in the `demos` map in
-   `src/app/(site)/snippets/[slug]/page.tsx`.
-
-## 🎨 Theming
-
-Theme tokens are CSS custom properties in `globals.css`:
-
-- `:root`, `[data-theme="light"]` — light palette
-- `[data-theme="dark"]` — dark palette
-
-A small inline script in `src/app/layout.tsx` applies the stored or system
-theme before paint. The header toggle writes `ffe-theme` to `localStorage`.
-Use the token variables (`var(--bg)`, `var(--text)`, `var(--primary)`, …)
-rather than hard-coded colors so both themes keep working.
-
-## ♿ Accessibility
-
-- Semantic landmarks and a skip-to-content link.
-- Labelled inputs, `aria-expanded` menu buttons, and `role="switch"` theme
-  toggle.
-- Visible `:focus-visible` outlines.
-- Reduced-motion media query disables non-essential animation.
-- Tables include captions and scoped headers.
-
-## 🤝 Contributing
-
-1. Fork the repository.
-2. Create a branch: `git checkout -b feature/my-change`.
-3. Make the change and run `npm run build` from the repository root.
-4. Open a pull request describing the change.
-
-## 🙏 Credits
-
-The hero background and visual lab use the open-source
-[`GradientASCII`](https://reactbits.dev) component from
-[React Bits](https://reactbits.dev), adapted to TypeScript and styled for this
-site. It renders entirely in the browser with WebGL2. The hero subtitle uses
-React Bits' `SplitText` (installed through the shadcn CLI) for its word reveal;
-`components.json` maps the `@react-bits` registry for future additions.
-
-## 📄 License
-
-MIT — see [`LICENSE`](./LICENSE).
-
-## 📫 Contact
-
-- GitHub: [bhargavtz](https://github.com/bhargavtz)
-- Email: bhargav05@yandex.com
+MIT — see [LICENSE](LICENSE).

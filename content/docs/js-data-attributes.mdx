@@ -1,0 +1,73 @@
+---
+title: Data attributes
+description: Embed custom data on HTML elements and read or update it through the dataset API.
+chapter: 34
+category: "JavaScript"
+order: 334
+---
+
+# Data attributes
+
+HTML elements can carry extra information that has no visual meaning of its own through `data-*` attributes. Anything prefixed with `data-` is ignored by the browser's renderer but is fair game for JavaScript and CSS. This is a clean way to keep behaviour-related metadata next to the markup it describes, instead of maintaining a separate lookup table in script.
+
+The rule is simple: an attribute like `data-user-id` becomes the camel-cased property `dataset.userId`. A leading `data-` is dropped and each dash-capital pair turns into camel case. Values are always strings, even when they look like numbers or booleans.
+
+## Reading values from dataset
+
+The `dataset` property lives on every HTML element. Reading `element.dataset.role` returns the string stored in `data-role`, or `undefined` when the attribute is absent. Because the values are strings, a numeric attribute must be converted with `Number` or `parseInt` before arithmetic. In CSS, the same attributes can be selected with brackets or consumed in generated content with the `attr()` function.
+
+## Writing and updating attributes
+
+Assignment works both ways. Setting `element.dataset.state = "active"` adds or updates the `data-state` attribute, and setting it to `null` style text removes it through `delete element.dataset.state`. Attributes written this way are immediately visible to CSS selectors, which makes them a handy bridge between script state and styling.
+
+The demo below is a small card gallery. Each card stores its category and price in data attributes; clicking a filter button reads those attributes to decide which cards to show, and clicking a card updates its `data-picked` attribute and styling.
+
+```html
+<div style="background:#f8fafc;border-radius:16px;padding:20px;max-width:560px;font-family:system-ui,sans-serif;color:#0f172a;">
+  <h3 style="margin-top:0;">Card gallery</h3>
+  <div style="display:flex;gap:8px;margin-bottom:12px;">
+    <button class="filter" data-filter="all">All</button>
+    <button class="filter" data-filter="fruit">Fruit</button>
+    <button class="filter" data-filter="tool">Tools</button>
+  </div>
+  <div id="gallery" style="display:flex;gap:10px;flex-wrap:wrap;"></div>
+  <pre id="out" style="background:#0f172a;color:#e2e8f0;padding:12px;border-radius:10px;min-height:60px;white-space:pre-wrap;margin-top:12px;"></pre>
+</div>
+<script>
+  (function () {
+    var gallery = document.getElementById("gallery");
+    var out = document.getElementById("out");
+    var items = [
+      { name: "Apple", category: "fruit", price: 2 },
+      { name: "Pear", category: "fruit", price: 3 },
+      { name: "Hammer", category: "tool", price: 12 },
+      { name: "Wrench", category: "tool", price: 9 }
+    ];
+    items.forEach(function (item) {
+      var card = document.createElement("button");
+      card.className = "card";
+      card.dataset.category = item.category;
+      card.dataset.price = String(item.price);
+      card.dataset.picked = "false";
+      card.textContent = item.name;
+      card.style.cssText = "padding:12px 16px;border:2px solid #cbd5e1;border-radius:12px;background:#fff;cursor:pointer;";
+      card.onclick = function () {
+        var picked = card.dataset.picked === "true";
+        card.dataset.picked = String(!picked);
+        card.style.borderColor = !picked ? "#2563eb" : "#cbd5e1";
+        out.textContent = item.name + " picked: " + card.dataset.picked + " (price stored as " + typeof card.dataset.price + ")";
+      };
+      gallery.appendChild(card);
+    });
+    document.querySelectorAll(".filter").forEach(function (btn) {
+      btn.onclick = function () {
+        var wanted = btn.dataset.filter;
+        document.querySelectorAll(".card").forEach(function (card) {
+          card.style.display = (wanted === "all" || card.dataset.category === wanted) ? "" : "none";
+        });
+        out.textContent = "Filter set to " + wanted + " using dataset.category";
+      };
+    });
+  })();
+</script>
+```

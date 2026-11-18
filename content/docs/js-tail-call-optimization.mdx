@@ -1,0 +1,111 @@
+---
+title: Tail Call Optimization
+description: Learn how a call in tail position can reuse its stack frame and how to structure recursion as an iterative loop.
+chapter: 84
+category: "JavaScript"
+order: 384
+---
+
+# Tail Call Optimization
+
+Deep recursion in JavaScript usually ends with a `RangeError` and the familiar "maximum call stack size exceeded" message. Each function call needs a stack frame that remembers where to return, and engines keep only a limited number of them. **Tail call optimization** (TCO) is a compiler feature that discards that frame when the recursive call is the very last action a function performs. Instead of stacking a new frame, the engine reuses the current one, so a properly written tail-recursive function can run for millions of iterations without growing the stack.
+
+## What makes a call a tail call
+
+A call is in *tail position* when its result is returned directly, with no work left to do afterwards. In `return n + sum(n - 1)`, the addition happens after the inner call returns, so the frame must stay alive and optimization cannot apply. In `return sum(n - 1, acc + n)`, the recursive call is the final operation and its value is passed straight back. An accumulator parameter carries the running result forward, which is what makes the reuse possible.
+
+Support is inconsistent across engines. Safari implements tail call optimization, while most others have chosen not to, citing debugging and stack-trace concerns. Code must therefore stay correct without it. The demo below detects support and compares a non-tail sum with a tail-recursive one.
+
+## Recursive loops in practice
+
+A tail-recursive function is essentially a `while` loop expressed with parameters. That makes it elegant for walks over lists or trees, but an explicit loop is always the portable choice when depth is unknown. Use tail recursion where it reads well, keep the accumulator explicit, and never depend on the engine optimizing it.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tail call lab</title>
+    <style>
+      body { margin: 0; padding: 24px 16px; font-family: system-ui, sans-serif; color: #243044; background: linear-gradient(135deg, #eef3fb, #fdf3ec 80%); }
+      .card { max-width: 560px; margin: 0 auto; padding: 22px; background: #fff; border-radius: 20px; box-shadow: 0 20px 42px -30px rgba(30, 50, 90, .55); }
+      h1 { margin: 0 0 6px; font-size: 1.15rem; }
+      .lead { margin: 0 0 14px; font-size: .84rem; color: #5b6478; }
+      .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+      button { padding: 8px 12px; border: 0; border-radius: 9px; background: #3f5bb7; color: #fff; font: inherit; font-size: .78rem; cursor: pointer; }
+      button:hover { background: #2f479a; }
+      input[type=number] { width: 96px; padding: 7px 9px; border: 1px solid #cdd5e6; border-radius: 9px; font: inherit; font-size: .8rem; }
+      .badge { display: inline-block; margin: 12px 0 4px; padding: 6px 10px; border-radius: 999px; font-size: .74rem; font-weight: 600; }
+      .yes { background: #e5f6ea; color: #1f7a44; }
+      .no { background: #fdecec; color: #a33; }
+      pre { margin: 10px 0 0; min-height: 170px; padding: 12px; border-radius: 11px; background: #1e2433; color: #d7e6ff; font-size: .75rem; line-height: 1.6; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Tail call lab</h1>
+      <p class="lead">Compare a plain recursive sum with a tail-recursive one.</p>
+      <div class="row">
+        <label for="n">n = <input id="n" type="number" value="5000" min="1" /></label>
+        <button data-run="plain">run sum(n-1)</button>
+        <button data-run="tail">run tail sum</button>
+        <button data-run="big">run n = 1,000,000</button>
+      </div>
+      <span id="badge" class="badge">checking support…</span>
+      <pre id="out"></pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      var badge = document.getElementById("badge");
+      var calls = 0;
+
+      function line(s) { out.textContent += s + "\n"; }
+
+      function supportsTco() {
+        "use strict";
+        function loop(n) { if (n === 0) return true; return loop(n - 1); }
+        try { return loop(200000); } catch (e) { return false; }
+      }
+
+      // Not tail recursive: the addition happens after the call returns.
+      function sumPlain(n) {
+        calls++;
+        return n === 0 ? 0 : n + sumPlain(n - 1);
+      }
+
+      // Tail recursive: the call is the last action, acc carries the result.
+      function sumTail(n, acc) {
+        calls++;
+        return n === 0 ? acc : sumTail(n - 1, acc + n);
+      }
+
+      function run(kind, n) {
+        calls = 0;
+        var start = performance.now();
+        try {
+          var value = kind === "plain" ? sumPlain(n) : sumTail(n, 0);
+          line(kind + " sum(1.." + n + ") = " + value);
+        } catch (e) {
+          line(kind + " at n=" + n + " threw " + e.name + ": " + e.message);
+        }
+        line("  calls made: " + calls + "   time: " + (performance.now() - start).toFixed(1) + " ms");
+      }
+
+      var tco = supportsTco();
+      badge.textContent = tco ? "TCO supported by this engine" : "TCO not supported here — stack still grows";
+      badge.className = "badge " + (tco ? "yes" : "no");
+      line("Engine detected: " + (tco ? "tail calls optimized" : "no tail call optimization"));
+
+      document.querySelectorAll("button[data-run]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var n = parseInt(document.getElementById("n").value, 10) || 10;
+          if (btn.dataset.run === "plain") run("plain", n);
+          if (btn.dataset.run === "tail") run("tail", n);
+          if (btn.dataset.run === "big") run("tail", 1000000);
+        });
+      });
+    </script>
+  </body>
+</html>
+```

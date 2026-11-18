@@ -1,0 +1,130 @@
+---
+title: Layout Control
+description: Compare display values from block and inline through inline-block, flex, grid, and none, including legacy table-style layouts.
+chapter: 23
+category: "CSS"
+order: 123
+---
+
+# Layout Control
+
+`display` decides two things at once: whether an element generates a box at all, and how that box behaves toward its siblings and children. Most layout bugs come down to picking the wrong value here.
+
+## The core values
+
+`block` boxes take the full available width, start on a new line, and accept width, height, and vertical margins. Headings, paragraphs, and `div` elements default to this.
+
+`inline` boxes flow with text, ignore width and height, and only accept horizontal margins and padding. Vertical padding paints but does not push lines apart, which is why inline links with padding can overlap the line above.
+
+`inline-block` sits in the text flow but accepts full box dimensions. It was the standard way to build card grids and navigation bars before Flexbox, and it still fits small chips or icon buttons. Watch out for the whitespace gap between inline elements — it comes from real spaces in your HTML.
+
+`flex` turns the element into a one-dimensional layout container. Children line up along a main axis, distribute free space, and align on the cross axis. It is the right tool for navbars, toolbars, and card rows.
+
+`grid` is two-dimensional: columns and rows are defined together, and children can be placed into cells. Use it for page shells, dashboards, and galleries.
+
+`none` removes the element and its subtree from rendering. The space collapses and the content is hidden from assistive technology. To hide visually while keeping it accessible, use a clipping pattern instead.
+
+## Old table-like layouts
+
+Before Flexbox, developers faked columns with `display: table`, `table-row`, and `table-cell`. Equal-height columns and vertical centering came free, which was hard to achieve otherwise. The pattern still appears in older codebases and in email templates, so it is worth recognising. Prefer Flexbox or Grid for new work; keep the table display only when you genuinely need its sizing behavior.
+
+`float` was the other workhorse. It remains useful for wrapping text around a figure, but float-based page layouts need clearfix hacks and break easily.
+
+## Demo: the same card row, three ways
+
+```html
+<div class="board">
+  <section>
+    <h2>inline-block</h2>
+    <div class="row row--inline">
+      <div class="card">Starter</div>
+      <div class="card">Studio</div>
+      <div class="card">Scale</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>flex</h2>
+    <div class="row row--flex">
+      <div class="card">Starter</div>
+      <div class="card">Studio</div>
+      <div class="card">Scale</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>table-cell centering</h2>
+    <div class="row row--table">
+      <div class="card card--center">Legacy, still centered</div>
+    </div>
+  </section>
+</div>
+
+<style>
+  body {
+    margin: 0;
+    padding: 2rem 1.25rem;
+    background: #f7f4ef;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    color: #2b2a26;
+  }
+  .board {
+    display: grid;
+    gap: 1.5rem;
+    max-width: 44rem;
+    margin: 0 auto;
+  }
+  h2 {
+    margin: 0 0 0.6rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #8a8172;
+  }
+  .card {
+    padding: 1.1rem 1.25rem;
+    border-radius: 12px;
+    background: #ffffff;
+    border: 1px solid #e6dfd2;
+    box-shadow: 0 10px 24px -20px rgba(60, 50, 30, 0.8);
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  .row--inline {
+    font-size: 0;
+  }
+  .row--inline .card {
+    display: inline-block;
+    width: 30%;
+    margin-right: 3%;
+    box-sizing: border-box;
+    font-size: 0.9rem;
+  }
+  .row--flex {
+    display: flex;
+    gap: 0.75rem;
+  }
+  .row--flex .card {
+    flex: 1;
+  }
+  .row--table {
+    display: table;
+    width: 100%;
+    height: 6rem;
+    background: #efe9dd;
+    border-radius: 12px;
+  }
+  .card--center {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+    border: none;
+    background: #fffdf8;
+    border-radius: 0;
+  }
+  .hidden-note {
+    display: none;
+  }
+</style>
+<p class="hidden-note">This paragraph is removed from the layout entirely.</p>
+```

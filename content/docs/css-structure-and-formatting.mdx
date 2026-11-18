@@ -1,0 +1,172 @@
+---
+title: Structure and Formatting of a CSS Rule
+description: Take a rule apart into its selector, declaration block, and property list, then format it so the next reader can scan it quickly.
+chapter: 2
+category: "CSS"
+order: 102
+---
+
+# Structure and Formatting of a CSS Rule
+
+A stylesheet looks like a wall of text until you notice the pattern. Every rule is built from the same three pieces, and once you can name them, reading someone else's CSS becomes much faster.
+
+## Anatomy of a rule
+
+A **selector** names the elements you want to affect. A **declaration block** — everything between a pair of curly braces — holds one or more **declarations**. Each declaration is a property, a colon, a value, and a closing semicolon. The final semicolon is technically optional, but leaving it in means you can reorder lines without breaking anything.
+
+```css
+.card-title {
+  font-size: 1.4rem;
+  color: #1d2433;
+}
+```
+
+Read it as: for every element matching `card-title`, set the font size and the colour. The whole chunk is one rule; the two lines inside are declarations.
+
+## Multiple selectors, one block
+
+Selectors can be combined with commas. The block then applies to all of them, which is handy for shared typography or for resetting a group of elements at once.
+
+```css
+h1,
+h2,
+h3 {
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+```
+
+Spacing around the comma is a style choice. Some teams put each selector on its own line, others keep them inline. What matters is consistency and the absence of a trailing comma before the block — that is a syntax error, not a quirk.
+
+## Formatting habits that age well
+
+- One declaration per line. Compressed one-liners are for build output, not source.
+- A space after the colon, none before it.
+- Keep a consistent property order, either grouped by concern (layout, box, typography, colour) or alphabetical.
+- Indent nested at-rules so the structure stays visible.
+- Use a comment above a rule to explain intent, not to restate the property name.
+- Let a minifier handle compression; hand-minified CSS is unreadable during review.
+- Avoid `!important` as formatting glue. If a value keeps losing, fix the selector instead.
+
+## A complete example
+
+This pricing card is written with grouped selectors and one declaration per line. The selector list for the headings keeps the shared reset in one place.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pricing card</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 48px 20px;
+        font-family: system-ui, sans-serif;
+        background: radial-gradient(circle at 20% 0%, #e6efff, #f7f9fc 62%);
+        color: #172033;
+      }
+
+      .plan {
+        position: relative;
+        max-width: 330px;
+        margin: 0 auto;
+        padding: 30px 28px 32px;
+        background: #ffffff;
+        border: 1px solid #e2e8f2;
+        border-radius: 22px;
+        box-shadow: 0 24px 48px -30px rgba(23, 32, 51, 0.45);
+      }
+
+      .plan h1,
+      .plan h2 {
+        margin: 0;
+        letter-spacing: -0.01em;
+      }
+
+      .plan h1 {
+        font-size: 0.72rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: #5a6b88;
+      }
+
+      .price {
+        margin: 14px 0 4px;
+        font-size: 2.7rem;
+        font-weight: 700;
+      }
+
+      .price span {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #74839c;
+      }
+
+      .tag {
+        position: absolute;
+        top: 24px;
+        right: 24px;
+        padding: 5px 11px;
+        border-radius: 999px;
+        background: #e7f7ee;
+        color: #1c7a4b;
+        font-size: 0.66rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .features {
+        margin: 22px 0 26px;
+        padding: 20px 0 0;
+        border-top: 1px solid #edf1f7;
+        list-style: none;
+      }
+
+      .features li {
+        padding: 7px 0;
+        font-size: 0.9rem;
+        color: #3b475c;
+      }
+
+      .features li::before {
+        content: "✓";
+        margin-right: 10px;
+        color: #2f9e63;
+        font-weight: 700;
+      }
+
+      .cta {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        border: 0;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #3f6bff, #6f4cf0);
+        color: #ffffff;
+        font: inherit;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="plan">
+      <span class="tag">Popular</span>
+      <h1>Studio plan</h1>
+      <h2 class="price">$24 <span>/ month</span></h2>
+      <ul class="features">
+        <li>Unlimited projects</li>
+        <li>Priority build queue</li>
+        <li>Two seats included</li>
+      </ul>
+      <button class="cta">Start the trial</button>
+    </section>
+  </body>
+</html>
+```
+
+Notice that the `.plan h1, .plan h2` rule only carries what both headings share. Everything specific lands in a later, narrower rule. That split is the formatting decision that keeps a stylesheet maintainable.

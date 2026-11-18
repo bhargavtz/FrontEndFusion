@@ -1,0 +1,102 @@
+---
+title: Constructor functions
+description: Build reusable objects from a constructor function using new, this, and methods shared through the prototype.
+chapter: 16
+category: "JavaScript"
+order: 316
+---
+
+# Constructor functions
+
+When you need many objects with the same shape, a constructor function acts as a blueprint. Calling it with `new` produces a fresh object whose properties are set up by the function.
+
+## Declaring a constructor
+
+A constructor is an ordinary function, conventionally named with a capital letter. Inside it, `this` refers to the new object being built. Assign fields with `this.title = value` and so on. You do not return the object explicitly: `new` creates it, runs the function, and hands back the result. Calling the function without `new` skips that setup and can write to the global object, which is why the capital-letter convention matters.
+
+```
+function Book(title, author) {
+  this.title = title;
+  this.author = author;
+}
+```
+
+## Prototype methods and instanceof
+
+Methods placed on `Book.prototype` are shared by every instance instead of being recreated for each one. A call like `book.summary()` looks for the method on the object, then follows its prototype chain to find it on `Book.prototype`. The `instanceof` operator tests whether an object was built by a particular constructor, returning true when that constructor's prototype appears in the chain. Use `Object.create` or a class when you need a different setup, but the constructor pattern is still widely seen in older code and remains useful to understand.
+
+## Demo: book shelf
+
+The demo builds several books from one constructor, gives them a shared method, and verifies their origin with `instanceof`.
+
+```html
+<div class="wrap">
+  <div class="card">
+    <h2>Book shelf</h2>
+    <p class="hint">Every card is an instance of the same constructor function.</p>
+    <div class="shelf" id="shelf"></div>
+    <pre class="out" id="out"></pre>
+  </div>
+</div>
+
+<style>
+  .wrap {
+    min-height: 70vh; display: grid; place-items: center;
+    padding: 2rem 1rem; background: #f4eee6;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+  .card {
+    width: min(100%, 28rem); background: #fff; border-radius: 18px;
+    padding: 1.75rem; box-shadow: 0 18px 40px -24px rgba(90, 65, 40, 0.5);
+  }
+  h2 { margin: 0 0 0.35rem; font-size: 1.2rem; color: #4a3a2a; }
+  .hint { margin: 0 0 1.1rem; font-size: 0.85rem; color: #8d7c6a; }
+  .shelf { display: grid; gap: 0.6rem; }
+  .book {
+    border-left: 4px solid #b27a45; border-radius: 8px;
+    background: #faf6f0; padding: 0.7rem 0.9rem;
+  }
+  .book strong { display: block; color: #4a3a2a; font-size: 0.95rem; }
+  .book span { font-size: 0.8rem; color: #85705c; }
+  .out {
+    margin: 1rem 0 0; padding: 0.85rem; border-radius: 12px;
+    background: #f4eee6; color: #4c3d2e; font-size: 0.82rem; white-space: pre-wrap;
+  }
+</style>
+
+<script>
+  function Book(title, author, pages) {
+    this.title = title;
+    this.author = author;
+    this.pages = pages;
+  }
+
+  Book.prototype.summary = function () {
+    return this.title + " by " + this.author + " (" + this.pages + " pages)";
+  };
+
+  var books = [
+    new Book("The Web Surface", "A. Rivera", 240),
+    new Book("Signals and Slots", "M. Chen", 318),
+    new Book("Small Systems", "L. Okafor", 176)
+  ];
+
+  var shelf = document.getElementById("shelf");
+  books.forEach(function (book) {
+    var row = document.createElement("div");
+    row.className = "book";
+    var title = document.createElement("strong");
+    var detail = document.createElement("span");
+    title.textContent = book.title;
+    detail.textContent = book.summary();
+    row.appendChild(title);
+    row.appendChild(detail);
+    shelf.appendChild(row);
+  });
+
+  document.getElementById("out").textContent =
+    "All are Book instances: " + books.every(function (b) { return b instanceof Book; }) + "\n" +
+    "summary lives on the prototype: " + (books[0].hasOwnProperty("summary") === false) + "\n" +
+    "Constructed count: " + books.length;
+</script>
+```

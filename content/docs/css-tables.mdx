@@ -1,0 +1,136 @@
+---
+title: Tables
+description: Control table sizing, cell borders, spacing, empty cells, and caption placement for readable data.
+chapter: 25
+category: "CSS"
+order: 125
+---
+
+# Tables
+
+Tables exist to show relationships between data, and CSS should make those relationships easier to scan. A few properties handle almost all of the styling work.
+
+## Sizing and borders
+
+`table-layout: auto` is the default: column widths come from content, so a long cell can stretch the whole table. `table-layout: fixed` distributes width from the first row or explicit column widths, which renders faster and keeps columns stable while data changes. With `fixed`, content that is too wide either wraps or overflows, so pair it with sensible widths.
+
+`border-collapse: collapse` merges adjacent cell borders into a single line. `separate` keeps them apart and lets `border-spacing` set the gap between cells. If you choose `separate`, remember that spacing is applied on the table element, not on each cell.
+
+`empty-cells: hide` stops borders and backgrounds from drawing around cells with no content when borders are separated. It has no effect with `collapse`.
+
+## Captions and rhythm
+
+`caption-side: top` or `bottom` moves the `<caption>` element. The default is `top`, which is usually correct — a caption introduces the data, and bottom captions are easily missed. Style it as a title with its own weight and margin.
+
+For readability, add padding to cells, use a subtle background on header cells, zebra-stripe body rows, and align numbers to the right so digits compare visually. Keep borders light; heavy grids make data harder to read, not easier.
+
+Wide tables break narrow screens. The usual fix is a wrapper with `overflow-x: auto` so the table keeps its natural width and scrolls horizontally inside the page, rather than forcing the whole layout to widen. Give the wrapper `max-width: 100%` and keep `min-width` on the table so columns do not crush into unreadable slivers.
+
+```css
+.pricing-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.pricing-table th,
+.pricing-table td {
+  padding: 0.8rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e6e1d6;
+}
+```
+
+## Demo: class schedule
+
+```html
+<table class="schedule">
+  <caption>Autumn workshop schedule</caption>
+  <thead>
+    <tr>
+      <th scope="col">Time</th>
+      <th scope="col">Studio A</th>
+      <th scope="col">Studio B</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">09:00</th>
+      <td>Type fundamentals</td>
+      <td>Color theory</td>
+    </tr>
+    <tr>
+      <th scope="row">11:00</th>
+      <td>Layout systems</td>
+      <td class="is-empty"></td>
+    </tr>
+    <tr>
+      <th scope="row">14:00</th>
+      <td>Motion basics</td>
+      <td>Accessibility review</td>
+    </tr>
+  </tbody>
+</table>
+
+<style>
+  body {
+    margin: 0;
+    padding: 2rem 1.25rem;
+    background: #f6f2e9;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    color: #33302a;
+  }
+  .schedule {
+    width: 100%;
+    max-width: 38rem;
+    margin: 0 auto;
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 6px;
+    background: #fffdf7;
+    border-radius: 16px;
+    padding: 8px;
+    box-shadow: 0 20px 44px -32px rgba(70, 58, 32, 0.7);
+  }
+  .schedule caption {
+    caption-side: top;
+    padding: 0.5rem 0.75rem 1rem;
+    font-family: ui-serif, Georgia, serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    text-align: left;
+    color: #4a3f2b;
+  }
+  .schedule th,
+  .schedule td {
+    padding: 0.85rem 0.9rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    text-align: left;
+  }
+  .schedule thead th {
+    background: #4a3f2b;
+    color: #f8f3e6;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .schedule tbody th {
+    width: 22%;
+    background: #efe7d6;
+    font-variant-numeric: tabular-nums;
+    color: #6b5b3d;
+  }
+  .schedule tbody td {
+    background: #faf7ef;
+    border: 1px solid #ece3d0;
+  }
+  .schedule tbody tr:hover td {
+    background: #fff3d6;
+  }
+  .schedule .is-empty {
+    empty-cells: hide;
+    background: #f2ece0;
+    border-style: dashed;
+  }
+</style>
+```

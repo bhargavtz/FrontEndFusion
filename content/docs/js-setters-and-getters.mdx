@@ -1,0 +1,166 @@
+---
+title: Setters and Getters
+description: Use accessor properties to validate writes and compute values on reads with defineProperty or class syntax.
+chapter: 25
+category: "JavaScript"
+order: 325
+---
+
+# Setters and Getters
+
+Accessors are properties that run functions instead of holding raw data. Reading one calls a getter; assigning to one calls a setter. To the code using the object, the result looks exactly like a normal field, which makes accessors a clean way to add validation without changing the public interface.
+
+## Accessors that look like fields
+
+A getter can compute a value from other fields every time it is read. A setter can check a range, convert units, or refuse a bad value before anything is stored. The usual pattern pairs them with a backing field, often prefixed with an underscore, that holds the actual data.
+
+Because the interface stays a simple property, you can replace stored data with computed data later without rewriting callers. That is the main appeal: accessors add behavior now and keep the door open for changes later.
+
+## Three ways to define them
+
+Inside an object literal, write `get name()` and `set name(value)` as method-like entries. With `Object.defineProperty()`, pass a descriptor containing `get` and `set` functions; you can also control `enumerable` and `configurable` there. ES6 classes support the same `get` and `set` prefixes inside the class body.
+
+All three forms create accessor properties rather than data properties. A setter that receives a string where a number is expected should either coerce it or raise an error, since silent bad data is harder to debug than an immediate failure.
+
+Accessors work with destructuring and spread too, though the exact behavior differs. Spreading an object reads its enumerable own properties, which invokes getters and produces plain values in the copy. If you need live accessor behavior, keep the original object rather than spreading it into a new one.
+
+## Demo: temperature converter
+
+```html
+<div class="thermo">
+  <h2>Temperature converter</h2>
+  <p>The setter guards the stored value; the getter computes another view of it.</p>
+  <label for="slider">Celsius: <span id="cLabel">20</span></label>
+  <input id="slider" type="range" min="-40" max="120" value="20" />
+  <div class="thermo__presets">
+    <button data-c="-10" type="button">Freezing</button>
+    <button data-c="22" type="button">Room</button>
+    <button data-c="100" type="button">Boiling</button>
+    <button id="invalid" type="button">Try bad input</button>
+  </div>
+  <div class="thermo__readouts">
+    <div class="readout"><span>defineProperty</span><strong id="a">--</strong></div>
+    <div class="readout"><span>Class accessors</span><strong id="b">--</strong></div>
+  </div>
+  <pre id="out" class="thermo__out">Move the slider to convert.</pre>
+</div>
+
+<style>
+  body {
+    margin: 0;
+    padding: 2rem 1.25rem;
+    background: #eaf1f6;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    color: #23394a;
+  }
+  .thermo {
+    max-width: 34rem;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 18px;
+    padding: 1.5rem;
+    box-shadow: 0 18px 40px -28px rgba(20, 60, 90, 0.65);
+  }
+  .thermo h2 { margin: 0 0 0.4rem; font-size: 1.25rem; }
+  .thermo p { margin: 0 0 1rem; color: #667f92; font-size: 0.88rem; }
+  label { display: block; font-size: 0.8rem; color: #667f92; margin-bottom: 0.4rem; }
+  input { width: 100%; accent-color: #2f7fb5; margin-bottom: 1rem; }
+  .thermo__presets { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  button {
+    font: inherit;
+    font-size: 0.8rem;
+    padding: 0.5rem 0.8rem;
+    border: 0;
+    border-radius: 9px;
+    background: #2f7fb5;
+    color: #fff;
+    cursor: pointer;
+  }
+  #invalid { background: #b5544f; }
+  button:hover { filter: brightness(1.08); }
+  .thermo__readouts { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 1rem; }
+  .readout {
+    background: #f0f6fa;
+    border: 1px solid #d9e6ef;
+    border-radius: 10px;
+    padding: 0.75rem;
+    display: grid;
+    gap: 0.35rem;
+  }
+  .readout span { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: #7b92a4; }
+  .readout strong { font-size: 1.1rem; }
+  .thermo__out {
+    margin: 0;
+    min-height: 3.2rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: #172c3b;
+    color: #c9e9ff;
+    border-radius: 10px;
+    padding: 0.85rem;
+    font-size: 0.8rem;
+    line-height: 1.5;
+  }
+</style>
+
+<script>
+  var sensor = { _celsius: 20 };
+
+  Object.defineProperty(sensor, "celsius", {
+    get: function () { return this._celsius; },
+    set: function (value) {
+      var n = Number(value);
+      if (!isFinite(n)) { throw new Error("Celsius must be a number"); }
+      this._celsius = Math.max(-273.15, n);
+    },
+    enumerable: true
+  });
+
+  Object.defineProperty(sensor, "fahrenheit", {
+    get: function () { return this.celsius * 9 / 5 + 32; },
+    set: function (f) { this.celsius = (f - 32) * 5 / 9; },
+    enumerable: true
+  });
+
+  class Thermometer {
+    constructor(c) { this.celsius = c; }
+    get celsius() { return this._c; }
+    set celsius(value) { this._c = Math.max(-273.15, Number(value)); }
+    get fahrenheit() { return this.celsius * 9 / 5 + 32; }
+    set fahrenheit(f) { this.celsius = (f - 32) * 5 / 9; }
+  }
+
+  var therm = new Thermometer(20);
+  var out = document.getElementById("out");
+  var slider = document.getElementById("slider");
+
+  function update(value) {
+    sensor.celsius = value;
+    therm.celsius = value;
+    document.getElementById("cLabel").textContent = value;
+    document.getElementById("a").textContent = sensor.fahrenheit.toFixed(1) + " F";
+    document.getElementById("b").textContent = therm.fahrenheit.toFixed(1) + " F";
+    out.textContent = "Stored celsius: " + sensor.celsius + " - fahrenheit was computed by a getter, never stored.";
+  }
+
+  slider.addEventListener("input", function () { update(Number(slider.value)); });
+
+  document.querySelectorAll("button[data-c]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var value = Number(btn.getAttribute("data-c"));
+      slider.value = value;
+      update(value);
+    });
+  });
+
+  document.getElementById("invalid").addEventListener("click", function () {
+    try {
+      sensor.celsius = "not a number";
+    } catch (err) {
+      out.textContent = "Setter rejected the write: " + err.message + " The stored value stayed at " + sensor.celsius + ".";
+    }
+  });
+
+  update(20);
+</script>
+```

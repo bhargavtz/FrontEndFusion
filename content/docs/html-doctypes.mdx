@@ -1,0 +1,59 @@
+---
+title: Doctypes
+description: Choose a doctype, avoid quirks mode, and understand why the first line of an HTML file matters.
+chapter: 2
+category: "HTML"
+order: 12
+---
+
+# Doctypes
+
+The doctype is the very first declaration in an HTML file. It tells the browser which rendering rules to use.
+
+## The HTML5 doctype
+
+Modern HTML uses one short declaration:
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Standards mode</title>
+  </head>
+  <body>
+    <p>This page renders in standards mode.</p>
+  </body>
+</html>
+```
+
+The declaration is case-insensitive, but lowercase is the common style.
+
+## Why it matters
+
+Without a doctype, browsers may switch to **quirks mode**. Quirks mode imitates old rendering bugs so that very old pages still look acceptable. New pages should never rely on it.
+
+| Mode | Trigger | Effect |
+| --- | --- | --- |
+| Standards | `<!doctype html>` | Modern box model and layout rules |
+| Almost standards | Some legacy doctypes | Mostly modern, with small table quirks |
+| Quirks | No doctype or an invalid one | Legacy layout behaviour |
+
+You can check the current mode in browser developer tools by inspecting `document.compatMode`. Standards mode reports `CSS1Compat`.
+
+## Legacy doctypes you may encounter
+
+Older documents sometimes start with long declarations:
+
+```html
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+  "http://www.w3.org/TR/html4/strict.dtd">
+```
+
+You do not need to copy these into new projects. If you are maintaining an old page, replacing the long doctype with `<!doctype html>` is usually safe and moves the page into standards mode.
+
+## Doctype rules of thumb
+
+- Put the doctype on the first line, before `<html>`.
+- Never place comments or whitespace-sensitive output before it.
+- Use it in every full document, including email templates where support allows.
+- A doctype is not an element and has no closing tag.

@@ -1,0 +1,92 @@
+---
+title: Memory eciency
+description: Understand how object design and lingering references affect memory use, especially the cost of true private methods.
+chapter: 105
+category: "JavaScript"
+order: 405
+---
+
+# Memory eciency
+
+JavaScript frees memory automatically through garbage collection, but that does not mean memory is free. An object stays alive as long as something reachable holds a reference to it. Holding onto references longer than necessary, or creating more function objects than you need, is a common source of waste and leaks.
+
+## The cost of true private methods
+
+A "true" private method is often built with a closure: the constructor defines a function inside itself that closes over local variables. Because the function captures that scope, every instance gets its **own copy** of the method. Create ten thousand instances and you have ten thousand separate function objects. With modern class syntax, a normal method lives on the prototype and is shared by every instance, which is far more memory-efficient.
+
+Private class fields, written with a leading hash, keep data private while methods remain on the prototype, giving you encapsulation without the per-instance function cost. If you need a closure for genuine encapsulation, use it sparingly and only on a few objects.
+
+## References, listeners, and cleanup
+
+Memory leaks usually come from references that refuse to go away. Event listeners attached to a long-lived element keep their callback, and everything it closes over, alive. Timers, observers, and global caches behave the same way. Remove listeners with `removeEventListener` when a component is torn down, clear intervals, and delete entries from maps you own. Detached DOM nodes held in a variable are another classic trap.
+
+Prefer reusing a single object over creating many throwaway ones in a loop, and avoid storing large data in closures that outlive their usefulness. When memory usage really matters, measure with your browser's heap snapshot tool instead of guessing.
+
+The demo builds many instances both ways, then compares whether their methods are shared or unique. It also reports heap size if the browser exposes it, with a visible fallback otherwise.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Memory efficiency</title>
+    <style>
+      body { margin: 0; padding: 24px 16px; font-family: system-ui, sans-serif;
+        color: #2b2b36; background: linear-gradient(135deg, #eef3fb, #faf0f5 80%); }
+      .card { max-width: 660px; margin: 0 auto; padding: 22px; background: #fff;
+        border-radius: 18px; box-shadow: 0 20px 40px -28px rgba(45,45,80,.42); }
+      h1 { margin: 0 0 6px; font-size: 1.15rem; }
+      p.hint { margin: 0 0 14px; font-size: .82rem; color: #6c6f80; }
+      button { padding: 8px 11px; border: 0; border-radius: 9px; color: #fff;
+        background: #4a5fa8; font: inherit; font-size: .78rem; cursor: pointer; }
+      pre { margin: 14px 0 0; padding: 12px; min-height: 130px; border-radius: 10px;
+        background: #202231; color: #e0e6ff; font-size: .76rem; line-height: 1.65;
+        white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Shared methods vs. private closures</h1>
+      <p class="hint">Compare how many function objects ten thousand instances create.</p>
+      <button id="run">Build 10,000 instances</button>
+      <pre id="out">Press the button to compare both designs.</pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+
+      function ClosureCounter() {
+        var count = 0;
+        this.increment = function () { count += 1; return count; };
+      }
+      function ProtoCounter() {
+        this.count = 0;
+      }
+      ProtoCounter.prototype.increment = function () { this.count += 1; return this.count; };
+
+      document.getElementById("run").addEventListener("click", function () {
+        var a = new ClosureCounter();
+        var b = new ClosureCounter();
+        var c = new ProtoCounter();
+        var d = new ProtoCounter();
+
+        var lines = [
+          "closure methods shared?  " + (a.increment === b.increment),
+          "prototype methods shared? " + (c.increment === d.increment),
+          "",
+          "Each closure instance owns its own increment function.",
+          "Prototype instances all point to one shared function."
+        ];
+
+        if (performance.memory && performance.memory.usedJSHeapSize) {
+          lines.push("", "JS heap in use: " +
+            Math.round(performance.memory.usedJSHeapSize / 1048576) + " MB");
+        } else {
+          lines.push("", "Heap metrics are unavailable in this sandbox.");
+        }
+        out.textContent = lines.join("\n");
+      });
+    </script>
+  </body>
+</html>
+```

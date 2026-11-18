@@ -1,0 +1,116 @@
+---
+title: Battery Status API
+description: Read battery level and charging state with the Battery Status API and its change events.
+chapter: 92
+category: "JavaScript"
+order: 392
+---
+
+# Battery Status API
+
+The Battery Status API exposes a device's power state to web pages through a `BatteryManager` object. You obtain it with `navigator.getBattery()`, which returns a promise that resolves to the manager. The information is deliberately coarse — a percentage and a few durations — but it is enough to adapt an interface, for example by dimming animations when power is low.
+
+## Properties and events
+
+A `BatteryManager` has four read-only properties. `level` is a number from `0` to `1`. `charging` is a boolean. `chargingTime` and `dischargingTime` give seconds until full or empty, using `Infinity` when the value is unknown. Each property has a matching event: `levelchange`, `chargingchange`, `chargingtimechange` and `dischargingtimechange`. Attach listeners with `addEventListener` to update the UI as the battery drains or a charger is plugged in.
+
+## Privacy and fallbacks
+
+Because battery level can be used for fingerprinting, several browsers have removed or restricted this API. Always check that `navigator.getBattery` is a function before calling it, and catch a rejected promise. When it is unavailable, the demo switches to a clearly labelled simulated battery with a slider and a charging toggle, so the event-driven model is still visible.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Battery Status demo</title>
+    <style>
+      body { margin: 0; padding: 24px 16px; font-family: system-ui, sans-serif; color: #26313f; background: linear-gradient(135deg, #eef4f8, #f8eef0 80%); }
+      .card { max-width: 540px; margin: 0 auto; padding: 22px; background: #fff; border-radius: 20px; box-shadow: 0 20px 42px -30px rgba(40, 60, 80, .5); }
+      h1 { margin: 0 0 6px; font-size: 1.15rem; }
+      .lead { margin: 0 0 14px; font-size: .84rem; color: #646f7f; }
+      .badge { display: inline-block; padding: 6px 10px; border-radius: 999px; background: #e9f2ec; color: #2c7a4f; font-size: .74rem; font-weight: 600; }
+      .gauge { margin: 16px 0 8px; height: 26px; padding: 3px; border: 2px solid #46556b; border-radius: 8px; position: relative; }
+      .fill { height: 100%; width: 50%; border-radius: 4px; background: linear-gradient(90deg, #e0a23c, #5cb87a); transition: width .25s; }
+      .label { display: flex; justify-content: space-between; font-size: .78rem; color: #4d586b; }
+      .sim { margin-top: 14px; padding: 12px; border-radius: 11px; background: #f6f7fb; }
+      .sim label { display: flex; align-items: center; gap: 10px; font-size: .8rem; }
+      .sim input[type=range] { flex: 1; }
+      .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+      button { padding: 8px 12px; border: 0; border-radius: 9px; background: #3f6b8a; color: #fff; font: inherit; font-size: .78rem; cursor: pointer; }
+      pre { margin: 14px 0 0; min-height: 120px; padding: 12px; border-radius: 11px; background: #1d2832; color: #d7ecf2; font-size: .75rem; line-height: 1.6; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Battery Status demo</h1>
+      <p class="lead">Real API when available, a labelled simulation otherwise.</p>
+      <span id="badge" class="badge">checking…</span>
+      <div class="gauge"><div class="fill" id="fill"></div></div>
+      <div class="label"><span id="pct">50%</span><span id="state">idle</span></div>
+      <div class="sim" id="sim">
+        <label>Level <input id="level" type="range" min="0" max="100" value="50" /></label>
+        <label><input id="charging" type="checkbox" /> charging</label>
+      </div>
+      <div class="row"><button id="clear">Clear log</button></div>
+      <pre id="out"></pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      var badge = document.getElementById("badge");
+      var fill = document.getElementById("fill");
+      var pct = document.getElementById("pct");
+      var state = document.getElementById("state");
+      var sim = document.getElementById("sim");
+      var level = document.getElementById("level");
+      var charging = document.getElementById("charging");
+
+      function line(s) { out.textContent += s + "\n"; }
+      function time(seconds) {
+        if (!isFinite(seconds) || seconds <= 0) return "unknown";
+        var m = Math.round(seconds / 60);
+        return m >= 60 ? Math.floor(m / 60) + "h " + (m % 60) + "m" : m + " min";
+      }
+
+      function render(levelValue, isCharging, chTime, disTime) {
+        var p = Math.round(levelValue * 100);
+        fill.style.width = p + "%";
+        pct.textContent = p + "%";
+        state.textContent = isCharging ? "charging · full in " + time(chTime) : "on battery · " + time(disTime) + " left";
+      }
+
+      var real = typeof navigator.getBattery === "function";
+      badge.textContent = real ? "Real BatteryManager API" : "Simulated battery (API unavailable)";
+      badge.style.background = real ? "#e9f2ec" : "#fdf1de";
+      badge.style.color = real ? "#2c7a4f" : "#9a6a22";
+      line(real ? "navigator.getBattery() detected." : "Battery Status API missing — using simulated values.");
+
+      if (real) {
+        sim.style.display = "none";
+        navigator.getBattery().then(function (b) {
+          function paint() { render(b.level, b.charging, b.chargingTime, b.dischargingTime); }
+          paint();
+          ["levelchange", "chargingchange", "chargingtimechange", "dischargingtimechange"].forEach(function (evt) {
+            b.addEventListener(evt, function () {
+              line("event " + evt + " -> level " + b.level.toFixed(2) + ", charging " + b.charging);
+              paint();
+            });
+          });
+          line("Listening for four battery change events.");
+        }).catch(function (e) { line("getBattery() rejected: " + e.name); });
+      } else {
+        function fire(name) {
+          line("event " + name + " -> level " + (level.value / 100).toFixed(2) + ", charging " + charging.checked);
+          render(level.value / 100, charging.checked, (100 - level.value) * 60, level.value * 36);
+        }
+        level.addEventListener("input", function () { fire("levelchange"); });
+        charging.addEventListener("change", function () { fire("chargingchange"); });
+        render(0.5, false, 3000, 1800);
+      }
+
+      document.getElementById("clear").addEventListener("click", function () { out.textContent = ""; });
+    </script>
+  </body>
+</html>
+```

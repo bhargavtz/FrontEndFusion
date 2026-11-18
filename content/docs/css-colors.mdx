@@ -1,0 +1,110 @@
+---
+title: "Colors"
+description: "Choose between keywords, hex, rgb(), hsl(), and alpha variants, and inherit a theme colour with currentColor."
+chapter: 18
+category: "CSS"
+order: 118
+---
+
+# Colors
+
+CSS accepts a colour in several notations, and they all resolve to the same underlying value. The differences are about readability, precision, and how easily you can derive related shades. Picking the right notation makes a palette easier to maintain.
+
+## Keywords, hex, and rgb()
+
+The 148 named keywords — `tomato`, `rebeccapurple`, `steelblue` — are convenient for quick tests and demos, but they carry no design intent and are hard to search for later. Use them sparingly in production.
+
+Hex is the compact workhorse: `#2f6f8f`, or the shorthand `#28f` when each pair repeats. Three-, four-, six-, and eight-digit forms exist; the four- and eight-digit versions finish with an alpha channel. Hex is opaque to humans scanning a stylesheet — you cannot tell at a glance how light or saturated it is.
+
+`rgb()` is explicit and works well with computed values: `rgb(47 111 143)`, with an optional fourth value for alpha (`rgb(47 111 143 / .5)`). Legacy comma syntax still works, and `rgba()` remains a valid alias.
+
+## HSL and alpha
+
+`hsl()` describes a colour the way a designer thinks about it: hue in degrees, saturation and lightness in percentages. Because those axes are independent, generating a palette is straightforward — hold the hue, shift lightness for hover and active states, or adjust saturation for muted variants. `hsl(202 51% 37%)` is the same blue as the hex above, and `hsl(202 51% 37% / .35)` adds transparency.
+
+Alpha transparency is not the same as `opacity`. An alpha colour affects only that one value, so a background can be translucent while its text stays fully solid. `opacity` fades the entire element, children included.
+
+## currentColor
+
+`currentColor` resolves to the element's computed `color`. It is the cleanest way to keep decorative borders, icons, and SVG fills in sync with text: set `color` once, then use `border-color: currentColor` or `fill="currentColor"` elsewhere. Change the text colour on hover and every dependent detail follows automatically.
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Colour notation palette</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 26px;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      background: #f7f6f3;
+      color: #2b2a26;
+    }
+    h2 { margin: 0 0 4px; font-size: 1.05rem; }
+    .lede { margin: 0 0 18px; font-size: .84rem; color: #6f6d65; }
+    .swatches {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+    }
+    .swatch {
+      height: 92px;
+      border-radius: 14px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      color: #fff;
+      font-size: .72rem;
+      line-height: 1.45;
+      box-shadow: 0 6px 16px rgba(43, 42, 38, .12);
+    }
+    .swatch b { font-size: .7rem; letter-spacing: .06em; text-transform: uppercase; opacity: .8; }
+    .s1 { background: steelblue; }
+    .s2 { background: #2f6f8f; }
+    .s3 { background: rgb(47 111 143); }
+    .s4 { background: hsl(202 51% 37%); }
+    .s5 { background: hsl(202 51% 37% / .55); color: #16333f; }
+    .theme-card {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-radius: 14px;
+      background: #fff;
+      border: 1px solid currentColor;
+      color: #9a5b34;
+      font-size: .85rem;
+      line-height: 1.6;
+      box-shadow: 0 8px 20px rgba(154, 91, 52, .12);
+    }
+    .theme-card strong { display: inline-flex; align-items: center; gap: 8px; }
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 0 4px rgba(154, 91, 52, .18);
+    }
+    .theme-card p { margin: 6px 0 0; color: #5f564e; }
+    .theme-card:hover { color: #b23b3b; }
+  </style>
+</head>
+<body>
+  <h2>One blue, five notations</h2>
+  <p class="lede">The first four swatches are the same colour. The fifth keeps the hue and drops the alpha.</p>
+  <div class="swatches">
+    <div class="swatch s1"><b>keyword</b>steelblue</div>
+    <div class="swatch s2"><b>hex</b>#2f6f8f</div>
+    <div class="swatch s3"><b>rgb()</b>47 111 143</div>
+    <div class="swatch s4"><b>hsl()</b>202 51% 37%</div>
+    <div class="swatch s5"><b>alpha</b>hsl / .55</div>
+  </div>
+  <div class="theme-card">
+    <strong><span class="dot"></span>currentColor in charge</strong>
+    <p>This border, dot, and glow all read from one <code>color</code> declaration. Hover the card to recolour everything at once.</p>
+  </div>
+</body>
+</html>
+```

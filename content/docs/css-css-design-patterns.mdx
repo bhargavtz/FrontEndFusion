@@ -1,0 +1,142 @@
+---
+title: CSS Design Patterns
+description: Structure reusable components with BEM naming so class names describe intent, specificity stays flat, and styles can be moved safely.
+chapter: 52
+category: "CSS"
+order: 152
+---
+
+# CSS Design Patterns
+
+Most CSS pain is not a missing property. It is a naming problem. When class names are vague, every new feature adds another rule that fights the previous one, and the only escape hatch left is `!important`. A naming pattern such as BEM makes the stylesheet legible years after it was written.
+
+## Anatomy of BEM
+
+BEM stands for block, element, modifier.
+
+- A **block** is a standalone component: `card`, `nav`, `search-form`. It owns its own namespace and should render correctly wherever it is placed.
+- An **element** is a part that only makes sense inside its block. It is written with two underscores: `card__title`, `card__media`, `card__footer`. Elements do not appear outside their block.
+- A **modifier** is a variation of a block or element, written with two hyphens: `card--compact`, `card__badge--new`. A modifier changes appearance or behaviour without changing identity.
+
+The payoff is that the class name tells you where the rule lives. Seeing `card__price` in a stylesheet immediately tells you it belongs to the card component and nowhere else.
+
+```css
+.card { }
+.card__title { }
+.card__price { }
+.card--featured { }
+```
+
+## Avoiding specificity wars
+
+Three habits keep specificity flat, and flat specificity is what makes a stylesheet maintainable.
+
+1. **Keep selectors shallow.** One class is enough. `nav ul li a` couples the styling to the markup structure; `.nav__link` survives a refactor.
+2. **Never nest deeper than one level of block-plus-element.** If you need a grandchild class, the block is probably two components that should be split.
+3. **Make modifiers additive.** Write the base block so a modifier only overrides the two or three properties that actually change, rather than redefining the whole component.
+
+Avoid styling bare element selectors in a component, because those rules leak to children you did not design for. A single `h3` rule inside a card will also hit the heading inside an embedded list.
+
+## A complete example
+
+The product card below follows the block-element-modifier shape. The `--featured` modifier only changes the border and the badge colour, which means the base card styles never need duplication.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BEM product card</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 48px 20px;
+        font-family: system-ui, sans-serif;
+        background: linear-gradient(180deg, #f7f5f0, #eef1f6);
+        color: #1f2733;
+      }
+
+      .card {
+        max-width: 320px;
+        margin: 0 auto;
+        padding: 18px;
+        background: #ffffff;
+        border: 1px solid #e5e8ef;
+        border-radius: 20px;
+        box-shadow: 0 22px 44px -30px rgba(24, 34, 51, 0.5);
+      }
+
+      .card--featured {
+        border-color: #b9cdff;
+        box-shadow: 0 22px 44px -26px rgba(58, 104, 240, 0.45);
+      }
+
+      .card__media {
+        height: 132px;
+        border-radius: 14px;
+        background:
+          radial-gradient(circle at 26% 30%, #ffffff 0 12%, transparent 13%),
+          linear-gradient(135deg, #cfe0ff, #7f9bf5);
+      }
+
+      .card__badge {
+        display: inline-block;
+        margin: 14px 0 0;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: #eef1f7;
+        color: #5b6779;
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .card__badge--new {
+        background: #eaf1ff;
+        color: #2c5bd8;
+      }
+
+      .card__title {
+        margin: 12px 0 6px;
+        font-size: 1.12rem;
+        letter-spacing: -0.01em;
+      }
+
+      .card__text {
+        margin: 0;
+        font-size: 0.83rem;
+        line-height: 1.5;
+        color: #67748a;
+      }
+
+      .card__price {
+        margin: 16px 0 0;
+        font-size: 1.3rem;
+        font-weight: 700;
+      }
+
+      .card__price small {
+        font-size: 0.72rem;
+        font-weight: 500;
+        color: #8a95a8;
+      }
+    </style>
+  </head>
+  <body>
+    <article class="card card--featured">
+      <div class="card__media"></div>
+      <span class="card__badge card__badge--new">New arrival</span>
+      <h1 class="card__title">Alpine wool throw</h1>
+      <p class="card__text">
+        Woven from undyed lambswool with a soft brushed finish. Ships in
+        recycled packaging.
+      </p>
+      <p class="card__price">$78 <small>incl. tax</small></p>
+    </article>
+  </body>
+</html>
+```
+
+Every class in that markup names one block and one relationship. Delete the `card--featured` class and the card still works; that is the test a good modifier should pass.

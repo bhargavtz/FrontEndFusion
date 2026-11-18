@@ -1,0 +1,112 @@
+---
+title: Images
+description: Embed images with useful alt text and serve responsive sources with srcset and picture.
+chapter: 15
+category: "HTML"
+order: 25
+---
+
+# Images
+
+The `img` element embeds an image. It is a void element: it has no closing tag.
+
+## Creating an image
+
+```html
+<img
+  src="https://picsum.photos/seed/forest/640/360"
+  alt="Sunlight filtering through tall pine trees"
+  width="640"
+  height="360"
+/>
+```
+
+Always set `width` and `height` when you know the aspect ratio. The browser reserves space and avoids layout shift while the image loads.
+
+## Choosing alt text
+
+Alt text describes the image's purpose in context.
+
+- If the image conveys information, describe it.
+- If the image is decorative, use `alt=""` so assistive technology skips it.
+- Do not start with “image of” or “picture of”.
+- Do not repeat the caption word for word.
+
+```html
+<!-- Informative -->
+<img src="/charts/sales-q3.png" alt="Sales rose 18% from July to September" />
+
+<!-- Decorative -->
+<img src="/patterns/wave.svg" alt="" />
+
+<!-- Functional: the image is the only content of a link -->
+<a href="/">
+  <img src="/logo.svg" alt="FrontEndFusion home" />
+</a>
+```
+
+## Responsive images with srcset
+
+`srcset` offers several candidates; `sizes` tells the browser how wide the image will be displayed.
+
+```html
+<img
+  src="https://picsum.photos/seed/coast/800/400"
+  srcset="
+    https://picsum.photos/seed/coast/400/200 400w,
+    https://picsum.photos/seed/coast/800/400 800w,
+    https://picsum.photos/seed/coast/1200/600 1200w
+  "
+  sizes="(max-width: 600px) 100vw, 600px"
+  alt="Waves breaking on a rocky coast"
+  width="800"
+  height="400"
+/>
+```
+
+The browser picks a candidate based on viewport width, device pixel ratio, and the `sizes` hint.
+
+## Responsive images with picture
+
+Use `picture` when the image itself should change art direction, not just resolution.
+
+```html
+<picture>
+  <source
+    media="(min-width: 800px)"
+    srcset="https://picsum.photos/seed/wide/1200/500"
+  />
+  <source
+    media="(max-width: 799px)"
+    srcset="https://picsum.photos/seed/tall/600/800"
+  />
+  <img
+    src="https://picsum.photos/seed/fallback/600/400"
+    alt="A narrow trail winding through a meadow"
+    width="600"
+    height="400"
+  />
+</picture>
+```
+
+The final `img` is required. It is the fallback and supplies the alt text.
+
+## Modern formats
+
+```html
+<picture>
+  <source srcset="/images/hero.avif" type="image/avif" />
+  <source srcset="/images/hero.webp" type="image/webp" />
+  <img src="/images/hero.jpg" alt="A cyclist on a mountain road" />
+</picture>
+```
+
+The browser uses the first source it supports.
+
+## Performance checklist
+
+1. Compress images before uploading.
+2. Use modern formats with fallbacks.
+3. Set dimensions to prevent layout shift.
+4. Lazy-load images below the fold with `loading="lazy"`.
+5. Do not lazy-load the hero image; it delays the largest paint.

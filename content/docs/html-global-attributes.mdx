@@ -1,0 +1,100 @@
+---
+title: Global Attributes
+description: Use contenteditable and the other attributes that work on almost every HTML element.
+chapter: 37
+category: "HTML"
+order: 47
+---
+
+# Global Attributes
+
+Global attributes can appear on any HTML element. They describe behaviour, language, state, or presentation.
+
+## Contenteditable
+
+`contenteditable` makes an element's content editable in the browser.
+
+```html
+<div
+  contenteditable="true"
+  role="textbox"
+  aria-multiline="true"
+  style="border:1px solid #cbd5e1; padding:12px; border-radius:8px; min-height:80px;"
+>
+  Click here and type. The browser edits the DOM directly.
+</div>
+```
+
+- `contenteditable="true"` enables editing.
+- `contenteditable="false"` disables it inside an editable ancestor.
+- `contenteditable="plaintext-only"` restricts input to plain text in supporting browsers.
+
+Always add a role and an accessible name. Save or sanitise the edited HTML on the server; never trust it.
+
+## Hidden
+
+```html
+<p hidden>This paragraph is not rendered.</p>
+```
+
+The `hidden` attribute removes the element from rendering and from the accessibility tree. It is not the same as `display: none` in a stylesheet, but it has a similar effect.
+
+## Language and direction
+
+```html
+<p lang="ar" dir="rtl">مرحبا بالعالم</p>
+<p dir="auto">Text whose direction should be detected.</p>
+```
+
+`dir="rtl"` sets right-to-left direction. `dir="auto"` lets the browser infer direction from the first strong character.
+
+## Title
+
+```html
+<abbr title="Cascading Style Sheets">CSS</abbr>
+```
+
+The `title` attribute provides advisory information, often shown as a tooltip. Do not use it as the only label; touch users may never see it.
+
+## Draggable
+
+```html
+<div draggable="true" style="padding:12px; border:1px dashed #94a3b8;">
+  Drag me
+</div>
+```
+
+`draggable="true"` makes an element draggable, but you still need drag event handlers to do something useful.
+
+## Spellcheck
+
+```html
+<textarea spellcheck="true">Teh quick brown fox</textarea>
+<textarea spellcheck="false">const exact = "value";</textarea>
+```
+
+Turn spellcheck off for code, identifiers, and fields where suggestions are distracting.
+
+## Translate
+
+```html
+<p translate="no">FrontEndFusion</p>
+```
+
+`translate="no"` asks translation tools to leave the content unchanged. Use it for brand names and code.
+
+## Accesskey
+
+```html
+<button accesskey="s">Save</button>
+```
+
+Access keys are inconsistent across browsers and can conflict with assistive technology shortcuts. Avoid them.
+
+## Autofocus
+
+```html
+<input autofocus name="search" type="search" />
+```
+
+`autofocus` moves focus to the element on page load. Use it sparingly; it can disorient keyboard and screen reader users. Never autofocus more than one element.

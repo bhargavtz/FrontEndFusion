@@ -1,0 +1,103 @@
+---
+title: Vibration API
+description: Trigger short haptic feedback with navigator.vibrate and detect browsers that lack support.
+chapter: 91
+category: "JavaScript"
+order: 391
+---
+
+# Vibration API
+
+The Vibration API gives a page a tiny amount of haptic feedback on devices that have a vibration motor. It is intentionally simple: one method, `navigator.vibrate()`, and no permission prompt. Most desktop browsers do not implement it, and some mobile browsers require the call to come from a user gesture, so feature detection is essential.
+
+## Single vibrations and patterns
+
+Passing a single number asks the device to vibrate for that many milliseconds: `navigator.vibrate(200)` produces one short buzz. Passing an array describes an alternating pattern of on and off durations, for example `[200, 100, 200, 100, 400]` — vibrate, pause, vibrate, pause, vibrate. The method returns `true` when the pattern was accepted and `false` when it was not, often because the device has no motor.
+
+Calling `navigator.vibrate(0)` stops any vibration currently playing. A new call also cancels the previous one, so patterns can be chained from successive user actions. Browsers usually cap long durations and ignore patterns while the page is in the background.
+
+## Checking support and falling back
+
+Support is checked with `if (navigator.vibrate)`. When it is missing, the polite thing is to do nothing — or to show a visual cue instead. The demo below responds to each button with a visible pulse and a log line, so the rhythm of a pattern is apparent even on hardware that cannot buzz.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Vibration API demo</title>
+    <style>
+      body { margin: 0; padding: 24px 16px; font-family: system-ui, sans-serif; color: #2a303f; background: linear-gradient(135deg, #f3f0fa, #eaf6f3 80%); }
+      .card { max-width: 540px; margin: 0 auto; padding: 22px; background: #fff; border-radius: 20px; box-shadow: 0 20px 42px -30px rgba(50, 40, 80, .5); }
+      h1 { margin: 0 0 6px; font-size: 1.15rem; }
+      .lead { margin: 0 0 12px; font-size: .84rem; color: #6a6f82; }
+      .badge { display: inline-block; padding: 6px 10px; border-radius: 999px; font-size: .74rem; font-weight: 600; background: #eceafa; color: #5a4fa3; }
+      .motor { margin: 16px 0; height: 74px; border-radius: 14px; background: #eef1f8; display: grid; place-items: center; color: #8790a8; font-size: .82rem; }
+      .motor.buzz { animation: shake .14s linear infinite; background: #e4def6; color: #5a4fa3; }
+      @keyframes shake { 0% { transform: translateX(-2px); } 50% { transform: translateX(2px); } 100% { transform: translateX(-2px); } }
+      .row { display: flex; flex-wrap: wrap; gap: 8px; }
+      button { padding: 8px 12px; border: 0; border-radius: 9px; background: #5a4fa3; color: #fff; font: inherit; font-size: .78rem; cursor: pointer; }
+      button:hover { background: #463c84; }
+      button.ghost { background: #e9e6f6; color: #5a4fa3; }
+      pre { margin: 14px 0 0; min-height: 120px; padding: 12px; border-radius: 11px; background: #201f31; color: #e2def7; font-size: .75rem; line-height: 1.6; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Vibration API demo</h1>
+      <p class="lead">The motor square shakes to visualise any pattern.</p>
+      <span id="badge" class="badge">checking support…</span>
+      <div class="motor" id="motor">motor idle</div>
+      <div class="row">
+        <button data-p="single">Single 200 ms</button>
+        <button data-p="pattern">Pattern 200-100-200-100-400</button>
+        <button data-p="stop" class="ghost">Stop</button>
+        <button data-p="check" class="ghost">Check support</button>
+      </div>
+      <pre id="out"></pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      var badge = document.getElementById("badge");
+      var motor = document.getElementById("motor");
+      var timer = null;
+
+      function line(s) { out.textContent += s + "\n"; }
+      var supported = !!(navigator && typeof navigator.vibrate === "function");
+      badge.textContent = supported ? "navigator.vibrate available" : "not supported — visual fallback only";
+
+      function buzz(pattern, label) {
+        var result = supported ? navigator.vibrate(pattern) : false;
+        line(label + " -> vibrate(" + JSON.stringify(pattern) + ") returned " + result + (supported ? "" : " (simulated)"));
+        clearTimeout(timer);
+        motor.classList.add("buzz");
+        motor.textContent = "buzzing…";
+        var total = Array.isArray(pattern) ? pattern.reduce(function (a, b) { return a + b; }, 0) : pattern;
+        timer = setTimeout(function () {
+          motor.classList.remove("buzz");
+          motor.textContent = "motor idle";
+        }, Math.min(total, 1600));
+      }
+
+      document.querySelector(".row").addEventListener("click", function (e) {
+        var btn = e.target.closest("button[data-p]");
+        if (!btn) return;
+        var kind = btn.dataset.p;
+        if (kind === "single") buzz(200, "single");
+        if (kind === "pattern") buzz([200, 100, 200, 100, 400], "pattern");
+        if (kind === "stop") {
+          if (supported) navigator.vibrate(0);
+          clearTimeout(timer);
+          motor.classList.remove("buzz");
+          motor.textContent = "motor idle";
+          line("stop() -> vibrate(0) cancels any active pattern.");
+        }
+        if (kind === "check") line("support check: " + (supported ? "yes" : "no") + " — feature detection avoids errors.");
+      });
+
+      line(supported ? "Vibration API detected." : "No vibration motor exposed here; showing a visual fallback.");
+    </script>
+  </body>
+</html>
+```

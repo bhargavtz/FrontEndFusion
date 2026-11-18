@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { books } from "@/data/books";
 import { BookBrowser } from "@/components/library/book-browser";
+import { resolveBookCover } from "@/lib/book-cover";
 
 export const metadata: Metadata = {
   title: "Book Library",
@@ -37,7 +38,12 @@ export default function LibraryPage() {
       </header>
 
       <div className="mt-10">
-        <BookBrowser books={books} />
+        <BookBrowser
+          books={books.map((book) => ({
+            ...book,
+            cover: resolveBookCover(book),
+          }))}
+        />
       </div>
     </main>
   );

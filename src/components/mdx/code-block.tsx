@@ -1,83 +1,65 @@
 "use client";
 
-import { Children, isValidElement, useMemo, useState, type ReactNode } from "react";
+import { Children, isValidElement, useId, useMemo, useState, type ReactNode } from "react";
+import { highlight } from "@/lib/highlight";
+import { buildSrcDoc, RUNNABLE } from "@/lib/sandbox";
+import { setAssistantOpen, setLearningContext } from "@/lib/ai/store";
 
 function nodeToText(node: ReactNode): string {
-  if (typeof node === "string" || typeof node === "number") {
-    return String(node);
-  }
-  if (Array.isArray(node)) {
-    return node.map(nodeToText).join("");
-  }
-  if (isValidElement<{ children?: ReactNode }>(node)) {
-    return nodeToText(node.props.children);
-  }
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(nodeToText).join("");
+  if (isValidElement<{ children?: ReactNode }>(node)) return nodeToText(node.props.children);
   return "";
 }
 
 function languageFrom(children: ReactNode): { language: string; code: string } {
   const child = Children.toArray(children)[0];
   if (isValidElement<{ className?: string; children?: ReactNode }>(child)) {
-    const className = child.props.className ?? "";
-    const match = /language-([\w-]+)/.exec(className);
-    return {
-      language: match?.[1] ?? "text",
-      code: nodeToText(child.props.children).replace(/\n$/, ""),
-    };
+    const match = /language-([\w-]+)/.exec(child.props.className ?? "");
+    return { language: match?.[1] ?? "text", code: nodeToText(child.props.children).replace(/\n$/, "") };
   }
   return { language: "text", code: nodeToText(children) };
 }
 
-const LIVE_LANGUAGES = new Set(["html", "css", "js", "javascript"]);
+const PREVIEWABLE = new Set(["html", "css", "js", "javascript"]);
 
-const CSS_SCAFFOLD = `<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body { margin: 0; padding: 16px; font-family: ui-sans-serif, system-ui, sans-serif; }
-  </style>
-  <style>__CODE__</style>
-</head>
-<body>
-  <h1>CSS Preview</h1>
-  <p>This paragraph, the heading, and the button below inherit your CSS.</p>
-  <button>Sample button</button>
-</body>
-</html>`;
-
-const JS_SCAFFOLD = `<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body { margin: 0; padding: 16px; font-family: ui-sans-serif, system-ui, sans-serif; }
-    #app { min-height: 120px; }
-  </style>
-</head>
-<body>
-  <div id="app"></div>
-  <script>__CODE__</script>
-</body>
-</html>`;
-
-function buildSrcDoc(language: string, code: string): string {
-  if (language === "html") return code;
-  if (language === "css") return CSS_SCAFFOLD.replace("__CODE__", code);
-  return JS_SCAFFOLD.replace("__CODE__", code);
-}
-
+/**
+ * Code block used throughout the MDX guides: syntax highlighting, copy,
+ * optional sandboxed preview (HTML/CSS/JS), and "Ask AI about this code".
+ * Previews use the same isolated sandbox as the playground (no same-origin).
+ */
 export function CodeBlock({ children }: { children?: ReactNode }) {
   const { language, code } = useMemo(() => languageFrom(children), [children]);
-  const canPreview = LIVE_LANGUAGES.has(language);
+  const lang = language === "javascript" ? "js" : language;
+  const canPreview = PREVIEWABLE.has(language) && RUNNABLE.has(lang);
   const [view, setView] = useState<"code" | "preview">("code");
+  const [copied, setCopied] = useState(false);
+  const token = useId();
 
-  const srcDoc = useMemo(
-    () => (canPreview ? buildSrcDoc(language, code) : ""),
-    [canPreview, language, code],
-  );
+  const highlighted = useMemo(() => highlight(code, lang), [code, lang]);
+  const srcDoc = useMemo(() => (canPreview && view === "preview" ? buildSrcDoc({ language: lang, code, token }) : ""), [canPreview, view, lang, code, token]);
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      /* clipboard unavailable */
+    }
+  }
+
+  function askAI() {
+    const selected = typeof window !== "undefined" ? (window.getSelection()?.toString() ?? "") : "";
+    setLearningContext({
+      topic: document.querySelector("h1")?.textContent ?? "",
+      location: window.location.pathname,
+      language: lang,
+      code,
+      selection: code.includes(selected) ? selected : "",
+    });
+    setAssistantOpen(true);
+  }
 
   return (
     <div className="mdx-code">
@@ -85,38 +67,29 @@ export function CodeBlock({ children }: { children?: ReactNode }) {
         <span className="mdx-code__lang">{language}</span>
         {canPreview && (
           <div className="mdx-code__tabs" role="tablist" aria-label="Code or preview">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={view === "code"}
-              className={view === "code" ? "is-active" : ""}
-              onClick={() => setView("code")}
-            >
+            <button type="button" role="tab" aria-selected={view === "code"} className={view === "code" ? "is-active" : ""} onClick={() => setView("code")}>
               Code
             </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={view === "preview"}
-              className={view === "preview" ? "is-active" : ""}
-              onClick={() => setView("preview")}
-            >
+            <button type="button" role="tab" aria-selected={view === "preview"} className={view === "preview" ? "is-active" : ""} onClick={() => setView("preview")}>
               Preview
             </button>
           </div>
         )}
+        <div className="mdx-code__actions">
+          <button type="button" onClick={copy}>
+            {copied ? "Copied ✓" : "Copy"}
+          </button>
+          <button type="button" onClick={askAI}>
+            Ask AI
+          </button>
+        </div>
       </div>
 
       {view === "preview" && canPreview ? (
-        <iframe
-          title={`${language} preview`}
-          srcDoc={srcDoc}
-          sandbox="allow-scripts allow-forms allow-modals"
-          className="mdx-code__frame"
-        />
+        <iframe title={`${language} preview`} srcDoc={srcDoc} sandbox="allow-scripts" referrerPolicy="no-referrer" className="mdx-code__frame" />
       ) : (
-        <pre>
-          <code className={`language-${language}`}>{code}</code>
+        <pre tabIndex={0}>
+          <code className={`language-${language}`}>{highlighted}</code>
         </pre>
       )}
     </div>

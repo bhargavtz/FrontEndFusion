@@ -1,0 +1,110 @@
+---
+title: Fetch
+description: Request data and read JSON responses with the promise-based Fetch API.
+chapter: 55
+category: "JavaScript"
+order: 355
+---
+
+# Fetch
+
+`fetch()` is the modern way to make network requests in the browser. It returns a promise that resolves to a `Response` object, replacing the older callback-based `XMLHttpRequest`. Because it is promise-based, it works nicely with `async` and `await`.
+
+## The basics of fetch
+
+The simplest call takes a URL and returns a promise:
+
+```js
+fetch('/api/users')
+  .then(function(response){
+    if (!response.ok) throw new Error('Request failed');
+    return response.json();
+  })
+  .then(function(data){ console.log(data); })
+  .catch(function(err){ console.error(err); });
+```
+
+A resolved promise does not mean the request succeeded. A 404 or 500 still resolves; you must check `response.ok` or `response.status` yourself. Note also that `fetch()` only rejects on network failure, not on HTTP error statuses.
+
+## Reading response bodies
+
+The `Response` object offers several readers, each returning a promise: `json()` for JSON, `text()` for plain text, `blob()` for binary data, and `arrayBuffer()` for raw bytes. You can call only one of them, because a response body can be consumed a single time. `response.headers` exposes the returned headers.
+
+## Headers, POST data, and credentials
+
+For a POST request, pass a second argument with a `method`, `headers`, and a serialized `body`:
+
+```js
+fetch('/api/users', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ name: 'Ada' })
+});
+```
+
+Cookies are not sent to other origins by default. Set `credentials: 'include'` when you need them, and remember the server must also allow that origin. Browser security rules still apply, so the target must permit cross-origin requests.
+
+The demo cannot make real requests inside a sandboxed preview, so it swaps in a local mock that behaves like `fetch()`. The loading, parsing, and rendering code is identical to what you would write with the real API.
+
+```html
+<div class="fe-wrap">
+  <div class="fe-card">
+    <h2>Mock Fetch Loader</h2>
+    <p class="fe-sub">The button triggers a promise-based request, just like fetch().</p>
+    <button id="load" type="button">Load users</button>
+    <span id="status" class="fe-status"></span>
+    <ul id="list" class="fe-list"></ul>
+    <pre id="out" class="fe-out"></pre>
+  </div>
+</div>
+<style>
+  .fe-wrap{font-family:system-ui,sans-serif;background:#eff6ff;padding:18px;border-radius:14px;}
+  .fe-card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 6px 18px rgba(30,60,120,.08);}
+  .fe-card h2{margin:0 0 4px;font-size:18px;color:#1e3a8a;}
+  .fe-sub{margin:0 0 14px;color:#475569;font-size:13px;}
+  #load{border:0;background:#2563eb;color:#fff;padding:8px 14px;border-radius:8px;cursor:pointer;font-weight:600;}
+  .fe-status{margin-left:10px;font-size:12px;color:#64748b;}
+  .fe-list{margin:14px 0 12px;padding:0;list-style:none;}
+  .fe-list li{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px;color:#334155;}
+  .fe-out{background:#0f172a;color:#93c5fd;padding:12px;border-radius:8px;font-size:12px;white-space:pre-wrap;margin:0;}
+</style>
+<script>
+  const out = document.getElementById('out');
+  const status = document.getElementById('status');
+  const list = document.getElementById('list');
+  // A local stand-in for fetch() so the demo stays offline and sandbox-safe.
+  function mockFetch(url){
+    const users = [
+      { name: 'Ada Lovelace', role: 'Mathematician' },
+      { name: 'Grace Hopper', role: 'Computer Scientist' },
+      { name: 'Alan Turing', role: 'Pioneer' }
+    ];
+    return new Promise(function(resolve){
+      setTimeout(function(){
+        resolve({ ok: true, status: 200, json: function(){ return Promise.resolve(users); } });
+      }, 550);
+    });
+  }
+  status.textContent = typeof window.fetch === 'function'
+    ? 'Fetch API available (demo uses local data)'
+    : 'Fetch unavailable (fallback mock active)';
+  document.getElementById('load').addEventListener('click', function(){
+    list.innerHTML = '';
+    out.textContent = 'Requesting /api/users ...';
+    mockFetch('/api/users')
+      .then(function(response){
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        return response.json();
+      })
+      .then(function(data){
+        data.forEach(function(u){
+          const li = document.createElement('li');
+          li.textContent = u.name + ' - ' + u.role;
+          list.appendChild(li);
+        });
+        out.textContent = 'Received ' + data.length + ' records (status 200).';
+      })
+      .catch(function(err){ out.textContent = 'Error: ' + err.message; });
+  });
+</script>
+```

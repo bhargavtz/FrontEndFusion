@@ -1,61 +1,84 @@
 import Link from "next/link";
+import { domains } from "@/data/curriculum";
+
+const columns = [
+  {
+    title: "Learn",
+    links: [
+      { label: "Curriculum", href: "/learn" },
+      { label: "Technologies", href: "/technologies" },
+      { label: "Roadmaps", href: "/roadmaps" },
+      { label: "All guides", href: "/docs" },
+    ],
+  },
+  {
+    title: "Practice",
+    links: [
+      { label: "Exercises & interviews", href: "/practice" },
+      { label: "Projects", href: "/projects" },
+      { label: "Snippets", href: "/snippets" },
+      { label: "Book library", href: "/library" },
+    ],
+  },
+  {
+    title: "AI development",
+    links: [
+      { label: "AI-powered frontend", href: "/ai" },
+      { label: "AI-assisted workflow", href: "/technologies/ai-assisted-development" },
+      { label: "Coding agents", href: "/technologies/ai-coding-agents" },
+      { label: "MCP", href: "/technologies/mcp-frontend" },
+    ],
+  },
+  {
+    title: "Project",
+    links: [
+      { label: "Resources", href: "/resources" },
+      { label: "GitHub", href: "https://github.com/bhargavtz/FrontEndFusion" },
+      { label: "Contribute", href: "https://github.com/bhargavtz/FrontEndFusion/blob/main/README.md" },
+      { label: "Security", href: "https://github.com/bhargavtz/FrontEndFusion/blob/main/SECURITY.md" },
+    ],
+  },
+];
 
 export function SiteFooter() {
   return (
-    <footer
-      className="mt-24 border-t py-12 transition-all"
-      style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}
-    >
-      <div className="mx-auto max-w-6xl px-4">
-        <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
-          <div>
-            <p
-              className="text-base font-extrabold tracking-tight"
-              style={{
-                backgroundImage:
-                  "linear-gradient(120deg, var(--primary), var(--secondary))",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-                color: "transparent",
-              }}
-            >
-              FrontEndFusion
-            </p>
-            <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
-              A learning hub for HTML, CSS, and modern frontend.
+    <footer className="site-footer">
+      <div className="wrap">
+        <div className="site-footer__top">
+          <div className="site-footer__about">
+            <p className="brand__name">FrontEndFusion</p>
+            <p>
+              One place to learn frontend development — from HTML to AI-powered engineering. Read it, run it, build it.
             </p>
           </div>
-          <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-            <Link href="/docs" className="no-underline hover:underline">
-              Docs
-            </Link>
-            <Link href="/projects" className="no-underline hover:underline">
-              Projects
-            </Link>
-            <Link href="/snippets" className="no-underline hover:underline">
-              Snippets
-            </Link>
-            <Link href="/learning" className="no-underline hover:underline">
-              Learn
-            </Link>
-            <Link
-              href="https://github.com/bhargavtz/FrontEndFusion"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline underline-offset-2 hover:no-underline"
-            >
-              GitHub
-            </Link>
-          </nav>
+          {columns.map((column) => (
+            <nav key={column.title} aria-label={column.title}>
+              <h2>{column.title}</h2>
+              <ul>
+                {column.links.map((link) => (
+                  <li key={link.href}>
+                    {link.href.startsWith("http") ? (
+                      <a href={link.href} target="_blank" rel="noopener noreferrer">
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link href={link.href}>{link.label}</Link>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ))}
         </div>
-        <div
-          className="mt-8 flex flex-col items-start justify-between gap-2 border-t pt-6 text-xs sm:flex-row sm:items-center"
-          style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
-        >
-          <p>© 2024–2026 FrontEndFusion · MIT License</p>
-          <p>Built with Next.js, TypeScript, and Tailwind CSS 4.</p>
-        </div>
+        <p className="site-footer__topics">
+          {domains.map((domain, i) => (
+            <span key={domain.id}>
+              <Link href={domain.href}>{domain.title}</Link>
+              {i < domains.length - 1 ? " · " : ""}
+            </span>
+          ))}
+        </p>
+        <p className="site-footer__legal">© 2024–2026 FrontEndFusion · MIT License · Open source.</p>
       </div>
     </footer>
   );

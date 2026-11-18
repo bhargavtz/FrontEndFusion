@@ -1,0 +1,119 @@
+---
+title: Navigation Bars
+description: Build a basic horizontal menu and a semantic HTML5 navigation bar with accessible markup.
+chapter: 21
+category: "HTML"
+order: 31
+---
+
+# Navigation Bars
+
+A navigation bar is a list of links presented as a horizontal or responsive menu.
+
+## Basic navigation bar
+
+```html
+<nav class="basic-nav" aria-label="Basic example">
+  <a href="#home">Home</a>
+  <a href="#guides">Guides</a>
+  <a href="#about">About</a>
+</nav>
+
+<style>
+  .basic-nav {
+    display: flex;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: #0f172a;
+  }
+  .basic-nav a {
+    color: #e2e8f0;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .basic-nav a:hover {
+    color: #5eead4;
+  }
+</style>
+```
+
+This is the shortest version. It works, but a list gives assistive technology an item count and a clearer structure.
+
+## HTML5 navigation bar
+
+```html
+<nav class="site-nav" aria-label="Primary">
+  <a class="site-nav__brand" href="#top">Fieldnotes</a>
+  <ul class="site-nav__list">
+    <li><a href="#html">HTML</a></li>
+    <li><a href="#css">CSS</a></li>
+    <li><a href="#a11y">Accessibility</a></li>
+  </ul>
+</nav>
+
+<style>
+  .site-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: #111827;
+    color: #f9fafb;
+  }
+  .site-nav__brand {
+    color: inherit;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .site-nav__list {
+    display: flex;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .site-nav__list a {
+    color: #d1d5db;
+    text-decoration: none;
+  }
+  .site-nav__list a:hover,
+  .site-nav__list a:focus-visible {
+    color: #5eead4;
+    text-decoration: underline;
+  }
+</style>
+```
+
+## Responsive behaviour
+
+On narrow screens, a horizontal menu can wrap or collapse behind a menu button.
+
+```html
+<nav class="responsive-nav" aria-label="Responsive example">
+  <button
+    type="button"
+    aria-expanded="false"
+    aria-controls="menu-list"
+    onclick="const list = document.getElementById('menu-list'); const open = this.getAttribute('aria-expanded') === 'true'; this.setAttribute('aria-expanded', String(!open)); list.hidden = open;"
+  >
+    Menu
+  </button>
+  <ul id="menu-list" hidden>
+    <li><a href="#one">One</a></li>
+    <li><a href="#two">Two</a></li>
+    <li><a href="#three">Three</a></li>
+  </ul>
+</nav>
+```
+
+The button controls the list with `aria-controls` and reports its state with `aria-expanded`.
+
+## Accessibility checklist
+
+1. Wrap the main navigation in `nav`.
+2. Give each `nav` a unique `aria-label` when there is more than one.
+3. Use a list of links.
+4. Keep a visible focus style.
+5. Make the collapse control a real button.
+6. Do not remove the menu from keyboard access when it is visually hidden.

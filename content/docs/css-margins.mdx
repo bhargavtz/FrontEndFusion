@@ -1,0 +1,171 @@
+---
+title: Margins
+description: Space elements apart with the margin shorthand, centre blocks with auto, and predict when vertical margins collapse.
+chapter: 8
+category: "CSS"
+order: 108
+---
+
+# Margins
+
+Margin is the space outside an element's border. It is invisible, it never receives a click, and it is the single most common cause of a layout that looks almost right.
+
+## Shorthand and per-side values
+
+`margin` accepts one to four values, applied clockwise:
+
+```css
+.a { margin: 12px; }                 /* all sides */
+.b { margin: 12px 24px; }            /* vertical, horizontal */
+.c { margin: 12px 24px 8px; }        /* top, horizontal, bottom */
+.d { margin: 12px 24px 8px 4px; }    /* top, right, bottom, left */
+```
+
+The longhands are `margin-top`, `margin-right`, `margin-bottom`, and `margin-left`. Logical versions such as `margin-inline` and `margin-block` adapt to writing direction, which matters for right-to-left locales.
+
+Percentage margins resolve against the inline size of the containing block, even for `margin-top`, so a 10 percent top margin behaves like 10 percent of the parent's width. That surprises almost everyone once.
+
+## Collapsing and negative values
+
+Adjacent vertical margins collapse: two stacked blocks with a 20-pixel bottom margin and a 30-pixel top margin end up 30 pixels apart, not 50. The larger value wins. Collapsing also happens between a parent and its first child when no border, padding, or inline content separates them. Margins do not collapse in flex or grid containers, which is one reason those layouts feel more predictable.
+
+Negative margins pull an element towards its neighbours. They are legitimate for overlapping avatar stacks, decorative image crops, and full-bleed sections, but they should be a deliberate choice rather than a rescue.
+
+`margin: 0 auto` centres a block horizontally — but only if the element has a width smaller than its container. For a shrink-wrapped element, use `width: fit-content` first.
+
+## A complete example
+
+The team card uses `auto` to centre itself, a negative `margin-left` to overlap the avatars, and a centred button.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Team card</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 44px 20px;
+        font-family: system-ui, sans-serif;
+        background: #f6f4f1;
+        color: #2a2622;
+      }
+
+      .team {
+        max-width: 350px;
+        margin: 0 auto;
+        padding: 26px;
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 22px 44px -30px rgba(42, 38, 34, 0.5);
+      }
+
+      .team h1 {
+        margin: 0 0 6px;
+        font-size: 1.15rem;
+      }
+
+      .lead {
+        margin: 0 0 20px;
+        font-size: 0.82rem;
+        line-height: 1.5;
+        color: #7d7368;
+      }
+
+      .stack {
+        display: flex;
+        margin: 0 0 18px 6px;
+      }
+
+      .avatar {
+        width: 46px;
+        height: 46px;
+        display: grid;
+        place-items: center;
+        border: 3px solid #ffffff;
+        border-radius: 50%;
+        color: #ffffff;
+        font-size: 0.74rem;
+        font-weight: 700;
+      }
+
+      /* The overlap: each avatar pulls left over the previous one. */
+      .avatar + .avatar {
+        margin-left: -14px;
+      }
+
+      .avatar:nth-child(1) { background: linear-gradient(140deg, #f4a261, #e4572e); }
+      .avatar:nth-child(2) { background: linear-gradient(140deg, #7ba4ff, #4361c9); }
+      .avatar:nth-child(3) { background: linear-gradient(140deg, #59c3a5, #21806a); }
+      .avatar:nth-child(4) { background: linear-gradient(140deg, #c9a7ff, #7c5cf0); }
+
+      .avatar--more {
+        background: #efeae3;
+        color: #6d6258;
+      }
+
+      .stats {
+        display: flex;
+        justify-content: space-between;
+        margin: 0 0 20px;
+        padding-top: 18px;
+        border-top: 1px solid #f0ebe4;
+        font-size: 0.7rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #9a9086;
+      }
+
+      .stats b {
+        display: block;
+        margin-top: 4px;
+        font-size: 1rem;
+        letter-spacing: 0;
+        text-transform: none;
+        color: #2a2622;
+      }
+
+      .invite {
+        display: block;
+        width: fit-content;
+        margin: 0 auto;
+        padding: 10px 22px;
+        border: 0;
+        border-radius: 999px;
+        background: #2a2622;
+        color: #f6f4f1;
+        font: inherit;
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <article class="team">
+      <h1>Design guild</h1>
+      <p class="lead">A small group shipping the interface system, one component at a time.</p>
+
+      <div class="stack">
+        <span class="avatar">AR</span>
+        <span class="avatar">KM</span>
+        <span class="avatar">JP</span>
+        <span class="avatar">LN</span>
+        <span class="avatar avatar--more">+9</span>
+      </div>
+
+      <div class="stats">
+        <div>Members<b>14</b></div>
+        <div>Projects<b>32</b></div>
+        <div>Since<b>2019</b></div>
+      </div>
+
+      <button class="invite">Invite a teammate</button>
+    </article>
+  </body>
+</html>
+```
+
+When gap is what you actually want between children, `gap` on a flex or grid parent is more reliable than margins, because there is no last-child leftover and no collapsing to reason about.

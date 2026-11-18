@@ -1,0 +1,99 @@
+---
+title: Performance Tips
+description: Measure and improve JavaScript speed with memoization, batched DOM updates, and smarter variable use.
+chapter: 104
+category: "JavaScript"
+order: 404
+---
+
+# Performance Tips
+
+Performance work should start with measurement, not guesswork. Modern engines are fast, and the bottleneck is often the DOM or the network rather than a loop. Use a profiler and `performance.now()` to find the real cost, apply one change, then measure again.
+
+## Avoid slow patterns in hot code
+
+`try`/`catch` blocks used to carry a heavy penalty in older engines, so avoid wrapping performance-critical loops in them; validate once outside the loop instead. Repeatedly touching the DOM is expensive because each write may force layout. Build markup in a string or a `DocumentFragment` and insert it once. Prefer local variables over repeatedly reading globals, object properties, or indexed array values inside a tight loop: a local reference is cheaper to resolve.
+
+Be consistent about number types. Mixing integers and differently shaped numeric values can prevent an engine from using its fast integer representation. Initializing object properties to `null` or a stable value up front keeps object shapes predictable, which helps hidden-class optimization. Similarly, reuse objects and arrays in a loop when you can clear and refill them rather than allocating fresh ones every iteration.
+
+## Memoization and benchmarking
+
+Memoization caches the result of an expensive pure function keyed by its arguments. Recursive calculations such as Fibonacci show a dramatic difference: the naive version recomputes the same subtree many times, while the cached version computes each value once. This is a classic example of trading memory for speed.
+
+The demo benchmarks naive versus memoized Fibonacci with `performance.now()` and compares adding many DOM rows one at a time against a single batch insert.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Performance benchmark</title>
+    <style>
+      body { margin: 0; padding: 24px 16px; font-family: system-ui, sans-serif;
+        color: #2b2b36; background: linear-gradient(135deg, #eef6f5, #f6f1fb 80%); }
+      .card { max-width: 640px; margin: 0 auto; padding: 22px; background: #fff;
+        border-radius: 18px; box-shadow: 0 20px 40px -28px rgba(40,60,55,.42); }
+      h1 { margin: 0 0 12px; font-size: 1.15rem; }
+      button { padding: 8px 11px; border: 0; border-radius: 9px; color: #fff;
+        background: #2f8d83; font: inherit; font-size: .78rem; cursor: pointer; }
+      pre { margin: 14px 0 0; padding: 12px; min-height: 120px; border-radius: 10px;
+        background: #20262a; color: #cdf0e8; font-size: .76rem; line-height: 1.65;
+        white-space: pre-wrap; }
+      #rows { margin-top: 12px; max-height: 90px; overflow: auto; font-size: .74rem; color: #666; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Measure, then optimize</h1>
+      <button id="run">Run benchmarks</button>
+      <pre id="out">Press the button to benchmark two patterns.</pre>
+      <div id="rows"></div>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      var rows = document.getElementById("rows");
+
+      function fibNaive(n) { return n < 2 ? n : fibNaive(n - 1) + fibNaive(n - 2); }
+      function memoized() {
+        var cache = {};
+        function fib(n) {
+          if (n in cache) return cache[n];
+          cache[n] = n < 2 ? n : fib(n - 1) + fib(n - 2);
+          return cache[n];
+        }
+        return fib;
+      }
+
+      document.getElementById("run").addEventListener("click", function () {
+        var n = 28;
+        var t0 = performance.now();
+        var a = fibNaive(n);
+        var naiveMs = performance.now() - t0;
+
+        var fib = memoized();
+        var t1 = performance.now();
+        var b = fib(n);
+        var memoMs = performance.now() - t1;
+
+        rows.textContent = "";
+        var frag = document.createDocumentFragment();
+        var t2 = performance.now();
+        for (var i = 0; i < 300; i++) {
+          var span = document.createElement("span");
+          span.textContent = i + " ";
+          frag.appendChild(span);
+        }
+        rows.appendChild(frag);
+        var domMs = performance.now() - t2;
+
+        out.textContent =
+          "fib(" + n + ") = " + a + " / " + b + "\n" +
+          "naive     : " + naiveMs.toFixed(2) + " ms\n" +
+          "memoized  : " + memoMs.toFixed(2) + " ms  <- cache wins\n" +
+          "batch DOM : " + domMs.toFixed(2) + " ms for 300 nodes";
+      });
+    </script>
+  </body>
+</html>
+```

@@ -1,0 +1,122 @@
+---
+title: Animations
+description: Define multi-step motion with @keyframes and animation properties, and keep it smooth with will-change.
+chapter: 27
+category: "CSS"
+order: 127
+---
+
+# Animations
+
+Transitions need a state change. Animations do not: `@keyframes` describes a sequence of styles and the browser plays it on a loop, on load, or whenever you apply the animation.
+
+## Keyframes and properties
+
+```css
+@keyframes drift {
+  0%   { transform: translateY(0); opacity: 0.6; }
+  50%  { transform: translateY(-10px); opacity: 1; }
+  100% { transform: translateY(0); opacity: 0.6; }
+}
+```
+
+The `animation` shorthand accepts name, duration, timing function, delay, iteration count, direction, fill mode, and play state:
+
+```css
+.dot {
+  animation: drift 2.4s ease-in-out 0s infinite alternate both;
+}
+```
+
+The longhands are `animation-name`, `animation-duration`, `animation-timing-function`, `animation-delay`, `animation-iteration-count`, `animation-direction`, `animation-fill-mode`, and `animation-play-state`. `infinite` repeats forever, `alternate` reverses on each cycle, and `both` keeps the first and last frame styles before and after playback. Multiple animations can be comma-separated, which is how you combine a fade with a movement.
+
+**Transition or animation?** Choose a transition when there are exactly two states driven by interaction — hover, focus, checked. It is shorter to write and easy to reverse. Choose an animation when you need three or more steps, looping, staggered delays, or motion that starts without user input. A helpful rule: transitions react, animations perform.
+
+## Performance
+
+Browsers can animate `transform` and `opacity` on the compositor without recalculating layout. Animating `width`, `top`, `left`, or `box-shadow` forces layout or paint on every frame and drops frames on slower devices. Move elements with `transform: translate()` instead of `top`.
+
+`will-change: transform` hints that an element is about to animate so the browser can promote it to its own layer ahead of time. Apply it narrowly and preferably just before the animation starts; leaving it on many elements wastes memory and can make text render blurry.
+
+Respect `prefers-reduced-motion`: wrap decorative animation in a media query that shortens or removes it.
+
+## Demo: staggered loading dots
+
+```html
+<div class="loader" role="status" aria-label="Loading results">
+  <div class="loader__dots">
+    <span class="loader__dot"></span>
+    <span class="loader__dot"></span>
+    <span class="loader__dot"></span>
+  </div>
+  <p class="loader__label">Fetching your dashboard…</p>
+</div>
+
+<style>
+  body {
+    margin: 0;
+    min-height: 60vh;
+    display: grid;
+    place-items: center;
+    padding: 2rem;
+    background: radial-gradient(circle at 30% 20%, #1e293b, #0b1120 70%);
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+  .loader {
+    display: grid;
+    justify-items: center;
+    gap: 1.25rem;
+    padding: 2.25rem 2.75rem;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    backdrop-filter: blur(6px);
+  }
+  .loader__dot {
+    display: block;
+    width: 0.85rem;
+    height: 0.85rem;
+    margin: 0 0.3rem;
+    border-radius: 50%;
+    background: #38bdf8;
+    box-shadow: 0 0 16px rgba(56, 189, 248, 0.65);
+    animation: pulse 1.4s ease-in-out infinite;
+    will-change: transform, opacity;
+  }
+  .loader__dot:nth-child(2) {
+    animation-delay: 160ms;
+    background: #a78bfa;
+  }
+  .loader__dot:nth-child(3) {
+    animation-delay: 320ms;
+    background: #34d399;
+  }
+  .loader__dots {
+    display: flex;
+  }
+  .loader__label {
+    margin: 0;
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    color: #94a3b8;
+  }
+  @keyframes pulse {
+    0%, 100% {
+      transform: translateY(0) scale(0.85);
+      opacity: 0.45;
+    }
+    50% {
+      transform: translateY(-14px) scale(1);
+      opacity: 1;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .loader__dot {
+      animation: none;
+      opacity: 0.9;
+    }
+  }
+</style>
+```
+
+The dots sit in a flex row while the label stays below in the grid. All three share the same keyframes; the staggered `animation-delay` values turn identical motion into a wave instead of three dots blinking in unison.

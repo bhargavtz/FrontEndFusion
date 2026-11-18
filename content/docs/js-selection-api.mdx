@@ -1,0 +1,101 @@
+---
+title: Selection API
+description: Inspect, clear and create text selections in the page with the Selection and Range interfaces.
+chapter: 88
+category: "JavaScript"
+order: 388
+---
+
+# Selection API
+
+The Selection API represents the text a user has highlighted, whether by dragging with a mouse, using the keyboard, or through script. It is centred on the `Selection` object returned by `window.getSelection()` (also available as `document.getSelection()`), together with `Range` objects that describe a continuous span of a document.
+
+## Reading and clearing a selection
+
+`selection.toString()` gives the plain text of the highlighted span, which is the quickest way to see what the user picked. `selection.rangeCount` tells you how many ranges exist; most browsers allow one. To clear everything, call `selection.removeAllRanges()`, or `selection.empty()` in older code. Emptying the selection removes the highlight but leaves the document untouched.
+
+## Selecting an element programmatically
+
+To select content yourself, create a range with `document.createRange()`, call `range.selectNodeContents(element)`, remove any existing ranges, then add the new one with `selection.addRange(range)`. That highlights the entire contents of the element without altering the markup. For a precise substring instead, use `range.setStart()` and `range.setEnd()` with a text node and character offsets.
+
+Listening for the `selectionchange` event on `document` lets you react as the user drags — useful for a "copy selected text" button that enables itself only when something is highlighted.
+
+The demo has a paragraph to highlight and three buttons that exercise these calls. Each action is logged below.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Selection API playground</title>
+    <style>
+      body { margin: 0; padding: 24px 16px; font-family: system-ui, sans-serif; color: #27313f; background: linear-gradient(135deg, #eaf3f1, #f7eef3 80%); }
+      .card { max-width: 560px; margin: 0 auto; padding: 22px; background: #fff; border-radius: 20px; box-shadow: 0 20px 42px -30px rgba(30, 70, 60, .5); }
+      h1 { margin: 0 0 6px; font-size: 1.15rem; }
+      .lead { margin: 0 0 14px; font-size: .84rem; color: #60706b; }
+      .text { padding: 14px 16px; border: 1px dashed #b9d2ca; border-radius: 12px; background: #f6fbfa; font-size: .9rem; line-height: 1.65; user-select: text; }
+      .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+      button { padding: 8px 12px; border: 0; border-radius: 9px; background: #2f7d6b; color: #fff; font: inherit; font-size: .78rem; cursor: pointer; }
+      button:hover { background: #246454; }
+      pre { margin: 14px 0 0; min-height: 130px; padding: 12px; border-radius: 11px; background: #1d2a2a; color: #cdf1e5; font-size: .75rem; line-height: 1.6; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Selection API playground</h1>
+      <p class="lead">Drag over the paragraph, then try the buttons.</p>
+      <div class="text" id="text">
+        JavaScript can read the text you highlight. Try selecting just a few words, or press the button to let a Range select this whole paragraph for you.
+      </div>
+      <div class="row">
+        <button id="show">Show selection</button>
+        <button id="clear">Clear selection</button>
+        <button id="select">Select paragraph</button>
+      </div>
+      <pre id="out"></pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      var text = document.getElementById("text");
+      var changes = 0;
+
+      function line(s) { out.textContent += s + "\n"; }
+      function current() { return window.getSelection ? window.getSelection() : null; }
+
+      document.getElementById("show").addEventListener("click", function () {
+        var sel = current();
+        if (!sel) { line("Selection API is unavailable."); return; }
+        var value = sel.toString();
+        line("selection.toString() = " + JSON.stringify(value) + "  (ranges: " + sel.rangeCount + ")");
+      });
+
+      document.getElementById("clear").addEventListener("click", function () {
+        var sel = current();
+        if (!sel) return;
+        sel.removeAllRanges();
+        line("removeAllRanges() called — highlight removed.");
+      });
+
+      document.getElementById("select").addEventListener("click", function () {
+        var sel = current();
+        if (!sel || !document.createRange) { line("Range API unavailable."); return; }
+        var range = document.createRange();
+        range.selectNodeContents(text);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        line("selectNodeContents() + addRange() selected " + sel.toString().length + " characters.");
+      });
+
+      if (document.addEventListener) {
+        document.addEventListener("selectionchange", function () {
+          changes++;
+          var s = current();
+          line("selectionchange #" + changes + " -> " + JSON.stringify(s ? s.toString().slice(0, 40) : ""));
+        });
+      }
+      line("Ready — drag across the paragraph above.");
+    </script>
+  </body>
+</html>
+```

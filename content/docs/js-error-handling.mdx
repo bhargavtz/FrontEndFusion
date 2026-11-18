@@ -1,0 +1,100 @@
+---
+title: Error Handling
+description: Work with Error objects, the built-in error types, and the way exceptions interact with promises and control flow.
+chapter: 97
+category: "JavaScript"
+order: 397
+---
+
+# Error Handling
+
+Errors are values that describe something going wrong. Handling them deliberately keeps an application from failing silently or crashing at the first unexpected input. JavaScript uses exceptions for synchronous failures and rejected promises for asynchronous ones.
+
+## Error objects and built-in types
+
+Throwing creates an `Error` object with a `message` and a `stack` trace. JavaScript also provides specialized constructors: `TypeError` for a value of the wrong kind, `ReferenceError` for an undeclared name, `RangeError` for a value outside the allowed range, `SyntaxError` for invalid code, and `URIError` for a bad encoded URL. You can define your own error type by extending `Error`, which lets callers distinguish expected application errors from genuine bugs.
+
+A `try` block wraps risky work; `catch` receives the thrown value; `finally` always runs, which makes it the right place to release resources. Catch sparingly: wrapping everything hides bugs. Catch where you can actually recover or add useful context.
+
+## Errors and promises
+
+Inside an `async` function, a thrown exception becomes a rejected promise, so `try`/`catch` works across an `await`. With raw promises, use `.catch()` at the end of the chain. An important detail is ordering: `.catch()` only handles rejections that happen *before* it in the chain, so placement changes behavior. Also remember that a `throw` inside a `.then()` is captured as a rejection, while a `throw` inside a `setTimeout` callback is not — that one escapes to the global handler.
+
+The demo throws several error types inside `try`/`catch`, inspects their properties, and shows a rejected promise being handled. Each result appears in a visible panel.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Error handling lab</title>
+    <style>
+      body { margin: 0; padding: 24px 16px; font-family: system-ui, sans-serif;
+        color: #2b2b36; background: linear-gradient(135deg, #f6f0fb, #eef6fb 80%); }
+      .card { max-width: 640px; margin: 0 auto; padding: 22px; background: #fff;
+        border-radius: 18px; box-shadow: 0 20px 40px -28px rgba(45,35,80,.45); }
+      h1 { margin: 0 0 12px; font-size: 1.15rem; }
+      .row { display: flex; flex-wrap: wrap; gap: 8px; }
+      button { padding: 8px 11px; border: 0; border-radius: 9px; color: #fff;
+        background: #6a4fa6; font: inherit; font-size: .76rem; cursor: pointer; }
+      button:hover { background: #573d8c; }
+      pre { margin: 14px 0 0; padding: 12px; min-height: 150px; border-radius: 10px;
+        background: #202230; color: #ffe0d6; font-size: .76rem; line-height: 1.6;
+        white-space: pre-wrap; word-break: break-word; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Catch an error type</h1>
+      <div class="row">
+        <button data-kind="type">TypeError</button>
+        <button data-kind="reference">ReferenceError</button>
+        <button data-kind="range">RangeError</button>
+        <button data-kind="custom">Custom Error</button>
+        <button data-kind="promise">Rejected promise</button>
+      </div>
+      <pre id="out">Pick a button to throw and catch an error.</pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      function report(label, err) {
+        out.textContent = label + "\n" +
+          "  name    : " + err.name + "\n" +
+          "  message : " + err.message + "\n" +
+          "  is Error: " + (err instanceof Error) + "\n" +
+          "  stack   : " + String(err.stack).split("\n")[0];
+      }
+      function AppError(message) {
+        this.name = "AppError";
+        this.message = message;
+        this.stack = new Error(message).stack;
+      }
+      AppError.prototype = Object.create(Error.prototype);
+
+      var makers = {
+        type: function () { var n = null; return n.toFixed(2); },
+        reference: function () { return undeclaredName + 1; },
+        range: function () { return new Array(-1); },
+        custom: function () { throw new AppError("the cart is empty"); }
+      };
+      document.querySelectorAll("button[data-kind]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var kind = btn.dataset.kind;
+          if (kind === "promise") {
+            Promise.reject(new TypeError("async lookup failed"))
+              .catch(function (err) { report("Caught from a rejected promise:", err); });
+            return;
+          }
+          try {
+            makers[kind]();
+            out.textContent = "No error was thrown for " + kind + ".";
+          } catch (err) {
+            report("Caught in try/catch:", err);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
+```

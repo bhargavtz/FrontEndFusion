@@ -5,6 +5,10 @@ import { docs, getDoc } from "@/data/docs";
 import { MdxContent } from "@/components/mdx/mdx-content";
 import { docIcon } from "@/lib/doc-icons";
 import { extractHeadings, stripLeadingTitle } from "@/lib/docs";
+import { technologies } from "@/data/technologies";
+import { lessonsFor } from "@/lib/learn";
+import { MarkDone } from "@/components/mark-done";
+import { LearningContext } from "@/components/assistant/learning-context";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -47,6 +51,7 @@ export default async function DocPage({ params }: PageProps) {
   const source = stripLeadingTitle(doc.body);
   const headings = extractHeadings(source);
   const icon = docIcon(doc.slug);
+  const parentTech = technologies.find((tech) => lessonsFor(tech).some((lesson) => lesson.slug === doc.slug));
 
   const index = docs.findIndex((item) => item.slug === doc.slug);
   const previous = index > 0 ? docs[index - 1] : null;
@@ -68,6 +73,7 @@ export default async function DocPage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <LearningContext topic={doc.title} location={`/docs/${doc.slug}`} />
       <main id="main-content" className="mx-auto max-w-6xl px-4 py-12">
       <nav aria-label="Breadcrumb" className="text-sm">
         <ol
@@ -112,6 +118,11 @@ export default async function DocPage({ params }: PageProps) {
             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
               {doc.title}
             </h1>
+            {parentTech && (
+              <p className="mt-2 text-sm" style={{ color: "var(--text-muted)" }}>
+                Part of <Link href={`/technologies/${parentTech.slug}`}>{parentTech.name}</Link>
+              </p>
+            )}
             <p
               className="mt-3 max-w-2xl text-base leading-relaxed"
               style={{ color: "var(--text-muted)" }}
@@ -148,6 +159,10 @@ export default async function DocPage({ params }: PageProps) {
           )}
 
           <MdxContent source={source} />
+
+          <div className="mt-10">
+            <MarkDone id={`lesson:${doc.slug}`} label="Mark lesson complete" />
+          </div>
 
           <nav
             className="mt-12 grid grid-cols-1 gap-4 border-t pt-8 sm:grid-cols-2"

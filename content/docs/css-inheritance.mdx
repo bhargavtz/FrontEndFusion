@@ -1,0 +1,116 @@
+---
+title: Inheritance
+description: Understand which properties flow from parent to child, use the inherit keyword deliberately, and reset styles without surprises.
+chapter: 42
+category: "CSS"
+order: 142
+---
+
+# Inheritance
+
+Some CSS properties travel down the tree on their own. Set `color` on `body` and every paragraph, link, and list item below it picks that colour up, even though none of them declare it. This cascade behaviour is inheritance, and it exists so you do not have to repeat typography on every element.
+
+Inheritance is not universal. It depends on the property's definition, not on the selector you used.
+
+## What inherits, and what does not
+
+The inherited family is mostly about text and lists:
+
+- `color`, `font-family`, `font-size`, `font-style`, `font-weight`, `font-variant`
+- `line-height`, `letter-spacing`, `word-spacing`, `text-align`, `text-indent`, `text-transform`
+- `white-space`, `visibility`, `cursor`, `direction`, `list-style` (`list-style-type`, `list-style-position`, and `list-style-image`)
+
+The non-inherited family is mostly about boxes and paint:
+
+- `background`, `border`, `margin`, `padding`, `width`, `height`
+- `display`, `position`, `float`, `overflow`
+- `box-shadow`, `opacity`, `transform`
+
+That split makes sense: a border drawn on a section should not reappear around every heading inside it. A font size, by contrast, needs to reach the text.
+
+## Inheriting on purpose
+
+For a non-inherited property you can opt in with the `inherit` keyword. `border-color: inherit` makes a child's border match its parent's, and `font: inherit` on a form control is the single most useful example: inputs, buttons, and selects use the operating system font by default, which is why they so often look out of place.
+
+Related keywords:
+
+- `initial` — the property's specification default, not the browser's default.
+- `unset` — inherit if the property naturally inherits, otherwise behave as `initial`.
+- `revert` — fall back to the browser or user-agent stylesheet.
+- `all: unset` — wipe every declaration at once, useful for a bare-bones button reset.
+
+Note that `line-height` inherits as a computed number when you use a unitless value such as `1.6`, but as a fixed length when you write `24px`. The unitless form rescales per element and is almost always the better choice.
+
+Later rules always win over inheritance: an inherited value has the lowest possible priority, so any matching declaration on the element itself overrides it, no matter how specific the parent's selector was.
+
+```html
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(160deg, #f7f2e8, #efe4d2);
+    font-family: Georgia, "Times New Roman", serif;
+  }
+  .quote {
+    width: min(580px, 92vw);
+    margin: 0;
+    padding: 34px 36px 30px;
+    background: #fffdf8;
+    border: 1px solid #e6dac4;
+    border-left: 6px solid #a2561f;
+    border-radius: 16px;
+    box-shadow: 0 26px 50px -32px rgba(84, 58, 22, 0.6);
+    /* these two inherit all the way down */
+    color: #2c2418;
+    line-height: 1.7;
+  }
+  .quote blockquote {
+    margin: 0;
+    font-size: 1.22rem;
+  }
+  .quote em { color: #a2561f; }
+  .meta {
+    margin-top: 22px;
+    padding-top: 16px;
+    border-top: 1px dashed #e0d2b8;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #8a7a5f;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  /* buttons do not inherit typography by default */
+  .meta button {
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    padding: 7px 14px;
+    background: transparent;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .meta button:hover { background: #a2561f; border-color: #a2561f; color: #fffdf8; }
+</style>
+
+<figure class="quote">
+  <blockquote>
+    Good typography is invisible until it is missing — then every reader feels it, even if nobody can <em>name</em> what changed.
+  </blockquote>
+  <figcaption class="meta">
+    <span>Inherited colour &amp; line-height</span>
+    <button type="button">font: inherit</button>
+  </figcaption>
+</figure>
+```
+
+Resetting inheritance is usually a matter of naming the element and giving it an explicit value. Reach for `all: unset` only on small, self-contained components — it also removes padding and borders, which you then have to put back.

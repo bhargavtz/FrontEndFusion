@@ -1,0 +1,130 @@
+---
+title: Date Comparison
+description: Compare Date objects reliably with relational operators and calculate the time between two moments.
+chapter: 9
+category: "JavaScript"
+order: 309
+---
+
+# Date Comparison
+
+Dates often need to be ordered: is this deadline in the past, which of two events happens first, and how many days separate them? JavaScript makes this straightforward because each `Date` holds a numeric value underneath.
+
+## Comparing dates directly
+
+You can use the relational operators `<`, `<=`, `>`, and `>=` on two `Date` objects. JavaScript converts each object to its numeric timestamp before comparing, so an earlier date is simply "less than" a later one.
+
+Equality is different. Two separate `Date` objects are never strictly equal, even when they describe the same moment, because `===` compares object identity rather than content. To test whether two dates represent the same instant, compare their timestamps with `getTime()` or use the `valueOf()` result. The `+` operator also forces a date to its numeric form.
+
+```js
+const a = new Date("2026-01-01");
+const b = new Date("2026-06-01");
+a < b;                       // true
+a.getTime() === b.getTime(); // false
+```
+
+## Calculating the difference
+
+Subtracting one date from another gives the difference in milliseconds. Divide by the number of milliseconds in a day, `1000 * 60 * 60 * 24`, to get a fractional number of days. Use `Math.round()` or `Math.floor()` depending on whether you want the nearest whole day or whole days elapsed.
+
+Be careful with calendar arithmetic across daylight-saving changes: a "day" measured in milliseconds can be 23 or 25 hours. For pure calendar counting, compare year, month, and day parts instead.
+
+The demo takes two dates and reports which comes first plus the gap between them in several units.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Date comparison</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px 18px;
+        font-family: system-ui, sans-serif;
+        color: #262c36;
+        background: linear-gradient(135deg, #eef7f7, #f7f0ff 75%);
+      }
+      .card {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 22px;
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 20px 42px -30px rgba(30, 60, 60, 0.5);
+      }
+      h1 { margin: 0 0 14px; font-size: 1.15rem; }
+      .fields { display: flex; gap: 10px; }
+      label { flex: 1; font-size: 0.78rem; color: #5a6b72; }
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 4px;
+        padding: 9px;
+        border: 1px solid #cfe0e0;
+        border-radius: 9px;
+        font: inherit;
+        font-size: 0.85rem;
+      }
+      button {
+        width: 100%;
+        margin-top: 14px;
+        padding: 10px;
+        border: 0;
+        border-radius: 10px;
+        background: #177c78;
+        color: #ffffff;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      pre {
+        margin: 14px 0 0;
+        min-height: 110px;
+        padding: 12px;
+        border-radius: 10px;
+        background: #142726;
+        color: #c7f3ea;
+        font-size: 0.78rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Which date comes first?</h1>
+      <div class="fields">
+        <label>First date<input type="date" id="a" value="2026-01-15" /></label>
+        <label>Second date<input type="date" id="b" value="2026-08-20" /></label>
+      </div>
+      <button id="compare">Compare</button>
+      <pre id="out">Pick two dates and press Compare.</pre>
+    </div>
+    <script>
+      const out = document.getElementById("out");
+      const DAY = 1000 * 60 * 60 * 24;
+      document.getElementById("compare").addEventListener("click", function () {
+        const a = new Date(document.getElementById("a").value);
+        const b = new Date(document.getElementById("b").value);
+        if (isNaN(a.getTime()) || isNaN(b.getTime())) {
+          out.textContent = "Please choose two valid dates.";
+          return;
+        }
+        const diffMs = b.getTime() - a.getTime();
+        const abs = Math.abs(diffMs);
+        const verdict = a < b ? "the first date is earlier" :
+          a > b ? "the first date is later" : "both dates are equal";
+        out.textContent =
+          "a < b           -> " + (a < b) + "\n" +
+          "a > b           -> " + (a > b) + "\n" +
+          "same instant?   -> " + (a.getTime() === b.getTime()) + "\n" +
+          "verdict         -> " + verdict + "\n" +
+          "difference      -> " + Math.round(abs / DAY) + " days" +
+          " (" + (abs / DAY / 7).toFixed(1) + " weeks)";
+      });
+    </script>
+  </body>
+</html>
+```

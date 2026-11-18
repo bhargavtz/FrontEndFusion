@@ -1,0 +1,81 @@
+---
+title: Arrow Functions
+description: Write compact functions with implicit returns and lexical this binding.
+chapter: 62
+category: "JavaScript"
+order: 362
+---
+
+# Arrow Functions
+
+Arrow functions are a shorter syntax for writing function expressions. They shine in callbacks and array methods, but they also behave differently from regular functions in ways worth understanding before you use them everywhere.
+
+## Syntax and implicit return
+
+When there is exactly one parameter, the parentheses can be dropped. If the body is a single expression, you can omit the braces and the `return` keyword; the expression value is returned automatically. This is called an implicit return. A parenthesized object literal is needed when you want to return an object, because bare braces would be read as a function body.
+
+```js
+const square = n => n * n;
+const make = name => ({ name: name, active: true });
+const sum = (a, b) => a + b;
+```
+
+## Lexical this
+
+The biggest difference is how `this` is handled. An arrow function has no `this` of its own; it captures `this` from the surrounding scope at creation time. This is called lexical binding, and it removes the need for workarounds like saving `self = this` inside timers or array callbacks. It also means arrow functions are poor choices for object methods that need to refer to the object itself.
+
+## Limitations
+
+Arrow functions cannot be used as constructors and cannot be called with `new`. They also do not have their own `arguments` object; rest parameters are the modern alternative. Because they are anonymous, stack traces may show less helpful names unless you assign them to a variable. Use them for short callbacks and transformations, and keep regular functions for constructors, methods, and anything requiring dynamic `this`.
+
+The playground applies arrows through `map`, `filter`, and `reduce` on a set of scores, then shows how a timer method keeps its object context thanks to lexical binding.
+
+```html
+<div class="af-wrap">
+  <div class="af-card">
+    <h2>Score Analyzer</h2>
+    <p class="af-sub">Each button uses an arrow function as a callback.</p>
+    <button data-mode="squares" type="button">Squares</button>
+    <button data-mode="passing" type="button">Passing</button>
+    <button data-mode="average" type="button">Average</button>
+    <pre id="out" class="af-out"></pre>
+  </div>
+</div>
+<style>
+  .af-wrap{font-family:system-ui,sans-serif;background:#eef2ff;padding:18px;border-radius:14px;}
+  .af-card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 6px 18px rgba(40,50,120,.08);}
+  .af-card h2{margin:0 0 4px;font-size:18px;color:#3730a3;}
+  .af-sub{margin:0 0 14px;color:#4338ca;font-size:13px;}
+  .af-card button{border:0;background:#4f46e5;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;margin-right:6px;}
+  .af-out{background:#0f172a;color:#a5b4fc;padding:12px;border-radius:8px;font-size:12px;line-height:1.7;white-space:pre-wrap;margin:14px 0 0;}
+</style>
+<script>
+  const out = document.getElementById('out');
+  const scores = [4, 7, 9, 2, 8, 5];
+  // Lexical this: the arrow inside start() keeps the object's this.
+  const timer = {
+    ticks: 0,
+    start: function(){
+      const step = () => { this.ticks++; return this.ticks; };
+      return step() + step();
+    }
+  };
+  function run(mode){
+    let result;
+    if (mode === 'squares'){
+      result = 'Squares: ' + JSON.stringify(scores.map(n => n * n));
+    } else if (mode === 'passing'){
+      result = 'Passing (>=5): ' + JSON.stringify(scores.filter(n => n >= 5));
+    } else {
+      const total = scores.reduce((acc, n) => acc + n, 0);
+      result = 'Average: ' + (total / scores.length).toFixed(2);
+    }
+    out.textContent = result + '\n\nLexical this ticks: ' + timer.start()
+      + '\n(scores: ' + scores.join(', ') + ')';
+  }
+  document.querySelectorAll('[data-mode]').forEach(function(btn){
+    btn.addEventListener('click', function(){ run(btn.getAttribute('data-mode')); });
+  });
+  run('squares');
+</script>
+```

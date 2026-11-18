@@ -1,0 +1,139 @@
+---
+title: Namespacing
+description: Group related functions and objects under a single global name so scripts can grow without colliding.
+chapter: 23
+category: "JavaScript"
+order: 323
+---
+
+# Namespacing
+
+A namespace is simply an object used as a container. Instead of scattering dozens of names across the global scope, you create one well-chosen global and hang everything else from it. Other scripts can then coexist without silently overwriting your helpers.
+
+## Why one global is enough
+
+Browser scripts share the same global object. Two files that both declare `format()` will clash, and the later definition wins. Wrapping your code in a single object such as `var App = App || {};` avoids that: you add `App.format` instead of a bare `format`, and the original value is preserved if another part of the app already created the container.
+
+The `|| {}` pattern is important. It reuses an existing namespace rather than replacing it, which lets separate files contribute to the same container in any load order.
+
+## Nesting related modules
+
+Large namespaces benefit from sub-objects. An application might keep string helpers in `App.text`, drawing code in `App.ui`, and network logic in `App.data`. Each group stays small and discoverable, and a reader can see where a function belongs from its name alone.
+
+Nested namespaces also make alias tricks easy. You can copy a deeply buried helper into a short local variable at the top of a function, keeping call sites readable while the public structure stays organized.
+
+A namespace also gives you a natural place for constants and configuration. Instead of magic values sprinkled through a file, group them under `App.config` and change them in one spot. Keep the top level small: a handful of well-named modules is easier to navigate than a deep tree of single-function folders.
+
+## Demo: a dashboard toolkit
+
+```html
+<div class="toolkit">
+  <h2>Dashboard toolkit</h2>
+  <p>Every helper lives inside one global object named Fusion.</p>
+  <label for="text">Your text</label>
+  <input id="text" type="text" value="namespaces keep things tidy" />
+  <div class="toolkit__buttons">
+    <button data-op="upper" type="button">UPPER</button>
+    <button data-op="title" type="button">Title Case</button>
+    <button data-op="reverse" type="button">Reverse</button>
+    <button data-op="count" type="button">Word Count</button>
+  </div>
+  <div id="card" class="toolkit__card">Result appears here.</div>
+  <pre id="out" class="toolkit__out">Globals created by this demo: Fusion</pre>
+</div>
+
+<style>
+  body {
+    margin: 0;
+    padding: 2rem 1.25rem;
+    background: #eef1f6;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    color: #2c3550;
+  }
+  .toolkit {
+    max-width: 34rem;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 18px;
+    padding: 1.5rem;
+    box-shadow: 0 18px 40px -28px rgba(40, 50, 80, 0.65);
+  }
+  .toolkit h2 { margin: 0 0 0.4rem; font-size: 1.25rem; }
+  .toolkit p { margin: 0 0 1rem; color: #6b7691; font-size: 0.88rem; }
+  label { display: block; font-size: 0.75rem; color: #6b7691; margin-bottom: 0.35rem; }
+  input {
+    width: 100%;
+    box-sizing: border-box;
+    font: inherit;
+    font-size: 0.9rem;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid #d5dcec;
+    border-radius: 9px;
+    margin-bottom: 0.8rem;
+  }
+  .toolkit__buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  button {
+    font: inherit;
+    font-size: 0.8rem;
+    padding: 0.5rem 0.8rem;
+    border: 0;
+    border-radius: 9px;
+    background: #4c5aa6;
+    color: #fff;
+    cursor: pointer;
+  }
+  button:hover { filter: brightness(1.1); }
+  .toolkit__card {
+    background: #f0f3fc;
+    border: 1px solid #dde4f5;
+    border-radius: 10px;
+    padding: 0.9rem;
+    font-size: 0.95rem;
+    min-height: 2.5rem;
+    margin-bottom: 1rem;
+    word-break: break-word;
+  }
+  .toolkit__out {
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: #1e2740;
+    color: #c7d5ff;
+    border-radius: 10px;
+    padding: 0.85rem;
+    font-size: 0.78rem;
+    line-height: 1.5;
+  }
+</style>
+
+<script>
+  var Fusion = Fusion || {};
+
+  Fusion.text = {
+    upper: function (s) { return s.toUpperCase(); },
+    title: function (s) {
+      return s.replace(/[a-z]/g, function (c, i, all) {
+        return i === 0 || all.charAt(i - 1) === " " ? c.toUpperCase() : c;
+      });
+    },
+    reverse: function (s) { return s.split("").reverse().join(""); },
+    count: function (s) { return s.trim() ? s.trim().split(" ").filter(Boolean).length : 0; }
+  };
+
+  Fusion.ui = {
+    render: function (target, value) { target.textContent = value; }
+  };
+
+  var card = document.getElementById("card");
+  var out = document.getElementById("out");
+
+  document.querySelectorAll("button[data-op]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var op = btn.getAttribute("data-op");
+      var value = document.getElementById("text").value;
+      Fusion.ui.render(card, Fusion.text[op](value));
+      out.textContent = "Called Fusion.text." + op + "() - only one global was added: Fusion";
+    });
+  });
+</script>
+```

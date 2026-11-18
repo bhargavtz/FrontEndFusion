@@ -1,0 +1,170 @@
+---
+title: Block Formatting Contexts
+description: Use overflow, floats, and display flow-root to contain floats, stop margin collapse, and isolate layout.
+chapter: 49
+category: "CSS"
+order: 149
+---
+
+# Block Formatting Contexts
+
+A block formatting context (BFC) is an isolated region in which block boxes are laid out. Inside it, floats are contained, margins behave locally, and the outside world cannot push in. Creating one is the standard fix for two of CSS's oldest complaints: collapsing parents and unwanted margin collapse.
+
+## What creates a BFC
+
+Any of the following on an element:
+
+- `float` with a value other than `none`.
+- `position: absolute` or `fixed`.
+- `overflow` with a value other than `visible` — `hidden`, `auto`, `scroll`, `clip`.
+- `display: flow-root`, `inline-block`, `table-cell`, `table-caption`, or `table`.
+- A flex or grid item.
+- `contain: layout`, `contain: paint`, or `contain: strict`.
+- `column-span: all`.
+
+`display: flow-root` is the purpose-built one. It creates a BFC and does nothing else — no clipping, no scrollbars, no change to the box's own display type. Before it existed, people used `overflow: hidden`, which contains floats but also cuts off anything that sticks out, such as a tooltip or a drop shadow.
+
+## Containing floats
+
+A floated child is taken out of normal flow, so a parent with only floated children has nothing to measure and collapses to zero height. Its border and background shrink to a line, and following content slides up underneath.
+
+Two side effects follow. First, the collapsed parent no longer wraps its own content. Second, text after the parent can flow beside the float, which is often not what you want. A BFC on the parent makes it grow to enclose the float.
+
+## Margins and floats
+
+Adjacent vertical margins between a parent and its first or last child collapse into one margin. Put a BFC on the parent and the child's margin stays inside, which is how you keep a padded card from leaking space onto its neighbour.
+
+Floats also stop overlapping a BFC. If a block sits next to a float, its line boxes wrap around the float; give that block `overflow: hidden` or `display: flow-root` and it becomes a rectangle beside the float instead.
+
+```html
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 28px;
+    background: radial-gradient(circle at 80% 0%, #f0fbf6, #e2f1ea 60%, #d5e8df);
+    font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+    color: #1e3a32;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 18px;
+    width: min(680px, 94vw);
+  }
+  .demo {
+    padding: 20px 22px 22px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 22px 40px -30px rgba(20, 60, 48, 0.75);
+  }
+  .demo h2 {
+    margin: 0 0 2px;
+    font-size: 0.9rem;
+    letter-spacing: 0.01em;
+  }
+  .demo .sub {
+    margin: 0 0 14px;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #7d9a90;
+  }
+  .demo .sub code {
+    font-family: ui-monospace, Menlo, monospace;
+    letter-spacing: 0;
+    text-transform: none;
+    color: #2f7d68;
+  }
+  .box {
+    padding: 12px;
+    border: 1px dashed #a9c9bd;
+    border-radius: 10px;
+    background: #f7fdfa;
+  }
+  .thumb {
+    float: left;
+    width: 62px;
+    height: 62px;
+    margin: 0 12px 6px 0;
+    display: grid;
+    place-items: center;
+    font-size: 1.5rem;
+    border-radius: 12px;
+    background: linear-gradient(150deg, #2f8f74, #7ad3b4);
+  }
+  .box p {
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1.6;
+    color: #3c5c53;
+  }
+  .after {
+    margin: 10px 0 0;
+    padding: 7px 10px;
+    border-radius: 8px;
+    background: #fff4e5;
+    color: #8a5a12;
+    font-size: 0.72rem;
+    line-height: 1.5;
+  }
+  /* the fix */
+  .good .box {
+    display: flow-root;
+    border-style: solid;
+    border-color: #8fcbb5;
+  }
+  .good .after {
+    background: #eafaf3;
+    color: #26705a;
+  }
+  .notes {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 14px 16px;
+    font-size: 0.72rem;
+    line-height: 1.7;
+    color: #4b6b61;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 18px 30px -28px rgba(20, 60, 48, 0.6);
+  }
+  .notes code {
+    font-family: ui-monospace, Menlo, monospace;
+    color: #1f6b56;
+  }
+</style>
+
+<div class="grid">
+  <section class="demo">
+    <h2>No formatting context</h2>
+    <p class="sub">parent height collapses</p>
+    <div class="box">
+      <div class="thumb">🌿</div>
+      <p>The float is out of flow, so this dashed border has only the text to measure and stops early.</p>
+    </div>
+    <p class="after">This following line rides up beside the float, outside the card's content.</p>
+  </section>
+
+  <section class="demo good">
+    <h2>display: flow-root</h2>
+    <p class="sub"><code>display: flow-root</code></p>
+    <div class="box">
+      <div class="thumb">🌿</div>
+      <p>The same markup, with one declaration on the wrapper. The box now encloses the floated thumb.</p>
+    </div>
+    <p class="after">Following content starts below the box, as a reader expects.</p>
+  </section>
+
+  <p class="notes">
+    BFC triggers: <code>float</code>, <code>position: absolute</code>, <code>overflow: hidden</code>,
+    <code>display: flow-root</code>, <code>contain: paint</code>. Prefer
+    <code>flow-root</code> — it isolates layout without clipping.
+  </p>
+</div>
+```
+
+One caveat: a BFC does not contain absolutely positioned descendants unless the context is also a containing block, which needs `position: relative` on the same element.

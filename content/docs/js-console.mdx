@@ -1,0 +1,143 @@
+---
+title: Console
+description: Use the browser console API for logging, formatting, timing, counting, assertions and inspecting structured data.
+chapter: 5
+category: "JavaScript"
+order: 305
+---
+
+# Console
+
+The `console` object is a set of tools for observing what a program is doing. It lives in every browser and in Node.js. Most methods only write to developer tools, but they are invaluable while debugging and are easy to mirror into a visible panel for demos like the one below.
+
+## Basic logging and formatting
+
+`console.log()` prints values, and you can pass several at once. Its first argument can contain format placeholders such as `%s` for a string, `%d` for a number, and `%c` to apply CSS to the following text. Related methods add meaning: `console.info()` for information, `console.warn()` for a warning, and `console.error()` for a failure.
+
+## Tables, counts, timers and traces
+
+`console.table()` draws an array of objects as a neat grid. `console.count(label)` keeps a running tally each time it is called with the same label, and `console.countReset()` clears it. `console.time(label)` starts a stopwatch that `console.timeEnd(label)` stops and reports. `console.trace()` prints the call stack that led to the current line, which is perfect for answering "who called this?".
+
+## Assertions, inspection and clearing
+
+`console.assert(condition, message)` writes an error only when the condition is false, so it stays quiet on the happy path. `console.dir()` shows an expandable view of an object, while `console.dirxml()` does the same for a DOM node. `console.clear()` wipes the console. Group related messages with `console.group()` and `console.groupEnd()` to collapse them.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Console playground</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px 18px;
+        font-family: system-ui, sans-serif;
+        color: #2b2b33;
+        background: linear-gradient(135deg, #eef0f7, #fdf4ee 75%);
+      }
+      .card {
+        max-width: 560px;
+        margin: 0 auto;
+        padding: 22px;
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 20px 42px -30px rgba(40, 40, 60, 0.5);
+      }
+      h1 { margin: 0 0 14px; font-size: 1.15rem; }
+      .row { display: flex; flex-wrap: wrap; gap: 7px; }
+      button {
+        padding: 8px 11px;
+        border: 0;
+        border-radius: 9px;
+        background: #4257b2;
+        color: #ffffff;
+        font: inherit;
+        font-size: 0.76rem;
+        cursor: pointer;
+      }
+      button:hover { background: #34479a; }
+      .out {
+        margin: 14px 0 0;
+        min-height: 150px;
+        padding: 12px;
+        border-radius: 10px;
+        background: #1d1f2a;
+        color: #d6f5e3;
+        font-size: 0.76rem;
+        line-height: 1.55;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Console playground</h1>
+      <div class="row">
+        <button data-tool="log">log + format</button>
+        <button data-tool="table">table</button>
+        <button data-tool="count">count</button>
+        <button data-tool="timer">time / timeEnd</button>
+        <button data-tool="assert">assert</button>
+        <button data-tool="group">group</button>
+        <button data-tool="clear">clear</button>
+      </div>
+      <pre id="out" class="out">Console output is mirrored here.</pre>
+    </div>
+    <script>
+      const out = document.getElementById("out");
+      function show(line) { out.textContent += line + "\n"; }
+      const people = [
+        { name: "Ada", role: "Engineer" },
+        { name: "Lin", role: "Designer" }
+      ];
+      let timerStarted = false;
+
+      const actions = {
+        log: function () {
+          console.log("Hello %s, you have %d messages", "Ada", 3);
+          show("log: Hello Ada, you have 3 messages (with %s and %d placeholders)");
+        },
+        table: function () {
+          if (console.table) console.table(people);
+          show("table: " + people.map(function (p) { return p.name + " / " + p.role; }).join(" | "));
+        },
+        count: function () {
+          console.count("clicks");
+          show("count: the 'clicks' counter just advanced");
+        },
+        timer: function () {
+          if (!timerStarted) {
+            console.time("work");
+            timerStarted = true;
+            show("time: stopwatch started");
+          } else {
+            console.timeEnd("work");
+            timerStarted = false;
+            show("timeEnd: stopwatch stopped");
+          }
+        },
+        assert: function () {
+          console.assert(1 + 1 === 3, "Math is broken!");
+          show("assert: a message appears only when its condition is false");
+        },
+        group: function () {
+          console.group("Details");
+          console.log("nested line");
+          console.groupEnd();
+          show("group: related messages can be collapsed together");
+        },
+        clear: function () {
+          out.textContent = "";
+          show("(visible panel cleared; console.clear() clears developer tools)");
+        }
+      };
+      document.querySelectorAll("button[data-tool]").forEach(function (btn) {
+        btn.addEventListener("click", function () { actions[btn.dataset.tool](); });
+      });
+      show("Ready. console.trace() would print the call stack here.");
+    </script>
+  </body>
+</html>
+```

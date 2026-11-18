@@ -1,0 +1,76 @@
+---
+title: Output Element
+description: Display calculated results with output, and connect it to the controls that produced them.
+chapter: 23
+category: "HTML"
+order: 33
+---
+
+# Output Element
+
+The `output` element displays the result of a calculation or a user action. It is a live region, so assistive technology can announce changes.
+
+## Basic output
+
+```html
+<form oninput="total.value = Number(a.value) + Number(b.value)">
+  <label for="a">First number</label>
+  <input id="a" name="a" type="number" value="4" />
+  <label for="b">Second number</label>
+  <input id="b" name="b" type="number" value="6" />
+  <p>Total: <output name="total" for="a b">10</output></p>
+</form>
+```
+
+The `for` attribute lists the IDs of the controls that contribute to the result. It is a space-separated list.
+
+## Output with attributes
+
+```html
+<label for="qty">Quantity</label>
+<input id="qty" type="number" min="1" max="10" value="3" />
+
+<label for="price">Unit price</label>
+<input id="price" type="number" min="0" step="0.01" value="12.50" />
+
+<p>
+  Subtotal:
+  <output
+    id="subtotal"
+    name="subtotal"
+    for="qty price"
+    aria-live="polite"
+  >37.50</output>
+</p>
+```
+
+Use `aria-live="polite"` when the value changes frequently. The browser announces the new value without interrupting the user.
+
+## Output versus a plain span
+
+A `span` can also display text, but `output` carries the semantics of a calculated result. Use `output` when the value is derived from form controls.
+
+## Styling output
+
+```html
+<style>
+  output {
+    display: inline-block;
+    min-width: 4rem;
+    padding: 0.15rem 0.5rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #f8fafc;
+    font-variant-numeric: tabular-nums;
+  }
+</style>
+```
+
+`font-variant-numeric: tabular-nums` keeps digits from shifting as the value changes.
+
+## Accessibility notes
+
+- Associate the output with the controls using `for`.
+- Do not use `output` for static text.
+- If the value changes without user action, announce it politely.
+- Keep the visible label close to the value.

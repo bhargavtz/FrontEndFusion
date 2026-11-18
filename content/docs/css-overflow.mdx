@@ -1,0 +1,119 @@
+---
+title: "Overflow"
+description: "Control what happens when content is larger than its box, scroll one axis, wrap long words, and use overflow to contain floats."
+chapter: 12
+category: "CSS"
+order: 112
+---
+
+# Overflow
+
+Every box has edges, but content does not always respect them. Overflow is the set of rules deciding whether the excess is clipped, scrolled, or allowed to spill into the surrounding layout.
+
+## The overflow properties
+
+`overflow-x` and `overflow-y` control the horizontal and vertical axis independently, while the `overflow` shorthand sets both. The common values are `visible` (the default, content escapes), `hidden` (clipped with no scrollbar), `scroll` (always shows a scrollbar track on that axis), `auto` (scrollbars appear only when needed), and `clip` (clipped, and not scrollable at all).
+
+Setting one axis to a scrolling value while the other stays `visible` is not allowed: the visible axis is quietly converted to `auto`. That behaviour surprises people who expect a single scrollbar, so set both axes explicitly when the intent matters. On a scroll container you can then add `scroll-snap-type` for paging and `scrollbar-width` or `scrollbar-color` to tame the native bar.
+
+For text, `overflow` is usually the wrong tool. A long URL will still refuse to break; `overflow-wrap: anywhere` or `overflow-wrap: break-word` lets it wrap, and `word-break: break-all` is the aggressive fallback. `white-space: nowrap` combined with `text-overflow: ellipsis` turns the overflow into a truncation signal instead.
+
+## Hidden overflow and block formatting contexts
+
+`overflow` with any value other than `visible` establishes a block formatting context. A block formatting context is a self-contained layout region: floats inside it are contained, and its margins do not collapse with its children's margins. That is why a wrapper with `overflow: hidden` can clear a floated child without any extra markup — a side effect that predates dedicated float-clearing techniques.
+
+The trade-off is that a formatting context also clips anything that deliberately extends beyond the box, such as dropdowns, tooltips, or box shadows. Reach for `overflow: hidden` to contain content, not to hide a bug you have not diagnosed.
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Overflow playground</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 26px;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      background: #f6f4f1;
+      color: #221f1b;
+    }
+    h2 { margin: 0 0 4px; font-size: 1.05rem; }
+    .lede { margin: 0 0 16px; font-size: .85rem; color: #6b635a; }
+    .strip {
+      display: flex;
+      gap: 12px;
+      padding: 4px 2px 14px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+    }
+    .tile {
+      flex: 0 0 152px;
+      height: 96px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 600;
+      font-size: .88rem;
+      scroll-snap-align: start;
+      box-shadow: 0 6px 16px rgba(34, 31, 27, .14);
+    }
+    .t1 { background: linear-gradient(135deg, #3f7d5e, #74ad8a); }
+    .t2 { background: linear-gradient(135deg, #8a5a3b, #c48f64); }
+    .t3 { background: linear-gradient(135deg, #3e5d7d, #7d9dbb); }
+    .t4 { background: linear-gradient(135deg, #6b4a7d, #a785b9); }
+    .t5 { background: linear-gradient(135deg, #7d6b3e, #c0ab72); }
+    .t6 { background: linear-gradient(135deg, #3b6b6b, #74aaa4); }
+    .card {
+      margin-top: 8px;
+      background: #fff;
+      border: 1px solid #e6e0d8;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .card header {
+      padding: 14px 18px;
+      background: linear-gradient(120deg, #f0d9c8, #e3c3ac);
+      font-weight: 600;
+      font-size: .92rem;
+    }
+    .card p {
+      margin: 0;
+      padding: 12px 18px 16px;
+      font-size: .85rem;
+      line-height: 1.6;
+    }
+    .long {
+      display: block;
+      margin-top: 8px;
+      overflow-wrap: anywhere;
+      font-family: ui-monospace, monospace;
+      font-size: .76rem;
+      color: #8a5a3b;
+    }
+  </style>
+</head>
+<body>
+  <h2>Overflow playground</h2>
+  <p class="lede">The strip scrolls sideways only; the card below rounds its corners by clipping its gradient header.</p>
+  <div class="strip">
+    <div class="tile t1">Snap one</div>
+    <div class="tile t2">Snap two</div>
+    <div class="tile t3">Snap three</div>
+    <div class="tile t4">Snap four</div>
+    <div class="tile t5">Snap five</div>
+    <div class="tile t6">Snap six</div>
+  </div>
+  <div class="card">
+    <header>Contained by the formatting context</header>
+    <p>
+      A wrapper with <code>overflow: hidden</code> contains floated children and hides the excess.
+      <span class="long">https://example.com/a/very/long/path/that/would/otherwise/escape/its/container/forever</span>
+    </p>
+  </div>
+</body>
+</html>
+```

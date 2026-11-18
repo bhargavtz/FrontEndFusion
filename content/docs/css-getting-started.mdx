@@ -1,0 +1,185 @@
+---
+title: Getting Started with CSS
+description: Learn the four ways to attach CSS to a page, restyle a list without images, and repaint a layout from JavaScript.
+chapter: 1
+category: "CSS"
+order: 101
+---
+
+# Getting Started with CSS
+
+HTML gives a page its structure; CSS gives it a voice. Every stylesheet you write is a list of rules, and every rule answers one question: which elements should look like this, and what exactly should change? This chapter shows where CSS can live and how the browser picks it up.
+
+## Attaching a stylesheet
+
+There are four common ways to connect CSS to markup, and they are not equal.
+
+- **External file** — the default choice for anything real. Put a `link` element in the document head pointing at a `.css` file. One file, many pages, one browser cache.
+- **Internal styles** — a `style` element inside the head. Useful for a single-page demo, an email template, or a component that must ship as one file.
+- **Imported stylesheet** — `@import` at the very top of a CSS file pulls in another file. It works, but each import is a separate request chain, so bundlers usually prefer plain `link` tags.
+- **Inline styles** — a `style` attribute on one element. Highest specificity, hardest to override, best reserved for values that genuinely change per element, such as a progress bar width.
+
+```css
+@import url("theme.css");
+
+.card {
+  border-radius: 18px;
+}
+```
+
+Order matters. Later rules win when specificity ties, so load resets first, then layout, then components, then overrides.
+
+## Change styles with JavaScript
+
+Scripts can rewrite styling in three ways: toggle a class, set an inline property, or swap a stylesheet. Toggling a class keeps the visual decisions inside CSS, which is almost always the cleanest option. Setting `element.style.backgroundColor` works for one-off values produced at runtime.
+
+## A complete example
+
+The demo below uses a `style` element, a counter-based list marker, and a button that toggles a class on the body. No images are involved.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Recipe card</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 40px 20px;
+        font-family: system-ui, sans-serif;
+        background: #fdf3e7;
+        color: #34261d;
+        transition: background 0.3s ease;
+      }
+
+      .recipe {
+        max-width: 350px;
+        margin: 0 auto;
+        background: #fffdf8;
+        border-radius: 20px;
+        box-shadow: 0 24px 44px -28px rgba(80, 42, 20, 0.45);
+        overflow: hidden;
+      }
+
+      .recipe header {
+        padding: 26px;
+        background: linear-gradient(135deg, #ffb26b, #e4572e);
+        color: #fff8f2;
+      }
+
+      .recipe header span {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 0.7rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.85;
+      }
+
+      .recipe h1 {
+        margin: 0;
+        font-size: 1.5rem;
+      }
+
+      .recipe__body {
+        padding: 20px 26px 26px;
+      }
+
+      .steps {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        counter-reset: step;
+      }
+
+      .steps li {
+        counter-increment: step;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        padding: 9px 0;
+        border-bottom: 1px dashed #e8dbc9;
+        font-size: 0.92rem;
+      }
+
+      .steps li:last-child {
+        border-bottom: 0;
+      }
+
+      .steps li::before {
+        content: counter(step);
+        flex: 0 0 22px;
+        height: 22px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: #ffe6d3;
+        color: #b3421c;
+        font-size: 0.72rem;
+        font-weight: 700;
+      }
+
+      .note {
+        margin: 18px 0 0;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: #f6efe4;
+        font-size: 0.78rem;
+        color: #6b5847;
+      }
+
+      .tone {
+        display: block;
+        margin: 16px auto 0;
+        padding: 9px 18px;
+        border: 0;
+        border-radius: 999px;
+        background: #34261d;
+        color: #fdf3e7;
+        font: inherit;
+        font-size: 0.8rem;
+        cursor: pointer;
+      }
+
+      body.night {
+        background: #1d232b;
+      }
+
+      body.night .recipe {
+        background: #262f3a;
+        color: #e8eef5;
+      }
+
+      body.night .recipe__body .note {
+        background: #1f2731;
+        color: #a9b6c5;
+      }
+    </style>
+  </head>
+  <body>
+    <article class="recipe">
+      <header>
+        <span>Ten minute breakfast</span>
+        <h1>Brown butter toast 🍞</h1>
+      </header>
+      <div class="recipe__body">
+        <ol class="steps">
+          <li>Toast thick slices until deeply golden.</li>
+          <li>Melt butter until it smells nutty, then pour.</li>
+          <li>Finish with flaky salt and orange zest.</li>
+        </ol>
+        <p class="note">The round markers are generated by CSS, not images.</p>
+        <button class="tone" onclick="document.body.classList.toggle('night')">
+          Toggle the palette
+        </button>
+      </div>
+    </article>
+  </body>
+</html>
+```
+
+## Styling lists
+
+Lists carry their own defaults: disc bullets, decimal numbers, and indentation set by the browser. You can change the marker shape with `list-style-type`, replace it with an emoji or text via `list-style: none` plus `::before`, or keep numbering and restyle the marker with `::marker`. Removing `padding-left` alongside the marker is usually necessary, because the browser reserves that space for the bullet.

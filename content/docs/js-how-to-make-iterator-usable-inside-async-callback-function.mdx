@@ -1,0 +1,92 @@
+---
+title: "How to make iterator usable inside async callback function"
+description: Avoid stale loop indexes in async callbacks by capturing each value in its own scope.
+chapter: 83
+category: "JavaScript"
+order: 383
+---
+
+# How to make iterator usable inside async callback function
+
+A classic JavaScript trap appears when a loop schedules an asynchronous callback that uses the loop counter. Functions declared with `var` are scoped to the whole function, not to each iteration, so every delayed callback closes over the same variable. By the time the timers run, the loop has finished and the counter holds its final value, producing a row of identical results instead of distinct ones.
+
+## The erroneous version
+
+Consider a loop that uses `var i` and a `setTimeout` that prints `i`. Because there is only one `i`, all callbacks read the value left after the last iteration. The same bug shows up with `for ... in` or when an index is read from an outer variable inside a promise callback or request handler. The symptom is always the same: the callback sees the state at execution time, not at scheduling time.
+
+## The correct version
+
+The simplest fix is to declare the counter with `let`, which creates a fresh binding per iteration so each callback captures its own value. In older code, an immediately invoked function expression achieves the same effect by passing the current value in as an argument. A third option is to make a copy with a named constant inside the loop body. All three approaches freeze the value the callback will see.
+
+The demo runs both versions side by side. The "buggy" loop uses `var` and every timer prints the same number; the "fixed" loop uses `let` and prints the expected sequence.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Async callback scope</title>
+    <style>
+      body { margin: 0; padding: 24px 18px; font-family: system-ui, sans-serif; color: #25323b; background: linear-gradient(135deg, #fef2f2, #eff6ff 75%); }
+      .card { max-width: 480px; margin: 0 auto; padding: 22px; background: #fff; border-radius: 20px; box-shadow: 0 18px 40px -28px rgba(70,50,60,.4); }
+      h1 { margin: 0 0 4px; font-size: 1.1rem; }
+      p.sub { margin: 0 0 14px; font-size: .8rem; color: #64748b; }
+      .row { display: flex; gap: 8px; margin-bottom: 14px; }
+      button { padding: 9px 13px; border: 0; border-radius: 10px; background: #dc2626; color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+      button.fix { background: #2563eb; }
+      .panel { padding: 12px; border-radius: 10px; margin-bottom: 10px; font-size: .8rem; }
+      .bad { background: #fef2f2; color: #991b1b; }
+      .good { background: #eff6ff; color: #1e40af; }
+      .panel b { display: block; margin-bottom: 6px; }
+      .nums { display: flex; flex-wrap: wrap; gap: 6px; }
+      .nums span { padding: 3px 8px; border-radius: 7px; background: rgba(255,255,255,.7); font-variant-numeric: tabular-nums; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Which counter does the timer see?</h1>
+      <p class="sub">Each loop schedules five delayed callbacks.</p>
+      <div class="row">
+        <button id="buggy">Run buggy (var)</button>
+        <button id="fixed" class="fix">Run fixed (let)</button>
+      </div>
+      <div class="panel bad"><b>Using var — one shared binding</b><div id="badNums" class="nums"></div></div>
+      <div class="panel good"><b>Using let — one binding per iteration</b><div id="goodNums" class="nums"></div></div>
+    </div>
+    <script>
+      function fill(id, values) {
+        var box = document.getElementById(id);
+        box.innerHTML = "";
+        values.forEach(function (v) {
+          var span = document.createElement("span");
+          span.textContent = v;
+          box.appendChild(span);
+        });
+      }
+      document.getElementById("buggy").addEventListener("click", function () {
+        fill("badNums", []);
+        for (var i = 1; i <= 5; i++) {
+          window.setTimeout(function () {
+            var box = document.getElementById("badNums");
+            var span = document.createElement("span");
+            span.textContent = i;
+            box.appendChild(span);
+          }, i * 180);
+        }
+      });
+      document.getElementById("fixed").addEventListener("click", function () {
+        fill("goodNums", []);
+        for (let i = 1; i <= 5; i++) {
+          window.setTimeout(function () {
+            var box = document.getElementById("goodNums");
+            var span = document.createElement("span");
+            span.textContent = i;
+            box.appendChild(span);
+          }, i * 180);
+        }
+      });
+    </script>
+  </body>
+</html>
+```

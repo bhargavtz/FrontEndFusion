@@ -1,0 +1,91 @@
+---
+title: Anchors and Hyperlinks
+description: Link to other sites, jump within a page, start a phone call or email, and open safe new tabs.
+chapter: 6
+category: "HTML"
+order: 16
+---
+
+# Anchors and Hyperlinks
+
+The `a` element creates a hyperlink. The `href` attribute decides where the link goes.
+
+## Link to another site
+
+```html
+<p>
+  Read the <a href="https://developer.mozilla.org/en-US/docs/Web/HTML">MDN
+  HTML reference</a> for the full element list.
+</p>
+```
+
+Absolute URLs include the protocol and domain. They are required for external links.
+
+## Link to a page on the same site
+
+Relative URLs resolve against the current page:
+
+```html
+<a href="/html5/forms">Forms chapter</a>
+<a href="../docs">Documentation index</a>
+<a href="#top">Back to top</a>
+```
+
+## Link to an anchor on the same page
+
+Give the target an `id`, then point to it with a fragment:
+
+```html
+<h2 id="schedule">Schedule</h2>
+<p>The sessions run from 09:00 to 17:00.</p>
+<p><a href="#schedule">Jump to the schedule</a></p>
+```
+
+Fragments also work across pages: `/html5/forms#validation`.
+
+## Link that dials a number
+
+```html
+<a href="tel:+15551234567">Call the studio</a>
+```
+
+Use the full international format. The visitor's device decides whether to open a dialler.
+
+## Link that opens an email client
+
+```html
+<a href="mailto:hello@example.com?subject=Workshop%20booking">Email us</a>
+```
+
+Keep the address in the `href`; do not rely on the link text alone.
+
+## Open a link in a new tab
+
+```html
+<a href="https://example.com" target="_blank" rel="noopener noreferrer">
+  Open example.com
+</a>
+```
+
+`rel="noopener"` prevents the new page from accessing `window.opener`. `noreferrer` also hides the referring URL.
+
+## Link that runs JavaScript
+
+```html
+<a href="/html5/forms" onclick="return confirm('Leave this page?')">
+  Continue to forms
+</a>
+```
+
+Avoid `href="javascript:..."`. Use a real URL for the no-JavaScript case and enhance behaviour with JavaScript.
+
+## Link states
+
+CSS can style `:link`, `:visited`, `:hover`, `:focus-visible`, and `:active`. Always keep a visible focus style for keyboard users.
+
+## Accessibility checklist
+
+1. Link text should describe the destination. Avoid “click here”.
+2. Do not open new tabs without warning.
+3. Use `rel="noopener"` with `target="_blank"`.
+4. Keep links visually distinct from surrounding text.

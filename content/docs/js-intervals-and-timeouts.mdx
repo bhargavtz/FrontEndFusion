@@ -1,0 +1,155 @@
+---
+title: Intervals and Timeouts
+description: Schedule one-shot work with setTimeout, repeat it with setInterval, and cancel both before they cause surprises.
+chapter: 30
+category: "JavaScript"
+order: 330
+---
+
+# Intervals and Timeouts
+
+The browser gives you two timers for delayed work. `setTimeout()` runs a function once after a delay, while `setInterval()` keeps running it on a repeating schedule. Both return an identifier you can pass to a clearing function when the work is no longer wanted.
+
+## One shot with setTimeout
+
+A timeout is useful for deferring an action: showing a message after a pause, debouncing keystrokes, or giving an animation time to finish. The delay is a minimum, not a promise. If the main thread is busy, the callback waits until it becomes free.
+
+`clearTimeout()` cancels a scheduled call as long as you kept the identifier. This matters for repeated clicks or rapid input, where an older timer might otherwise fire after a newer one and overwrite fresh state with stale results.
+
+## Repeating with setInterval
+
+An interval calls the same function again and again until you stop it. A clock or a progress display is the classic use. Store the identifier and call `clearInterval()` when the task is done, or the callback will keep running invisibly and waste resources.
+
+A related pattern is recursive `setTimeout`: a function does a step, then schedules itself again. This guarantees a gap between runs, which an interval does not, since an interval can queue up calls if a step takes too long.
+
+Browsers also throttle timers in background tabs, so an interval is never a precise clock. For elapsed time, read `Date.now()` or a high-resolution timer on each tick instead of counting how many ticks fired. The displayed value will then stay honest even when the tab was asleep.
+
+## Demo: stopwatch with a delayed note
+
+```html
+<div class="timer">
+  <h2>Stopwatch</h2>
+  <p>The clock uses an interval. A timeout adds a small note after you pause.</p>
+  <div id="clock" class="timer__clock">00:00.0</div>
+  <div class="timer__buttons">
+    <button id="start" type="button">Start</button>
+    <button id="pause" type="button">Pause</button>
+    <button id="reset" type="button">Reset</button>
+  </div>
+  <pre id="out" class="timer__out">Press start to run the timer.</pre>
+</div>
+
+<style>
+  body {
+    margin: 0;
+    padding: 2rem 1.25rem;
+    background: #e9eef4;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    color: #2b3648;
+  }
+  .timer {
+    max-width: 30rem;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 18px;
+    padding: 1.5rem;
+    box-shadow: 0 18px 40px -28px rgba(30, 45, 75, 0.65);
+  }
+  .timer h2 { margin: 0 0 0.4rem; font-size: 1.25rem; }
+  .timer p { margin: 0 0 1rem; color: #748398; font-size: 0.88rem; }
+  .timer__clock {
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    font-size: 3rem;
+    letter-spacing: 0.04em;
+    background: #f1f5fb;
+    border: 1px solid #dce4f0;
+    border-radius: 14px;
+    padding: 1rem 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .timer__buttons { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+  button {
+    font: inherit;
+    font-size: 0.82rem;
+    padding: 0.55rem 1rem;
+    border: 0;
+    border-radius: 10px;
+    background: #3a6ea5;
+    color: #fff;
+    cursor: pointer;
+    flex: 1;
+  }
+  #pause { background: #c08a35; }
+  #reset { background: #77839a; }
+  button:hover { filter: brightness(1.08); }
+  .timer__out {
+    margin: 0;
+    min-height: 3.5rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: #1c2940;
+    color: #d3e3ff;
+    border-radius: 10px;
+    padding: 0.85rem;
+    font-size: 0.8rem;
+    line-height: 1.5;
+  }
+</style>
+
+<script>
+  var clock = document.getElementById("clock");
+  var out = document.getElementById("out");
+  var elapsed = 0;
+  var startedAt = 0;
+  var ticker = null;
+  var splash = null;
+
+  function pad(n) { return n < 10 ? "0" + n : String(n); }
+
+  function paint(ms) {
+    var tenths = Math.floor(ms / 100);
+    var mins = Math.floor(tenths / 600);
+    var secs = Math.floor((tenths % 600) / 10);
+    clock.textContent = pad(mins) + ":" + pad(secs) + "." + (tenths % 10);
+  }
+
+  function stopTicker() {
+    if (ticker !== null) { clearInterval(ticker); ticker = null; }
+  }
+  function cancelSplash() {
+    if (splash !== null) { clearTimeout(splash); splash = null; }
+  }
+
+  document.getElementById("start").addEventListener("click", function () {
+    if (ticker !== null) { out.textContent = "Already running."; return; }
+    cancelSplash();
+    startedAt = Date.now() - elapsed;
+    ticker = setInterval(function () {
+      elapsed = Date.now() - startedAt;
+      paint(elapsed);
+    }, 50);
+    out.textContent = "Interval started. Pass its id to clearInterval to stop it.";
+  });
+
+  document.getElementById("pause").addEventListener("click", function () {
+    if (ticker === null) { out.textContent = "Nothing is running."; return; }
+    elapsed = Date.now() - startedAt;
+    stopTicker();
+    paint(elapsed);
+    out.textContent = "Paused at " + clock.textContent + ". Waiting for the timeout note...";
+    splash = setTimeout(function () {
+      out.textContent = "Saved at " + clock.textContent + ". The timeout fired once, then cleared itself.";
+      splash = null;
+    }, 900);
+  });
+
+  document.getElementById("reset").addEventListener("click", function () {
+    stopTicker();
+    cancelSplash();
+    elapsed = 0;
+    paint(0);
+    out.textContent = "Both timers cleared and the clock reset.";
+  });
+</script>
+```

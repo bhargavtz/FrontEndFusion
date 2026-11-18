@@ -1,0 +1,107 @@
+---
+title: Media Elements
+description: Embed audio and video with native controls, captions, multiple sources, and poster images.
+chapter: 25
+category: "HTML"
+order: 35
+---
+
+# Media Elements
+
+HTML5 provides native `audio` and `video` elements. They work without plugins and expose controls to assistive technology.
+
+## Audio
+
+```html
+<audio controls preload="metadata">
+  <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3" type="audio/mpeg" />
+  Your browser does not support the audio element.
+</audio>
+```
+
+- `controls` shows the play, pause, and volume UI.
+- `preload="metadata"` fetches duration and track information without downloading the whole file.
+- The text inside the element is a fallback for browsers that cannot render it.
+
+## Video
+
+```html
+<video
+  controls
+  width="640"
+  height="360"
+  poster="https://picsum.photos/seed/video-poster/640/360"
+>
+  <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4" />
+  Your browser does not support the video element.
+</video>
+```
+
+`poster` shows an image before playback starts. Always set `width` and `height` to reserve space.
+
+## Captions and subtitles
+
+```html
+<video controls width="640" height="360">
+  <source src="/media/talk.mp4" type="video/mp4" />
+  <track
+    kind="captions"
+    src="/media/talk.en.vtt"
+    srclang="en"
+    label="English captions"
+    default
+  />
+</video>
+```
+
+Captions are not optional for pre-recorded speech. They make the content usable without sound and help in noisy environments.
+
+## Multiple sources
+
+```html
+<video controls width="640" height="360">
+  <source src="/media/clip.webm" type="video/webm" />
+  <source src="/media/clip.mp4" type="video/mp4" />
+  <p><a href="/media/clip.mp4">Download the video</a></p>
+</video>
+```
+
+The browser uses the first source it can play. The final link is a fallback for downloads.
+
+## Video as a header background
+
+```html
+<header class="video-hero">
+  <video autoplay muted loop playsinline poster="/media/hero-poster.jpg">
+    <source src="/media/hero.webm" type="video/webm" />
+    <source src="/media/hero.mp4" type="video/mp4" />
+  </video>
+  <div class="video-hero__content">
+    <h2>Field notes from the coast</h2>
+    <p>A short film about slowing down.</p>
+  </div>
+</header>
+
+<style>
+  .video-hero { position: relative; overflow: hidden; border-radius: 16px; }
+  .video-hero video {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; opacity: 0.55;
+  }
+  .video-hero__content {
+    position: relative; padding: 4rem 2rem; color: #fff;
+    background: linear-gradient(180deg, rgba(0,0,0,.2), rgba(0,0,0,.7));
+  }
+</style>
+```
+
+Background video must be muted to autoplay in modern browsers. Provide a poster and a readable overlay. Respect `prefers-reduced-motion` by pausing or hiding the video.
+
+## Accessibility checklist
+
+1. Add captions to video with speech.
+2. Provide a transcript for audio.
+3. Do not autoplay audio.
+4. Keep controls visible.
+5. Do not rely on colour alone in the video content.
+6. Provide a download link when possible.

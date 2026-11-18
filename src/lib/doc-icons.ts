@@ -12,5 +12,13 @@ const learningIcons = new Map(
 );
 
 export function docIcon(slug: string) {
+  if (slug.startsWith("html-") && slug !== "html-basics") return "🌐";
+  if (
+    slug.startsWith("css-") &&
+    slug !== "css-fundamentals" &&
+    slug !== "css-cheatsheet"
+  ) {
+    return "🎨";
+  }
   return learningIcons.get(slug) ?? fallbackIcons[slug] ?? "📄";
 }

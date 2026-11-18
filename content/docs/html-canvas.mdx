@@ -1,0 +1,110 @@
+---
+title: Canvas
+description: Create a drawing surface with canvas and paint shapes using the 2D context.
+chapter: 32
+category: "HTML"
+order: 42
+---
+
+# Canvas
+
+The `canvas` element provides a bitmap drawing surface. JavaScript draws on it through the 2D rendering context.
+
+## Basic example
+
+```html
+<canvas id="badge" width="240" height="120">
+  Your browser does not support the canvas element.
+</canvas>
+
+<script>
+  const canvas = document.getElementById("badge");
+  const ctx = canvas.getContext("2d");
+
+  ctx.fillStyle = "#0f172a";
+  ctx.fillRect(0, 0, 240, 120);
+
+  ctx.fillStyle = "#5eead4";
+  ctx.font = "600 20px system-ui, sans-serif";
+  ctx.fillText("Hello, canvas", 24, 62);
+
+  ctx.strokeStyle = "#f59e0b";
+  ctx.lineWidth = 4;
+  ctx.strokeRect(8, 8, 224, 104);
+</script>
+```
+
+The fallback text is shown only if the browser cannot create a canvas.
+
+## Drawing two rectangles
+
+```html
+<canvas id="rects" width="320" height="160">
+  Two rectangles drawn on a canvas.
+</canvas>
+
+<script>
+  const canvas = document.getElementById("rects");
+  const ctx = canvas.getContext("2d");
+
+  ctx.fillStyle = "#e0f2fe";
+  ctx.fillRect(0, 0, 320, 160);
+
+  ctx.fillStyle = "#0284c7";
+  ctx.fillRect(24, 32, 120, 96);
+
+  ctx.fillStyle = "#f97316";
+  ctx.fillRect(176, 32, 120, 96);
+</script>
+```
+
+## Coordinates and pixels
+
+The canvas coordinate system starts at `(0, 0)` in the top-left corner. `fillRect(x, y, width, height)` draws a filled rectangle.
+
+```html
+<canvas id="grid" width="200" height="200"></canvas>
+<script>
+  const ctx = document.getElementById("grid").getContext("2d");
+  ctx.strokeStyle = "#94a3b8";
+  for (let i = 0; i <= 200; i += 20) {
+    ctx.beginPath();
+    ctx.moveTo(i, 0);
+    ctx.lineTo(i, 200);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, i);
+    ctx.lineTo(200, i);
+    ctx.stroke();
+  }
+</script>
+```
+
+## High-density displays
+
+Canvas pixels are not automatically scaled for high-DPI screens. Multiply the backing store size by `devicePixelRatio` and scale the context:
+
+```html
+<canvas id="sharp" width="300" height="150" style="width: 300px; height: 150px"></canvas>
+<script>
+  const canvas = document.getElementById("sharp");
+  const ratio = window.devicePixelRatio || 1;
+  canvas.width = 300 * ratio;
+  canvas.height = 150 * ratio;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(ratio, ratio);
+  ctx.fillStyle = "#0f766e";
+  ctx.fillRect(20, 20, 120, 80);
+</script>
+```
+
+## Canvas versus SVG
+
+- Canvas is a bitmap; SVG is a vector document.
+- Canvas is better for many objects and real-time animation.
+- SVG is better for accessible diagrams and scalable icons.
+- Canvas content is not accessible to screen readers unless you provide a text alternative.
+
+## Accessibility
+
+Give the canvas an `aria-label` or nearby description. If the drawing conveys information, provide a text summary. Do not rely on colour alone.

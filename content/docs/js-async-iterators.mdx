@@ -1,0 +1,87 @@
+---
+title: Async Iterators
+description: Consume streams of asynchronously produced values with async generators and for-await loops.
+chapter: 82
+category: "JavaScript"
+order: 382
+---
+
+# Async Iterators
+
+A regular iterator produces values synchronously, one `next` call at a time. An async iterator does the same job when each value arrives later, returning a promise that resolves to an object with `value` and `done` fields. This makes it possible to walk over data that is fetched, streamed, or generated over time without manually juggling chained promises.
+
+## Basics
+
+An object becomes async-iterable by defining a method at the `Symbol.asyncIterator` key that returns the iterator. The easiest way to create one is with an async generator: a function declared with `async function*` can use `yield` to produce values and `await` to pause between them. Its `next` method then returns a promise for each result.
+
+You consume such a source with the `for await` loop, which pauses at each step until the next value is ready. The loop ends when the generator finishes, and a `try` and `catch` block around it handles any error the source throws. This pattern is the foundation behind streaming responses and paginated APIs.
+
+## Walking an async generator
+
+The demo defines an async generator that yields simulated page results with a short delay between each. Pressing start consumes it with a `for await` loop and appends each value to the output as it arrives. A stop control cancels the run by flipping a flag, showing that you can break out of an async loop just like a normal one.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Async iterators</title>
+    <style>
+      body { margin: 0; padding: 24px 18px; font-family: system-ui, sans-serif; color: #25323b; background: linear-gradient(135deg, #eef2ff, #fdf2f8 75%); }
+      .card { max-width: 470px; margin: 0 auto; padding: 22px; background: #fff; border-radius: 20px; box-shadow: 0 18px 40px -28px rgba(50,50,90,.45); }
+      h1 { margin: 0 0 4px; font-size: 1.1rem; }
+      p.sub { margin: 0 0 14px; font-size: .8rem; color: #64748b; }
+      .row { display: flex; gap: 8px; margin-bottom: 12px; }
+      button { padding: 9px 13px; border: 0; border-radius: 10px; background: #7c3aed; color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+      button.stop { background: #94a3b8; }
+      pre { margin: 0; padding: 12px; border-radius: 10px; background: #1e1b2e; color: #c4b5fd; font-size: .76rem; line-height: 1.6; white-space: pre-wrap; min-height: 150px; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Async page stream</h1>
+      <p class="sub">Values arrive over time from an async generator.</p>
+      <div class="row">
+        <button id="start">Start stream</button>
+        <button id="stop" class="stop">Stop</button>
+      </div>
+      <pre id="out">Press Start to consume the async iterator.</pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      var lines = [];
+      var running = false;
+      function log(text) {
+        lines.push(text);
+        if (lines.length > 9) lines.shift();
+        out.textContent = lines.join("\n");
+      }
+      function wait(ms) {
+        return new Promise(function (resolve) { window.setTimeout(resolve, ms); });
+      }
+      async function* pages() {
+        for (var n = 1; n <= 6; n++) {
+          await wait(450);
+          yield { page: n, title: "Article batch " + n };
+        }
+      }
+      document.getElementById("start").addEventListener("click", async function () {
+        if (running) return;
+        running = true;
+        lines = [];
+        log("for await loop started");
+        for await (var item of pages()) {
+          if (!running) break;
+          log("yielded -> page " + item.page + ": " + item.title);
+        }
+        log(running ? "stream finished (done = true)" : "stream stopped by user");
+        running = false;
+      });
+      document.getElementById("stop").addEventListener("click", function () {
+        if (running) { running = false; log("stop requested…"); }
+      });
+    </script>
+  </body>
+</html>
+```

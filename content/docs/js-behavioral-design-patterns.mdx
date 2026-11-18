@@ -1,0 +1,93 @@
+---
+title: Behavioral Design Patterns
+description: Organize communication between objects with observer, mediator, command, and iterator patterns.
+chapter: 79
+category: "JavaScript"
+order: 379
+---
+
+# Behavioral Design Patterns
+
+Behavioral patterns describe how objects interact and share responsibility. They are less about creating objects and more about keeping the flow of control clean as a system grows. Four useful ones are the observer, mediator, command, and iterator patterns, each solving a different kind of coupling problem.
+
+## Observer and mediator
+
+The observer pattern defines a subject that maintains a list of dependents and notifies them automatically when its state changes. Subscribers register a callback, and the subject broadcasts an update to all of them. This keeps the subject from knowing anything specific about its observers. The mediator pattern goes a step further: instead of many objects referring to each other directly, they communicate through a central mediator, which reduces a web of connections to a hub-and-spoke arrangement.
+
+## Command and iterator
+
+A command turns a request into an object, bundling the action with its arguments so it can be passed around, queued, or undone later. A button and a menu item can share the same command object without either knowing how it is carried out. The iterator pattern provides a uniform way to walk through a collection without exposing how that collection stores its elements, which is why methods like `values` and generators are so common in modern JavaScript.
+
+## A live observer feed
+
+The demo implements a small news subject with three subscribers. Toggle a subscriber on or off, publish a headline, and watch only the active observers receive it. The publish action is itself a command object, showing how a request can be represented as data.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Behavioral patterns</title>
+    <style>
+      body { margin: 0; padding: 24px 18px; font-family: system-ui, sans-serif; color: #24313b; background: linear-gradient(135deg, #eef2ff, #f0fdfa 75%); }
+      .card { max-width: 500px; margin: 0 auto; padding: 22px; background: #fff; border-radius: 20px; box-shadow: 0 18px 40px -28px rgba(40,60,90,.45); }
+      h1 { margin: 0 0 4px; font-size: 1.1rem; }
+      p.sub { margin: 0 0 14px; font-size: .8rem; color: #64748b; }
+      .subs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+      .subs label { display: flex; align-items: center; gap: 6px; padding: 7px 10px; border: 1px solid #dbe4f0; border-radius: 999px; font-size: .78rem; cursor: pointer; }
+      .row { display: flex; gap: 8px; }
+      input { flex: 1; min-width: 0; padding: 9px 11px; border: 1px solid #d3dcea; border-radius: 10px; font: inherit; font-size: .84rem; }
+      button { padding: 9px 14px; border: 0; border-radius: 10px; background: #4338ca; color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+      pre { margin: 14px 0 0; padding: 12px; border-radius: 10px; background: #141b2e; color: #a5f3fc; font-size: .76rem; line-height: 1.6; white-space: pre-wrap; min-height: 110px; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Observer news feed</h1>
+      <p class="sub">A subject broadcasts to its active subscribers.</p>
+      <div class="subs">
+        <label><input type="checkbox" data-ch="email" checked /> Email</label>
+        <label><input type="checkbox" data-ch="sms" checked /> SMS</label>
+        <label><input type="checkbox" data-ch="feed" checked /> Dashboard</label>
+      </div>
+      <div class="row">
+        <input id="headline" value="New release is live" />
+        <button id="publish">Publish</button>
+      </div>
+      <pre id="out">Waiting for a headline…</pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      var lines = [];
+      function log(text) {
+        lines.push(text);
+        if (lines.length > 8) lines.shift();
+        out.textContent = lines.join("\n");
+      }
+      function Subject() { this.observers = []; }
+      Subject.prototype.subscribe = function (name, fn) { this.observers.push({ name: name, fn: fn, active: true }); };
+      Subject.prototype.publish = function (value) {
+        this.observers.forEach(function (o) { if (o.active) o.fn(value); });
+      };
+      var news = new Subject();
+      document.querySelectorAll("[data-ch]").forEach(function (box) {
+        var name = box.getAttribute("data-ch");
+        var toggle = box;
+        news.subscribe(name, function (value) {
+          log(name + " observer -> " + value);
+        });
+        toggle.addEventListener("change", function () {
+          news.observers.forEach(function (o) { if (o.name === name) o.active = toggle.checked; });
+        });
+      });
+      var publishCommand = { execute: function (text) { news.publish(text); } };
+      document.getElementById("publish").addEventListener("click", function () {
+        var text = document.getElementById("headline").value.trim() || "(untitled)";
+        log("command execute -> " + text);
+        publishCommand.execute(text);
+      });
+    </script>
+  </body>
+</html>
+```

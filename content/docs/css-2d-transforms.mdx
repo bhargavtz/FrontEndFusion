@@ -1,0 +1,125 @@
+---
+title: 2D Transforms
+description: Move, rotate, scale, and skew elements in two dimensions, combine transforms, and control the pivot with transform-origin.
+chapter: 28
+category: "CSS"
+order: 128
+---
+
+# 2D Transforms
+
+The `transform` property repositions an element's painted box without disturbing the layout around it. Neighbours keep their places, which makes transforms ideal for hover effects, badges, and layered compositions.
+
+## The four functions
+
+`translate(x, y)` moves an element. It accepts lengths or percentages, and percentages resolve against the element's own size, so `translate(-50%, -50%)` is the classic centering trick when combined with absolute positioning.
+
+`scale(n)` resizes from a factor. `scaleX` and `scaleY` act on one axis. Scaling does not affect layout space, so a scaled card can visually overlap its neighbours.
+
+`rotate(angle)` spins the element around its origin. Positive angles turn clockwise.
+
+`skew(x, y)` slants the box along the axes, producing a sheared look often used for background ribbons and speed lines.
+
+## Combining and pivoting
+
+Multiple functions go in one declaration, space-separated. Order matters: each function is applied to the coordinate system the previous one produced, so `translate(20px) rotate(10deg)` differs from `rotate(10deg) translate(20px)`.
+
+```css
+.card:hover {
+  transform: translateY(-4px) rotate(-2deg) scale(1.03);
+}
+```
+
+`transform-origin` sets the pivot, defaulting to `50% 50%` (the center). Change it to `bottom center` for a door swing, or `top left` for a card that drops away. Individual properties — `translate`, `rotate`, and `scale` — are also available and are applied in a fixed order, which makes them easier to reason about and animate separately.
+
+Transforms create a containing block for absolutely positioned descendants and a new stacking context, a detail that surprises people when a fixed header stops behaving.
+
+## Demo: fanned card gallery
+
+```html
+<div class="fan">
+  <figure class="fan__card fan__card--a">
+    <span class="fan__glyph">◐</span>
+    <figcaption>Dawn</figcaption>
+  </figure>
+  <figure class="fan__card fan__card--b">
+    <span class="fan__glyph">◑</span>
+    <figcaption>Noon</figcaption>
+  </figure>
+  <figure class="fan__card fan__card--c">
+    <span class="fan__glyph">◒</span>
+    <figcaption>Dusk</figcaption>
+  </figure>
+</div>
+
+<style>
+  body {
+    margin: 0;
+    min-height: 70vh;
+    display: grid;
+    place-items: center;
+    padding: 3rem 1.25rem;
+    background: #eae6df;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+  .fan {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 15rem;
+    width: 22rem;
+  }
+  .fan__card {
+    position: absolute;
+    margin: 0;
+    display: grid;
+    place-items: center;
+    gap: 0.4rem;
+    width: 9rem;
+    height: 11rem;
+    border-radius: 16px;
+    background: #fffdf8;
+    border: 1px solid #ded6c6;
+    box-shadow: 0 16px 30px -22px rgba(60, 50, 30, 0.85);
+    transform-origin: bottom center;
+    transition:
+      transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 320ms ease;
+  }
+  .fan__glyph {
+    font-size: 2.75rem;
+    line-height: 1;
+    color: #b08968;
+  }
+  .fan__card figcaption {
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #8a7f6c;
+  }
+  .fan__card--a {
+    transform: translateX(-5.5rem) rotate(-12deg);
+  }
+  .fan__card--b {
+    z-index: 2;
+    transform: translateY(-1.25rem) scale(1.06);
+  }
+  .fan__card--c {
+    transform: translateX(5.5rem) rotate(12deg);
+  }
+  .fan__card:hover {
+    z-index: 3;
+    transform: translateY(-2.5rem) rotate(0deg) scale(1.09);
+    box-shadow: 0 28px 44px -24px rgba(60, 50, 30, 0.7);
+  }
+  .fan__card--a:hover {
+    transform: translateX(-5.5rem) translateY(-2.5rem) rotate(0deg) scale(1.09);
+  }
+  .fan__card--c:hover {
+    transform: translateX(5.5rem) translateY(-2.5rem) rotate(0deg) scale(1.09);
+  }
+</style>
+```
+
+Each card is absolutely positioned inside a fixed-size stage, so transforms control the fan without any of them displacing the others. The middle card sits slightly higher and larger to suggest depth, while hover lifts a card and flattens its rotation to bring the content forward.

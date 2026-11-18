@@ -1,0 +1,175 @@
+---
+title: Columns
+description: Split prose into newspaper columns with column-count, column-width, column-gap, and column-rule.
+chapter: 39
+category: "CSS"
+order: 139
+---
+
+# Columns
+
+Long paragraphs are hard to track on a wide screen. The multi-column layout module lets the browser split a single block of content into side-by-side columns, filling them in reading order. No wrappers, no duplicated markup — the flow itself is fragmented.
+
+## column-count and column-width
+
+The blunt instrument. You ask for two, three, or four columns and the browser divides the available width evenly, taking the gap out of the total.
+
+```css
+.article {
+  column-count: 3;
+  column-gap: 2.5rem;
+}
+```
+
+Lines are balanced automatically, so with a short article you may get three columns of nearly equal height rather than three columns stacked to the bottom. That is usually what you want for prose and occasionally not what you want for a continuing element — the next chapter covers how to control it.
+
+The second instrument is more flexible. You specify a *preferred* width, and the browser fits as many columns of at least that width as the container allows. `column-width: 18rem` on a 900px container gives three columns; on a 500px container it gives one.
+
+```css
+.article {
+  column-width: 18rem;
+  column-gap: 2rem;
+}
+```
+
+This is the responsive choice, because the column count adapts without a media query. When both `column-width` and `column-count` are set, `column-count` acts as a maximum and `column-width` as a minimum — the browser satisfies both if it can, then prioritises the count.
+
+## column-gap and column-rule
+
+The gutter. It takes any length, and it is the only thing standing between two columns of text. Too small and the eye jumps to the wrong line; too large and the columns stop feeling like one article. Between `1.5rem` and `3rem` covers most designs. For the older spelling, `column-gap` is now the standard name (the prefix `-webkit-column-gap` still appears in legacy code).
+
+A vertical line can be drawn in that gap, centred, using the same shorthand as `border`:
+
+```css
+.article {
+  column-rule: 1px solid #e2e8f2;
+}
+```
+
+The rule is purely decorative — it has no width of its own and never pushes the columns apart. If the gap is too narrow the line crowds the text, so set the gap first and then decide whether a rule is even needed. A hairline at low opacity often reads better than a hairline at full contrast.
+
+## A complete example
+
+A newsletter digest laid out in three columns with a subtle rule, over a warm neutral background.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Column digest</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 44px 20px;
+        font-family: Georgia, "Times New Roman", serif;
+        background: #f3f1ec;
+        color: #2a2620;
+        line-height: 1.65;
+      }
+
+      .digest {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 34px 36px 40px;
+        background: #fffdf9;
+        border-radius: 18px;
+        box-shadow: 0 28px 55px -40px rgba(70, 58, 40, 0.5);
+      }
+
+      header {
+        margin-bottom: 22px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid #2a2620;
+      }
+
+      .issue {
+        font-family: system-ui, sans-serif;
+        font-size: 0.66rem;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+        color: #a3895f;
+      }
+
+      h1 {
+        margin: 6px 0 0;
+        font-size: 1.75rem;
+        letter-spacing: -0.015em;
+      }
+
+      .body {
+        column-count: 3;
+        column-gap: 2rem;
+        column-rule: 1px solid #e6ddce;
+        font-size: 0.86rem;
+        text-align: justify;
+        hyphens: auto;
+      }
+
+      .body p {
+        margin: 0 0 0.9em;
+      }
+
+      .body p:first-child::first-letter {
+        float: left;
+        margin: 0.06em 0.08em 0 0;
+        font-size: 3.1rem;
+        line-height: 0.8;
+        font-weight: 700;
+        color: #c1703a;
+      }
+
+      .byline {
+        margin-top: 20px;
+        padding-top: 14px;
+        border-top: 1px solid #eee5d6;
+        font-family: system-ui, sans-serif;
+        font-size: 0.7rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #a3895f;
+      }
+    </style>
+  </head>
+  <body>
+    <article class="digest">
+      <header>
+        <span class="issue">Issue 14 · Autumn</span>
+        <h1>The quiet quarter</h1>
+      </header>
+
+      <div class="body">
+        <p>
+          The best work of the season arrived without announcement. No launch
+          thread, no countdown, just a small note in a changelog and a link. By
+          the following morning a handful of teams had already rebuilt their
+          intake forms around it.
+        </p>
+        <p>
+          What makes the release interesting is not the feature but the
+          restraint. Three settings were removed, two defaults changed, and the
+          interface lost a whole row of buttons. People who used the old version
+          describe it as lighter, which is a strange compliment for software
+          that does more.
+        </p>
+        <p>
+          The pattern repeats across the industry. Tools that once competed on
+          surface area now compete on how little they ask of you. Every removed
+          option is a decision the product makes on your behalf, and those
+          decisions are becoming the actual differentiator.
+        </p>
+        <p>
+          Meanwhile the documentation grew by a third, mostly in the form of
+          short recipes. The team says support tickets dropped sharply in the
+          weeks after publication, though they are careful not to claim a cause.
+        </p>
+      </div>
+
+      <p class="byline">Notes from the editor</p>
+    </article>
+  </body>
+</html>
+```
+
+Narrow the window and the three columns persist until the text gets genuinely cramped — at that point `column-count` alone cannot help you. Pairing it with `column-width` is how most production layouts handle the small end, which is exactly what the next chapter builds on.

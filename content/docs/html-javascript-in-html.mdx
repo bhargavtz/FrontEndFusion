@@ -1,0 +1,90 @@
+---
+title: Include JavaScript Code in HTML
+description: Load scripts safely, handle disabled JavaScript, and choose between inline, external, async, and deferred code.
+chapter: 13
+category: "HTML"
+order: 23
+---
+
+# Include JavaScript Code in HTML
+
+JavaScript adds behaviour to a page. It can be embedded in the document or loaded from an external file.
+
+## Handling disabled JavaScript
+
+Use `noscript` to show a fallback when scripting is unavailable:
+
+```html
+<noscript>
+  <p class="notice">
+    This demo needs JavaScript. You can still read the source code below.
+  </p>
+</noscript>
+
+<div id="app">Static fallback content</div>
+```
+
+Do not hide essential content behind JavaScript. Navigation, text, and forms should work without it.
+
+## Linking to an external JavaScript file
+
+```html
+<script src="/js/app.js"></script>
+```
+
+Place the script at the end of the body, or use `defer` in the head:
+
+```html
+<script src="/js/app.js" defer></script>
+```
+
+External files are cached by the browser and keep HTML readable.
+
+## Directly including JavaScript code
+
+```html
+<script>
+  document.querySelector("[data-year]").textContent = new Date().getFullYear();
+</script>
+```
+
+Inline scripts are convenient for tiny snippets. For anything larger, use an external file so it can be cached, tested, and reviewed.
+
+## Asynchronous loading
+
+```html
+<script src="/js/analytics.js" async></script>
+<script src="/js/app.js" defer></script>
+```
+
+- `async` downloads in parallel and runs as soon as it is ready. Order is not guaranteed.
+- `defer` downloads in parallel and runs after parsing, in document order.
+
+Use `defer` for application code. Use `async` for independent widgets such as analytics.
+
+## Module scripts
+
+```html
+<script type="module" src="/js/main.js"></script>
+```
+
+Module scripts are deferred by default, have their own scope, and support `import`/`export`.
+
+## Error handling
+
+```html
+<script>
+  window.addEventListener("error", (event) => {
+    console.error("Script error:", event.message);
+  });
+</script>
+```
+
+A global error handler is a last resort. Prefer `try`/`catch` around operations that can fail, such as `fetch` or `JSON.parse`.
+
+## Security notes
+
+- Do not inject untrusted strings into `innerHTML`.
+- Use `textContent` for plain text.
+- Add `integrity` and `crossorigin` when loading a third-party script from a CDN that supports subresource integrity.
+- Avoid inline event handlers such as `onclick` in large codebases; attach listeners in JavaScript.

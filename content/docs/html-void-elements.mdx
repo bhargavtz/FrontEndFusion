@@ -1,0 +1,84 @@
+---
+title: Void Elements
+description: Learn which HTML elements never have closing tags and how to write them correctly.
+chapter: 24
+category: "HTML"
+order: 34
+---
+
+# Void Elements
+
+Void elements are empty elements. They cannot contain text or other elements, so they have no closing tag.
+
+## The common void elements
+
+```html
+<br />
+<hr />
+<img src="/photo.jpg" alt="A lake at dawn" />
+<input type="text" name="city" />
+<meta charset="utf-8" />
+<link rel="stylesheet" href="/css/site.css" />
+<source src="/media/clip.webm" type="video/webm" />
+<track kind="captions" src="/media/clip.vtt" srclang="en" label="English" />
+<area shape="rect" coords="0,0,100,100" href="#zone" alt="Zone" />
+<base href="/docs/" />
+<col span="2" />
+<embed src="/media/demo.pdf" type="application/pdf" />
+<param name="movie" value="/media/demo.swf" />
+<wbr />
+```
+
+## Syntax
+
+HTML5 allows both of these forms:
+
+```html
+<img src="/logo.svg" alt="Logo">
+<img src="/logo.svg" alt="Logo" />
+```
+
+The self-closing slash is optional in HTML. It is required in XHTML and JSX. Pick one style and keep it consistent in a project.
+
+## What not to do
+
+Do not add a closing tag to a void element:
+
+```html
+<!-- Invalid -->
+<img src="/logo.svg" alt="Logo"></img>
+```
+
+Do not put content inside a void element:
+
+```html
+<!-- Invalid -->
+<input type="text">Default text</input>
+```
+
+Use the `value` attribute instead:
+
+```html
+<input type="text" value="Default text" />
+```
+
+## Void elements versus empty elements
+
+A normal element can be empty but still has a closing tag:
+
+```html
+<div></div>
+<p></p>
+```
+
+Those are not void elements. They can contain content later.
+
+## Why it matters
+
+Invalid closing tags confuse parsers, break component templates, and can produce unexpected nesting. When you write JSX, remember that all void elements must self-close:
+
+```jsx
+<img src="/logo.svg" alt="Logo" />
+<br />
+<input type="email" name="email" />
+```
