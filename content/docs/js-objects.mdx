@@ -1,0 +1,99 @@
+---
+title: Objects
+description: Group related data into objects, copy and merge them safely, and enumerate or define their properties.
+chapter: 13
+category: "JavaScript"
+order: 313
+---
+
+# Objects
+
+An object collects related values under named keys. Where arrays organize data by position, objects organize it by meaning, which makes them the natural choice for records, settings, and anything with labeled fields.
+
+## Creating and accessing objects
+
+Write an object literal with key-value pairs, such as `var user = { name: "Ada", age: 36 }`. Read a value with dot notation like `user.name`, or bracket notation like `user["name"]` when the key is stored in a variable. Assigning to a new key adds it at runtime. Bracket notation is also the only way to use keys containing spaces or special characters.
+
+## Copying and merging
+
+Assignment copies a reference, not the object itself, so two variables can point at the same data. To make a shallow copy, spread the source into a fresh literal: `var copy = { ...user }`. The spread syntax also merges several objects left to right, with later values winning on duplicate keys. `Object.assign` performs a similar shallow merge into a target. Both approaches copy only the top level; nested objects remain shared. When you want to prevent changes, `Object.freeze` makes an object's own properties immutable, and `Object.seal` stops properties from being added or removed while leaving their values writable.
+
+## Enumerating and defining properties
+
+`Object.keys` returns an array of a object's own enumerable key names, `Object.values` returns the values, and `Object.entries` returns key-value pairs that work nicely in a loop. For finer control, `Object.defineProperty` sets attributes such as `enumerable` or `writable`, and can install accessor properties with `get` and `set` functions that run on read and write. Properties whose `enumerable` flag is false stay hidden from enumeration even though they remain accessible directly.
+
+## Demo: team directory
+
+The demo merges default fields into partial member records with spread, renders each resulting object through `Object.entries`, and reports the frozen configuration.
+
+```html
+<div class="wrap">
+  <div class="card">
+    <h2>Team directory</h2>
+    <p class="hint">Defaults are merged into each member, then shown through Object.entries.</p>
+    <div class="grid" id="grid"></div>
+    <pre class="out" id="out"></pre>
+  </div>
+</div>
+
+<style>
+  .wrap {
+    min-height: 70vh; display: grid; place-items: center;
+    padding: 2rem 1rem; background: #f3eef8;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+  .card {
+    width: min(100%, 30rem); background: #fff; border-radius: 18px;
+    padding: 1.75rem; box-shadow: 0 18px 40px -24px rgba(70, 45, 100, 0.5);
+  }
+  h2 { margin: 0 0 0.35rem; font-size: 1.2rem; color: #3b2b52; }
+  .hint { margin: 0 0 1.1rem; font-size: 0.85rem; color: #85769a; }
+  .grid { display: grid; gap: 0.7rem; }
+  .tile {
+    border: 1px solid #ebe2f3; border-radius: 12px; padding: 0.7rem 0.9rem;
+    background: #fcfaff;
+  }
+  .tile strong { color: #5b3f83; font-size: 0.95rem; }
+  .tile ul { margin: 0.4rem 0 0; padding: 0; list-style: none; }
+  .tile li { font-size: 0.8rem; color: #6b5c80; line-height: 1.5; }
+  .out {
+    margin: 1rem 0 0; padding: 0.85rem; border-radius: 12px;
+    background: #f3eef8; color: #4a3a60; font-size: 0.8rem; white-space: pre-wrap;
+  }
+</style>
+
+<script>
+  var defaults = { role: "Member", city: "Remote", years: 0, active: true };
+  var members = [
+    { name: "Ada", role: "Engineer", years: 5 },
+    { name: "Grace", city: "New York", years: 8 },
+    { name: "Linus" }
+  ];
+  var config = Object.freeze({ theme: "light" });
+
+  var grid = document.getElementById("grid");
+  var full = members.map(function (m) { return { ...defaults, ...m }; });
+
+  full.forEach(function (person) {
+    var tile = document.createElement("div");
+    tile.className = "tile";
+    var name = document.createElement("strong");
+    name.textContent = person.name;
+    var list = document.createElement("ul");
+    Object.entries(person).forEach(function (entry) {
+      if (entry[0] === "name") return;
+      var li = document.createElement("li");
+      li.textContent = entry[0] + ": " + entry[1];
+      list.appendChild(li);
+    });
+    tile.appendChild(name);
+    tile.appendChild(list);
+    grid.appendChild(tile);
+  });
+
+  document.getElementById("out").textContent =
+    "Keys of first member: " + Object.keys(full[0]).join(", ") + "\n" +
+    "Values of first member: " + Object.values(full[0]).join(" | ") + "\n" +
+    "Config frozen: " + Object.isFrozen(config) + " · theme: " + config.theme;
+</script>
+```

@@ -1,0 +1,82 @@
+---
+title: Image Maps
+description: Turn regions of a single image into separate links with map, area, and usemap.
+chapter: 16
+category: "HTML"
+order: 26
+---
+
+# Image Maps
+
+An image map defines clickable regions inside one image. Each region can link somewhere different.
+
+## Basic structure
+
+- `map` defines the named map.
+- `area` defines one clickable region.
+- `img` connects to the map with `usemap="#name"`.
+
+```html
+<img
+  src="https://picsum.photos/seed/floorplan/600/320"
+  alt="Floor plan with two highlighted rooms"
+  usemap="#rooms"
+  width="600"
+  height="320"
+/>
+
+<map name="rooms">
+  <area
+    shape="rect"
+    coords="20,20,280,300"
+    href="#studio"
+    alt="Open the studio page"
+  />
+  <area
+    shape="rect"
+    coords="320,20,580,300"
+    href="#workshop"
+    alt="Open the workshop page"
+  />
+</map>
+```
+
+## Shapes and coordinates
+
+| Shape | Coordinates | Example |
+| --- | --- | --- |
+| `rect` | left, top, right, bottom | `coords="10,10,120,80"` |
+| `circle` | centre x, centre y, radius | `coords="150,75,40"` |
+| `poly` | x1,y1, x2,y2, … | `coords="10,10,100,20,60,90"` |
+| `default` | whole image | no coordinates |
+
+```html
+<map name="shapes">
+  <area shape="circle" coords="100,100,60" href="#circle" alt="Circle region" />
+  <area shape="poly" coords="260,40,340,40,300,120" href="#triangle" alt="Triangle region" />
+</map>
+```
+
+## Accessibility
+
+Every `area` needs an `alt` attribute. The alt text is the link text for assistive technology.
+
+Image maps are hard to use on touch devices and with keyboard navigation. Provide the same links as a normal list nearby, especially if the map carries important navigation.
+
+```html
+<ul>
+  <li><a href="#studio">Studio</a></li>
+  <li><a href="#workshop">Workshop</a></li>
+</ul>
+```
+
+## When to use an image map
+
+Use one when the visual regions are the point, such as a diagram, a map, or a floor plan. For ordinary navigation, use normal links or buttons instead.
+
+## Testing
+
+1. Hover each region and confirm the cursor changes.
+2. Tab through the areas and check the focus outline.
+3. Read the alt text aloud with a screen reader.
+4. Resize the image and verify that the coordinates still line up.

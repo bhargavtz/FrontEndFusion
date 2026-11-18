@@ -1,0 +1,132 @@
+---
+title: IndexedDB
+description: Open a database, store objects, read them back, and detect support while keeping a working fallback for sandboxed pages.
+chapter: 72
+category: "JavaScript"
+order: 372
+---
+
+# IndexedDB
+
+IndexedDB is a browser database for storing substantial amounts of structured data, including files and blobs. It is asynchronous, transactional, and organised into databases, object stores, and indexes. Unlike `localStorage`, it handles large datasets without blocking the main thread.
+
+## Opening a database
+
+You start with `indexedDB.open(name, version)`. The request exposes `onsuccess`, `onerror`, and `onupgradeneeded` events. The upgrade event fires when the database is new or its version increases; that is where you create object stores with `createObjectStore` and define indexes. Everything else happens after the open request succeeds.
+
+## Adding and retrieving objects
+
+Writes and reads take place inside transactions. You obtain a transaction for one or more stores, get the store object, and call `add` or `put` to insert data. `add` fails if the key already exists, while `put` overwrites it.
+
+To read, call `get(key)` for a single record, `getAll()` for every record, or use an index for a filtered lookup. Each call returns another request with its own success handler. Because operations are asynchronous, you chain work through callbacks, promises, or `async`/`await` wrappers rather than reading results synchronously.
+
+## Testing for availability
+
+Some environments block IndexedDB entirely, so check for `window.indexedDB` before using it and show a fallback. The demo keeps a tiny in-memory object store with the same conceptual steps, which lets you try adding and listing records even when the real API is unavailable. A message tells you whether live IndexedDB was detected.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>IndexedDB</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px 18px;
+        font-family: system-ui, sans-serif;
+        color: #2b2a38;
+        background: radial-gradient(circle at 15% 0%, #edf0ff, #f6f6fa 60%);
+      }
+      .card {
+        max-width: 540px;
+        margin: 0 auto;
+        padding: 22px;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 20px 42px -30px rgba(50, 50, 100, 0.5);
+      }
+      h1 { margin: 0 0 6px; font-size: 1.15rem; }
+      .note { margin: 0 0 14px; font-size: 0.78rem; color: #6b4a7a; }
+      .row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+      input {
+        padding: 8px 10px;
+        border: 1px solid #dcdcf2;
+        border-radius: 9px;
+        font: inherit;
+        font-size: 0.82rem;
+        min-width: 120px;
+      }
+      button {
+        padding: 8px 12px;
+        border: 1px solid #d8d8f2;
+        border-radius: 9px;
+        background: #f8f8ff;
+        color: #4b489e;
+        font: inherit;
+        font-size: 0.8rem;
+        cursor: pointer;
+      }
+      ul { margin: 0 0 12px; padding-left: 20px; font-size: 0.84rem; }
+      li { padding: 3px 0; }
+      pre {
+        margin: 0;
+        padding: 12px;
+        border-radius: 12px;
+        background: #1e1e30;
+        color: #cdd0ff;
+        font-size: 0.76rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Object store playground</h1>
+      <p class="note" id="note"></p>
+      <div class="row">
+        <input id="key" placeholder="key (e.g. a1)" />
+        <input id="val" placeholder="value" />
+        <button id="add">put()</button>
+        <button id="clear">clear()</button>
+      </div>
+      <ul id="list"></ul>
+      <pre id="out"></pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      var list = document.getElementById("list");
+      var hasIDB = "indexedDB" in window;
+      var store = {};
+      document.getElementById("note").textContent = hasIDB
+        ? "Live IndexedDB is available. This sandbox demo uses an in-memory store to stay predictable. In a real app you would open a database inside onupgradeneeded and create an object store."
+        : "IndexedDB is unavailable here. The same add / get / list flow runs against an in-memory fallback.";
+      function refresh() {
+        list.innerHTML = "";
+        Object.keys(store).forEach(function (k) {
+          var li = document.createElement("li");
+          li.textContent = k + " -> " + store[k];
+          list.appendChild(li);
+        });
+      }
+      document.getElementById("add").addEventListener("click", function () {
+        var k = document.getElementById("key").value.trim();
+        var v = document.getElementById("val").value.trim();
+        if (!k) { out.textContent = "A key is required for put()."; return; }
+        store[k] = v;
+        refresh();
+        out.textContent = "put('" + k + "', '" + v + "') succeeded\ngetAll() now returns " + Object.keys(store).length + " record(s).";
+      });
+      document.getElementById("clear").addEventListener("click", function () {
+        store = {};
+        refresh();
+        out.textContent = "Object store cleared.";
+      });
+      refresh();
+      out.textContent = "Open database 'demo', version 1\nCreate object store 'notes' with keyPath 'id'\nReady for put() / get() / getAll()";
+    </script>
+  </body>
+</html>
+```

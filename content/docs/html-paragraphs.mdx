@@ -1,0 +1,74 @@
+---
+title: Paragraphs
+description: Group prose with p, control line breaks with br, and preserve whitespace with pre.
+chapter: 4
+category: "HTML"
+order: 14
+---
+
+# Paragraphs
+
+The `p` element represents a paragraph of prose. Browsers add vertical space between paragraphs, but that spacing is a style concern.
+
+## Basic paragraphs
+
+```html
+<p>
+  The trail starts behind the old stone bridge and climbs steadily through
+  pine forest for about two kilometres.
+</p>
+<p>
+  At the ridge, the trees open up and the whole valley becomes visible.
+</p>
+```
+
+Each `p` is a block of related sentences. Do not use empty paragraphs to create gaps; use margins in CSS instead.
+
+## Line breaks inside a paragraph
+
+Use `br` when the line break is part of the content, such as a postal address or a poem.
+
+```html
+<p>
+  Riverside Studio<br />
+  14 Harbour Lane<br />
+  Port Townsend
+</p>
+```
+
+Do not use repeated `br` elements to separate sections. Use separate paragraphs or CSS spacing.
+
+## Preformatted text
+
+The `pre` element preserves spaces and line breaks. It is commonly paired with `code` for terminal output and source listings.
+
+```html
+<pre><code>npm install
+npm run dev
+
+Local: http://localhost:3000</code></pre>
+```
+
+Inside `pre`, long lines can overflow. Add `overflow-x: auto` in CSS when needed.
+
+## Paragraphs and inline content
+
+A paragraph can contain links, emphasis, images, and other inline elements:
+
+```html
+<p>
+  Read the <a href="/html5/doctypes">doctype chapter</a> before you copy an
+  old template. It explains why the first line matters.
+</p>
+```
+
+## Common mistakes
+
+- Using `br` to fake paragraph spacing.
+- Putting block elements such as `div` inside a `p`.
+- Using `pre` for ordinary prose.
+- Forgetting that whitespace in HTML source collapses into a single space.
+
+## Rule of thumb
+
+Use `p` for prose, `br` for meaningful line breaks, and `pre` for content where whitespace is significant.

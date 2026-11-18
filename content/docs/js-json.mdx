@@ -1,0 +1,69 @@
+---
+title: JSON
+description: Convert data to and from JSON with stringify and parse, including replacer and reviver functions.
+chapter: 35
+category: "JavaScript"
+order: 335
+---
+
+# JSON
+
+JSON is a text format for exchanging structured data. JavaScript provides two built-in functions: `JSON.stringify` turns a value into a JSON string, and `JSON.parse` turns a valid JSON string back into a value. The format is a strict subset of JavaScript syntax - property names and strings use double quotes, and functions, `undefined`, and `Symbol` values have no representation and are silently dropped from objects.
+
+## Parsing and stringifying safely
+
+Parsing fails loudly with a syntax error on malformed text, so it is common to wrap `JSON.parse` in a `try` block when the input is untrusted. Stringifying is forgiving: unsupported values inside an object are omitted, while the same values at the top level become `null`. Arrays turn missing entries into `null` as well. The optional indentation argument to `stringify` makes output human-readable, which is useful for debugging.
+
+## Revivers, replacers, and tricky values
+
+Both functions accept a second argument for fine-grained control. A *replacer* function (or array of keys) runs during stringify and decides which properties to keep and how to transform them. A *reviver* function runs during parse, walking each key in order and returning the value that should replace the original. This is how dates stored as strings become real `Date` objects again.
+
+Class instances lose their prototype during a round trip - you get a plain object back, so a reviver must rebuild the instance if methods are needed. Cyclic references, where an object points back to itself, cause `stringify` to throw a type error; a WeakSet can track visited objects to break the cycle.
+
+The demo serialises a profile with a replacer that hides a secret field, then parses it back with a reviver that restores a date.
+
+```html
+<div style="background:#f8fafc;border-radius:16px;padding:20px;max-width:560px;font-family:system-ui,sans-serif;color:#0f172a;">
+  <h3 style="margin-top:0;">JSON round trip</h3>
+  <div style="display:flex;gap:8px;margin-bottom:12px;">
+    <button id="doStringify">Stringify</button>
+    <button id="doParse">Parse with reviver</button>
+  </div>
+  <pre id="out" style="background:#0f172a;color:#e2e8f0;padding:12px;border-radius:10px;min-height:130px;white-space:pre-wrap;"></pre>
+</div>
+<script>
+  (function () {
+    var out = document.getElementById("out");
+    var text = "";
+    var profile = {
+      name: "Ada",
+      role: "engineer",
+      joined: "2020-05-01T00:00:00.000Z",
+      password: "hide-me"
+    };
+    function replacer(key, value) {
+      if (key === "password") return undefined;
+      return value;
+    }
+    function reviver(key, value) {
+      if (key === "joined") return new Date(value);
+      return value;
+    }
+    document.getElementById("doStringify").onclick = function () {
+      text = JSON.stringify(profile, replacer, 2);
+      out.textContent = text;
+    };
+    document.getElementById("doParse").onclick = function () {
+      if (!text) { out.textContent = "Click Stringify first."; return; }
+      try {
+        var restored = JSON.parse(text, reviver);
+        out.textContent = "joined is a " + (restored.joined instanceof Date ? "Date object" : typeof restored.joined)
+          + "\nname: " + restored.name
+          + "\npassword present: " + ("password" in restored);
+      } catch (e) {
+        out.textContent = "Parse error: " + e.message;
+      }
+    };
+  })();
+</script>
+```

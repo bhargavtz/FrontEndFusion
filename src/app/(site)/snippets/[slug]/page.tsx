@@ -1,9 +1,10 @@
-import type { ComponentType } from "react";
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSnippet, snippets } from "@/data/snippets";
 import { TechTags } from "@/components/tech-tags";
+import { MdxContent } from "@/components/mdx/mdx-content";
 import { LoginForm } from "@/components/snippets/login-form";
 import { ContactForm } from "@/components/snippets/contact-form";
 import { NewsletterForm } from "@/components/snippets/newsletter-form";
@@ -12,10 +13,10 @@ type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
-const demos: Record<string, ComponentType> = {
-  "login-form": LoginForm,
-  "contact-form": ContactForm,
-  "newsletter-form": NewsletterForm,
+const demoComponents = {
+  LoginForm,
+  ContactForm,
+  NewsletterForm,
 };
 
 const canvasBySlug: Record<string, string> = {
@@ -48,9 +49,8 @@ export async function generateMetadata({
 export default async function SnippetPage({ params }: PageProps) {
   const { slug } = await params;
   const snippet = getSnippet(slug);
-  const Demo = demos[slug];
 
-  if (!snippet || !Demo) {
+  if (!snippet) {
     notFound();
   }
 
@@ -97,22 +97,22 @@ export default async function SnippetPage({ params }: PageProps) {
         <TechTags tags={snippet.tags} />
       </header>
 
-      <div
-        className="mt-8 flex items-center justify-center rounded-2xl border p-5 shadow-inner sm:p-10"
-        style={{
-          background: canvasBySlug[snippet.slug],
-          borderColor: "var(--border)",
+      <MdxContent
+        source={snippet.body}
+        components={{
+          ...demoComponents,
+          Preview: ({ children }: { children?: ReactNode }) => (
+            <div
+              className="mdx-preview"
+              style={{
+                background: canvasBySlug[snippet.slug],
+              }}
+            >
+              {children}
+            </div>
+          ),
         }}
-      >
-        <Demo />
-      </div>
-
-      <p
-        className="mt-4 text-center text-xs"
-        style={{ color: "var(--text-muted)" }}
-      >
-        Interactive demo — no data leaves your browser.
-      </p>
+      />
 
       <nav
         className="mt-10 grid grid-cols-1 gap-4 border-t pt-8 sm:grid-cols-2"

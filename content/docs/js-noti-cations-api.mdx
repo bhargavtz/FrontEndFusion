@@ -1,0 +1,126 @@
+---
+title: Notiﬁcations API
+description: Request permission and display system notifications with the Notifications API, with a graceful in-page fallback.
+chapter: 90
+category: "JavaScript"
+order: 390
+---
+
+# Notiﬁcations API
+
+The Notifications API lets a page show short messages outside the browser window, in the operating system's notification area. Because alerts can be intrusive, the browser gates them behind an explicit permission prompt and usually requires a secure context.
+
+## Permission and delivery
+
+Check for support with `if ("Notification" in window)`. `Notification.permission` is one of `"default"`, `"granted"` or `"denied"`. Call `Notification.requestPermission()` (it returns a promise in modern browsers) to ask the user, and use the value it resolves to as the new permission state. Only when it is `"granted"` should you construct a message with `new Notification(title, options)`, where options can include `body`, `icon`, `tag` and `silent`.
+
+A notification stays until it is dismissed, but `notification.close()` removes it programmatically. The object also emits events: `onshow`, `onclick`, `onclose` and `onerror`. Assign handlers to react when the user clicks or dismisses the message.
+
+## Sandbox realities
+
+In an embedded or sandboxed preview, permission prompts and system notifications are frequently blocked. Production code must treat denial as a normal outcome and provide an in-page message instead. The demo reports the detected permission, mirrors notifications in a visible card, and logs every event so the model is clear even when the system UI is unavailable.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Notifications lab</title>
+    <style>
+      body { margin: 0; padding: 24px 16px; font-family: system-ui, sans-serif; color: #26313f; background: linear-gradient(135deg, #eef2fa, #f9eef4 80%); }
+      .card { max-width: 540px; margin: 0 auto; padding: 22px; background: #fff; border-radius: 20px; box-shadow: 0 20px 42px -30px rgba(40, 40, 80, .5); }
+      h1 { margin: 0 0 6px; font-size: 1.15rem; }
+      .lead { margin: 0 0 12px; font-size: .84rem; color: #636d80; }
+      .badge { display: inline-block; padding: 6px 10px; border-radius: 999px; background: #eceff8; color: #46527a; font-size: .74rem; font-weight: 600; }
+      .row { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+      button { padding: 8px 12px; border: 0; border-radius: 9px; background: #4a5bb0; color: #fff; font: inherit; font-size: .78rem; cursor: pointer; }
+      button:hover { background: #394893; }
+      button.ghost { background: #e9ecf7; color: #46527a; }
+      .fake { display: none; padding: 14px 16px; border-radius: 13px; background: linear-gradient(135deg, #3c4a8f, #6a4fa0); color: #fff; box-shadow: 0 12px 26px -14px rgba(50, 40, 110, .8); }
+      .fake.show { display: block; }
+      .fake b { font-size: .92rem; }
+      .fake p { margin: 5px 0 0; font-size: .8rem; opacity: .92; }
+      pre { margin: 14px 0 0; min-height: 150px; padding: 12px; border-radius: 11px; background: #202235; color: #e2ddf6; font-size: .75rem; line-height: 1.6; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Notifications lab</h1>
+      <p class="lead">System alerts are mirrored here when the sandbox blocks them.</p>
+      <span id="badge" class="badge">checking…</span>
+      <div class="row">
+        <button id="ask">Request permission</button>
+        <button id="send">Show notification</button>
+        <button id="close" class="ghost">Close last</button>
+        <button id="clear" class="ghost">Clear log</button>
+      </div>
+      <div class="fake" id="fake"><b id="ftitle">Title</b><p id="fbody">Body</p></div>
+      <pre id="out"></pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      var badge = document.getElementById("badge");
+      var fake = document.getElementById("fake");
+      var last = null;
+      var supported = "Notification" in window;
+
+      function line(s) { out.textContent += s + "\n"; }
+      function status() { return supported ? Notification.permission : "unavailable"; }
+      function updateBadge() {
+        badge.textContent = supported ? "Notification.permission = " + status() : "Notification API missing — simulated mode";
+      }
+
+      document.getElementById("ask").addEventListener("click", function () {
+        if (!supported) { line("No Notification API here; permission request simulated."); return; }
+        try {
+          var p = Notification.requestPermission();
+          if (p && typeof p.then === "function") {
+            p.then(function (value) { line("requestPermission resolved: " + value); updateBadge(); });
+          } else {
+            line("requestPermission called (callback-style browser).");
+            updateBadge();
+          }
+        } catch (e) { line("Permission request blocked: " + e.name); }
+      });
+
+      document.getElementById("send").addEventListener("click", function () {
+        var title = "Build finished";
+        var body = "Your export is ready to view.";
+        document.getElementById("ftitle").textContent = title;
+        document.getElementById("fbody").textContent = body;
+        fake.classList.add("show");
+        line("In-page notification shown: " + title);
+
+        if (!supported) { line("System UI skipped — API unsupported in this sandbox."); return; }
+        if (status() !== "granted") {
+          line("Permission is '" + status() + "', so no system notification was sent.");
+          return;
+        }
+        try {
+          last = new Notification(title, { body: body, tag: "demo" });
+          ["onshow", "onclick", "onclose", "onerror"].forEach(function (name) {
+            last[name] = function () { line("event " + name + " fired"); };
+          });
+          line("System notification created.");
+        } catch (e) { line("Creating a notification failed: " + e.name); }
+      });
+
+      document.getElementById("close").addEventListener("click", function () {
+        fake.classList.remove("show");
+        if (last && typeof last.close === "function") {
+          last.close();
+          line("close() called on the system notification.");
+        } else {
+          line("In-page card closed.");
+        }
+      });
+
+      document.getElementById("clear").addEventListener("click", function () { out.textContent = ""; });
+
+      updateBadge();
+      line(supported ? "Notification API detected. Ask for permission first." : "Notification API not detected. Running in simulated mode.");
+    </script>
+  </body>
+</html>
+```

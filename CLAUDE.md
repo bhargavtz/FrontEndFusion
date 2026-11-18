@@ -4,19 +4,17 @@ Guidance for agents working in this repository.
 
 ## Repository overview
 
-FrontEndFusion is a **Next.js 16 App Router** learning site for HTML, CSS, and
-frontend fundamentals. It is no longer a static HTML/CSS project. The entire
-site lives at the repository root:
+FrontEndFusion is a **Next.js 16 App Router** frontend learning platform
+(static export). It is organised as a curriculum:
 
-- interactive project demos
-- copy-paste form snippets
-- nine Markdown-backed guides
-- a data-driven hub page with light/dark theming
+- 10 domains → 56 technology pages → 207 MDX lessons
+- 9 roadmaps, 17 project briefs, practice (exercises + interview questions)
+- a sandboxed code playground and a provider-independent AI assistant
+- global search (⌘K), light/dark themes, local progress
 
-The repository root holds the Next.js app plus project documentation. Serverless
-backend code will be added later. Do not recreate `index.html`, `styles.css`, or
-top-level `projects/`, `snippets/`, `resources/`, or `web-dev-learning-path/`
-copies.
+Product and architecture decisions live in `docs/PRODUCT.md`. Serverless
+backend code may be added later; do not recreate `index.html`, `styles.css`, or
+top-level `projects/`, `snippets/`, `resources/` copies.
 
 ## Commands
 
@@ -26,94 +24,94 @@ Run everything from the repository root:
 npm run dev      # development server on :3000
 npm run build    # production build + type check
 npm run lint     # ESLint
+npx tsx scripts/validate-content.ts   # curriculum references resolve
 ```
 
-`next.config.ts` enables `cacheComponents` and `partialPrefetching`. Read the
-bundled Next.js docs in `node_modules/next/dist/docs/` before using an
-unfamiliar API; this version has breaking changes from older releases.
+`next.config.ts` uses `output: "export"`. Read the bundled Next.js docs in
+`node_modules/next/dist/docs/` before using an unfamiliar API; this version has
+breaking changes from older releases.
 
 ## Architecture
 
 ```text
 ./
-├── components.json          # shadcn config + @react-bits registry mapping
-├── content/docs/*.md        # guide bodies (one file per docs.ts slug)
+├── content/docs/*.mdx       # lessons (one file per slug)
+├── content/snippets/*.mdx
+├── docs/PRODUCT.md          # product + architecture record
+├── scripts/validate-content.ts
 ├── src/app/
-│   ├── (site)/              # hub, /docs, /snippets with shared chrome
+│   ├── (site)/              # home, learn, technologies, roadmaps, practice, projects, ai, docs, snippets, library, resources
 │   ├── projects/            # standalone demo routes (no site chrome)
-│   ├── globals.css          # Tailwind import, tokens, shared styles
-│   └── layout.tsx           # <html>, metadata, pre-paint theme script
-├── src/components/          # UI, project demos, snippet demos, markdown
-│   └── react-bits/          # upstream React Bits components (GradientASCII)
-├── src/data/                # single source of truth (9 datasets / 42 keys)
-└── src/lib/                 # markdown + icon helpers
+│   ├── search-index.json/   # static search index (route handler)
+│   ├── globals.css          # Tailwind import, tokens, base + doc styles
+│   └── layout.tsx
+├── src/styles/platform.css  # layout, nav, playground, palette, assistant styles
+├── src/components/          # playground/, assistant/, mdx/, header-nav, search-palette, …
+├── src/data/                # curriculum, technologies/, roadmaps, project-briefs, others
+└── src/lib/                 # learn.ts, sandbox.ts, highlight.tsx, ai/, progress.ts, content.ts
 ```
-
-The home page renders `GradientASCII` twice: as the full-bleed hero backdrop and
-inside `gradient-showcase.tsx`, an interactive lab (`/#visual-lab`) with shape,
-palette, and density controls. The component is client-only (WebGL2), lives in
-`src/components/react-bits/gradient-ascii.tsx`, and respects
-`prefers-reduced-motion`. Keep its `.gradient-ascii-*` class names namespaced.
-
-React Bits components can also be added through shadcn:
-`npx shadcn@latest add @react-bits/<Name>-<LANG>-<STYLE>` (run it at
-the repository root). The registry lives in `components.json`. The installed
-`SplitText.jsx` is generated JavaScript with one local patch: an `aria` prop
-forwarded to GSAP's SplitText options so callers can avoid an invalid
-`aria-label` on a paragraph. `SplitText.d.ts` provides its TypeScript props for
-the hero subtitle. Re-apply the `aria` patch if the component is regenerated,
-and add a matching `.d.ts` instead of annotating generated files.
 
 ### Data contract
 
-All content comes from `src/data`. `src/data/index.ts` exports `siteData`
-(the nine datasets) and `dataSummary`. The nine datasets and their keys:
+`src/data` is the single source of truth. Never hard-code content in a page that
+already exists there.
 
-1. `navigation.ts` — `label`, `href`
-2. `hero.ts` — `title`, `subtitle`, `actions`
-3. `features.ts` — `icon`, `title`, `detail`
-4. `projects.ts` — `slug`, `title`, `description`, `tags`, `level`
-5. `snippets.ts` — `slug`, `title`, `description`, `tags`, `icon`
-6. `resources.ts` — `title`, `href`, `icon`, `tint`
-7. `learning-path.ts` — `slug`, `title`, `description`, `icon`, `level`
-8. `docs.ts` — `slug`, `title`, `description`, `category`
-9. `books.ts` — `slug`, `title`, `author`, `year`, `description`, `takeaways`, `topic`, `level`, `tags`, `href`, `source`
+- `curriculum.ts` — 10 domains (`id`, `letter`, `title`, `tagline`, `description`, `href`)
+- `technologies/*.ts` — `Technology` entries (see `technologies/types.ts`); sections render only when filled
+- `roadmaps.ts` — stages reference technology, guide and project slugs
+- `project-briefs.ts` — 17 briefs; `starter` = runnable single-file solution
+- `projects.ts` — 6 interactive demos (routes under `src/app/projects/<slug>`)
+- `navigation.ts`, `snippets.ts` (MDX-backed), `docs.ts` (MDX-backed), `resources.ts`, `learning-path.ts` (guide icons), `books.ts`
 
 Rules:
 
-- Never hard-code content in a page that already exists in `src/data`.
-- A `docs.ts` slug must match `content/docs/<slug>.md`.
-- Project/snippet slugs must match their route folders and component maps.
-- Keep the 9/42 count in sync if the schema changes, and update the README
-  table at the same time.
+- Every slug referenced by technologies, roadmaps and briefs must exist.
+  Run `npx tsx scripts/validate-content.ts` after editing data.
+- A `docs` slug is the file name in `content/docs/<slug>.mdx`.
+- Lessons attach to a technology via `guidePrefix` or `guides`.
+- Do not add empty placeholder sections or lessons; omit what you cannot write well.
+
+### Playground and sandbox (security-critical)
+
+- User/example code runs only in `<iframe sandbox="allow-scripts">`. **Never add
+  `allow-same-origin`** and never run user code on the site origin.
+- `src/lib/sandbox.ts` builds the iframe document, CSP and the postMessage bridge;
+  messages are accepted only from the frame's `contentWindow` and a per-run token.
+- `runnability()` decides what runs. Examples importing npm packages are shown
+  read-only with an explanation. Do not simulate output.
+
+### AI assistant
+
+- UI depends only on `AIProvider` (`src/lib/ai/types.ts`). Providers are in
+  `src/lib/ai/providers/`. There is no backend: keys stay in the browser.
+- Never log, persist beyond the user's choice, or send API keys anywhere except the chosen provider.
+- Keep client components free of server-only imports (`node:fs`, `@/lib/content`,
+  `@/data/docs`, `@/data/snippets`); pass data in as props from a server component.
 
 ## Adding content
 
-### Guide
+### Technology
 
-1. Create `content/docs/<slug>.md` with a single leading `# Title`.
-2. Add `{ slug, title, description, category }` to `src/data/docs.ts`.
-3. Optionally add the same slug to `src/data/learning-path.ts`.
+1. Add an entry to a file in `src/data/technologies/` (`slug`, `name`, `domain`, `level`, `summary`, `what`, `why`, `concepts`, `docs` are required).
+2. Add `examples` for a playground; add `markup` for CSS examples.
+3. Link `related`, `prerequisites`, `projects`, `guidePrefix`/`guides`.
+4. Run the validator.
 
-The docs route strips the leading H1, builds a table of contents from `##` and
-`###` headings, and renders Markdown with `react-markdown` + `remark-gfm`.
+### Lesson
 
-### Project
+1. Create `content/docs/<slug>.mdx` with frontmatter (`title`, `description`, `category`, `order`) and a single leading `# Title`.
+2. Attach it to a technology and run the validator.
 
-1. Add `{ slug, title, description, tags, level }` to `src/data/projects.ts`.
-2. Create `src/app/projects/<slug>/page.tsx` as a server component.
-3. Export `metadata` from the page.
-4. Put client interactivity in `src/components/projects/<demo>.tsx`.
+### Roadmap / project brief
 
-Demo pages sit outside the `(site)` route group, so they do not inherit the
-site header/footer. Each demo must provide its own way back to `/`.
+Add to `roadmaps.ts` / `project-briefs.ts`; run the validator.
 
-### Snippet
+### Interactive demo / snippet
 
-1. Add `{ slug, title, description, tags, icon }` to `src/data/snippets.ts`.
-2. Add a client component under `src/components/snippets/`.
-3. Register it in the `demos` record in
-   `src/app/(site)/snippets/[slug]/page.tsx`.
+Demo: add to `projects.ts`, create `src/app/projects/<slug>/page.tsx`, client code in
+`src/components/projects/`, provide a way back to `/`. Snippet: add MDX in
+`content/snippets/`, component under `src/components/snippets/`, register it in
+`src/app/(site)/snippets/[slug]/page.tsx`.
 
 ## Conventions
 
@@ -137,8 +135,9 @@ site header/footer. Each demo must provide its own way back to `/`.
   `layout.tsx` own it; `localStorage` key is `ffe-theme`.
 - Element selectors (`body`, `a`) live in `@layer base` so Tailwind utilities
   can override them. New global element rules must follow the same pattern.
-- Reuse `.hub-card`, `.section-title`, `.tech-tag`, `.diff-badge`,
-  `.snippet-card`, `.resource-link`, `.doc-body`, and `.table-cell`.
+- Reuse the platform classes in `src/styles/platform.css` (`.wrap`, `.page`, `.rows`/`.row`, `.chips`, `.btn`,
+  `.level`, `.tsec`, `.pg*`, `.ai*`) and the older `.hub-card`, `.tech-tag`, `.snippet-card`,
+  `.resource-link`, `.doc-body`, `.table-cell`. Prefer flat lists to card grids.
 - Demo pages may use scoped `<style>` blocks, but scope every selector under a
   demo wrapper. Never style `body`, `nav`, or `table` globally from a demo.
 
@@ -157,7 +156,8 @@ Before finishing a change:
 
 1. `npm run build`
 2. `npm run lint`
-3. Spot-check `/`, `/docs`, `/docs/<slug>`, `/snippets/<slug>`, and the touched
-   project route in a browser.
-4. Confirm no dead links to removed HTML or Markdown files remain:
+3. `npx tsx scripts/validate-content.ts` after any data change.
+4. Spot-check `/`, `/learn`, `/technologies/<slug>` (run its playground), `/roadmaps/<slug>`,
+   `/docs/<slug>`, and the touched route in a browser; press ⌘K to check search.
+5. Confirm no dead links to removed HTML or Markdown files remain:
    `grep -rn "index.html\|styles.css\|\.md\"" src`

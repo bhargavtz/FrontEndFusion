@@ -1,0 +1,129 @@
+---
+title: Strings
+description: Work with text in JavaScript, from concatenation and indexing to slicing, searching, replacing and counting words.
+chapter: 7
+category: "JavaScript"
+order: 307
+---
+
+# Strings
+
+Strings hold text. Whether you are showing a user's name, parsing a sentence, or building markup, you will constantly create and reshape strings. JavaScript gives them a length, numeric indexes, and a large set of helpful methods.
+
+## Creating and combining strings
+
+A string can be written with single quotes, double quotes, or backticks. Backticks create template literals, which allow line breaks and interpolation with placeholders. The plus sign joins strings together, and `+=` appends to an existing one. To place a quote inside a string, either use the other kind of quote around it or escape it with a backslash.
+
+Strings are sequences of Unicode characters, so many symbols and emoji work as expected. Keep in mind that indexing counts code units, which can split certain characters; iterating with a `for...of` loop handles full characters more safely.
+
+## Searching, slicing and replacing
+
+You can read a character at a position with `charAt()` or bracket indexing. `indexOf()` returns the first position of a substring, or minus one when it is absent, and `includes()` gives a simple boolean. `slice(start, end)` extracts a portion without changing the original, and `split(separator)` breaks a string into an array of pieces.
+
+For replacements, `replace(oldText, newText)` swaps the first match; a regular expression with a global flag replaces all of them. These methods never modify the source string — they return a new one, because strings are immutable.
+
+## Case, repetition and counting words
+
+`toUpperCase()` and `toLowerCase()` change case, `repeat(n)` concatenates a string with itself a given number of times, and `trim()` removes surrounding whitespace. A common exercise is counting words: trim the input, split on runs of whitespace, and count the resulting items. Checking whether a value is a string is simply `typeof value === "string"`.
+
+The toolbox below applies several of these ideas to text you type yourself.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Strings</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px 18px;
+        font-family: system-ui, sans-serif;
+        color: #292b38;
+        background: linear-gradient(135deg, #eaf6ff, #f7f2ff 75%);
+      }
+      .card {
+        max-width: 520px;
+        margin: 0 auto;
+        padding: 22px;
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 20px 42px -30px rgba(40, 50, 90, 0.5);
+      }
+      h1 { margin: 0 0 12px; font-size: 1.15rem; }
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px 12px;
+        border: 1px solid #d6dcef;
+        border-radius: 10px;
+        font: inherit;
+        font-size: 0.85rem;
+      }
+      .row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+      button {
+        padding: 8px 11px;
+        border: 0;
+        border-radius: 9px;
+        background: #3b62c4;
+        color: #ffffff;
+        font: inherit;
+        font-size: 0.76rem;
+        cursor: pointer;
+      }
+      button:hover { background: #2d4fa8; }
+      pre {
+        margin: 14px 0 0;
+        min-height: 96px;
+        padding: 12px;
+        border-radius: 10px;
+        background: #1b2233;
+        color: #cfe3ff;
+        font-size: 0.78rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>String toolbox</h1>
+      <input id="text" value="JavaScript makes strings fun" />
+      <div class="row">
+        <button data-op="reverse">Reverse</button>
+        <button data-op="words">Word count</button>
+        <button data-op="upper">Upper case</button>
+        <button data-op="first">First character</button>
+        <button data-op="slice">slice(0, 10)</button>
+        <button data-op="replace">Replace JS</button>
+        <button data-op="repeat">Repeat twice</button>
+        <button data-op="index">indexOf('make')</button>
+      </div>
+      <pre id="out">Type some text and choose an operation.</pre>
+    </div>
+    <script>
+      const out = document.getElementById("out");
+      const input = document.getElementById("text");
+      const ops = {
+        reverse: function (s) { return s.split("").reverse().join(""); },
+        words: function (s) {
+          return "Word count: " + (s.trim() ? s.trim().split(/\s+/).length : 0);
+        },
+        upper: function (s) { return s.toUpperCase(); },
+        first: function (s) { return "charAt(0): " + s.charAt(0); },
+        slice: function (s) { return "slice(0, 10): " + s.slice(0, 10); },
+        replace: function (s) { return s.replace("JS", "JavaScript"); },
+        repeat: function (s) { return s.repeat(2); },
+        index: function (s) { return "indexOf('make'): " + s.indexOf("make"); }
+      };
+      document.querySelectorAll("button[data-op]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          const s = input.value;
+          out.textContent = "typeof input -> " + typeof s + "\n" + ops[btn.dataset.op](s);
+        });
+      });
+    </script>
+  </body>
+</html>
+```

@@ -1,0 +1,238 @@
+---
+title: Multiple columns
+description: Build a magazine-style layout where a headline spans the full width, figures refuse to split, balancing is controlled deliberately, and the column count adapts to the screen.
+chapter: 40
+category: "CSS"
+order: 140
+---
+
+# Multiple columns
+
+The basic column properties let a block fragment itself. Larger layouts need a bit more control: something that interrupts the columns, elements that must not be sliced in half, and a way to choose between equal-height columns and columns that fill the container as far as the content reaches.
+
+## Setting up and balancing columns
+
+A single declaration creates the columns, and a companion sets a floor for their width.
+
+```css
+.spread {
+  columns: 16rem 3;
+  column-gap: 2rem;
+}
+```
+
+The `columns` shorthand takes `column-width` then `column-count`. Written that way, the container asks for columns no narrower than 16rem and no more than three of them. On a phone it collapses to one; on a laptop it settles at three. That single rule handles the whole responsive story without a media query, though you can still add one to tune the gap at each breakpoint.
+
+The fill behaviour is the next decision. By default the browser balances: it equalises the height of every column so the article looks like a finished page. `column-fill: auto` changes that — columns are filled completely one after another, and the last one may be short. Use `auto` only when the container has a fixed height and you genuinely want a sequential fill; in an auto-height container it collapses to a single full column.
+
+```css
+.spread { column-fill: balance; }
+```
+
+For a deliberately dramatic effect, give the container a set height and `column-fill: auto` — you get an overflow that scrolls horizontally, like a carousel of printed panels. Be careful: that is a layout decision with real accessibility cost, since content beyond the visible area can be missed.
+
+## Spanning and keeping elements whole
+
+`column-span: all` makes an element break out of the column flow and stretch across every column. It is the property that turns a wall of text into a magazine page, because the headline and the standfirst can sit above the columns instead of inside the first one.
+
+```css
+.headline { column-span: all; }
+```
+
+Rules worth knowing: a spanning element ends the current row of columns and starts a new one below itself, so only one span is practical per row. `none` is the default. Values other than `all` and `none` are not supported, and the property has no effect outside a multi-column container.
+
+The other half of the job is preventing bad cuts. Floats, images, and bordered boxes look broken when a column edge cuts through them. `break-inside: avoid` tells the fragmenter not to split the element, so it moves to the next column intact.
+
+```css
+.figure { break-inside: avoid; }
+```
+
+Apply it to cards, captions, code samples, and list items. Pair it with `orphans` and `widows` for text: `orphans: 2` stops a single line being stranded at the bottom of a column, `widows: 2` stops one being stranded at the top. Both take a number and apply only in fragmented contexts.
+
+## A complete example
+
+A feature spread with a spanned masthead, a pull quote, and two photos that refuse to be split.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Feature spread</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 40px 18px;
+        font-family: Georgia, "Times New Roman", serif;
+        background: #10151f;
+        color: #e8e3d8;
+        line-height: 1.7;
+      }
+
+      .spread {
+        max-width: 780px;
+        margin: 0 auto;
+        padding: 32px 34px 36px;
+        background: #171d29;
+        border-radius: 18px;
+        columns: 15rem 3;
+        column-gap: 2.2rem;
+        column-rule: 1px solid rgba(232, 227, 216, 0.14);
+        font-size: 0.85rem;
+        orphans: 2;
+        widows: 2;
+      }
+
+      .masthead {
+        column-span: all;
+        margin-bottom: 22px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid rgba(232, 227, 216, 0.2);
+      }
+
+      .tag {
+        font-family: system-ui, sans-serif;
+        font-size: 0.62rem;
+        letter-spacing: 0.26em;
+        text-transform: uppercase;
+        color: #d8a760;
+      }
+
+      h1 {
+        margin: 8px 0 6px;
+        font-size: clamp(1.5rem, 4vw, 2.15rem);
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+      }
+
+      .standfirst {
+        margin: 0;
+        max-width: 46ch;
+        font-size: 0.9rem;
+        color: #a8b0bf;
+        font-style: italic;
+      }
+
+      .spread p {
+        margin: 0 0 0.95em;
+      }
+
+      .pull {
+        column-span: all;
+        margin: 20px 0;
+        padding: 18px 22px;
+        border-left: 3px solid #d8a760;
+        background: rgba(216, 167, 96, 0.08);
+        border-radius: 0 12px 12px 0;
+        font-size: 1.05rem;
+        line-height: 1.45;
+        color: #f0e7d6;
+      }
+
+      .figure {
+        break-inside: avoid;
+        margin: 0 0 16px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(232, 227, 216, 0.1);
+        border-radius: 12px;
+      }
+
+      .figure .plate {
+        height: 86px;
+        border-radius: 8px;
+      }
+
+      .plate.one {
+        background:
+          radial-gradient(circle at 70% 30%, rgba(255, 214, 150, 0.85), transparent 55%),
+          linear-gradient(160deg, #2b3a55, #131a26);
+      }
+
+      .plate.two {
+        background:
+          radial-gradient(circle at 30% 70%, rgba(160, 214, 190, 0.8), transparent 55%),
+          linear-gradient(200deg, #1f3a37, #101b1b);
+      }
+
+      .figure figcaption {
+        margin-top: 8px;
+        font-family: system-ui, sans-serif;
+        font-size: 0.66rem;
+        letter-spacing: 0.05em;
+        color: #8f99aa;
+      }
+
+      .footnote {
+        column-span: all;
+        margin-top: 22px;
+        padding-top: 14px;
+        border-top: 1px solid rgba(232, 227, 216, 0.2);
+        font-family: system-ui, sans-serif;
+        font-size: 0.66rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #7c8798;
+      }
+    </style>
+  </head>
+  <body>
+    <article class="spread">
+      <header class="masthead">
+        <span class="tag">Field notes</span>
+        <h1>The last mile of a design system</h1>
+        <p class="standfirst">
+          Every component ships. Very few systems survive the handoff to the
+          teams who are supposed to use them.
+        </p>
+      </header>
+
+      <p>
+        The hard part was never the button. It was the fourth page that needed a
+        slightly different button, and the conversation that followed. Systems
+        fail in the gap between the library and the work, where nobody has
+        authority and everybody has a deadline.
+      </p>
+      <p>
+        Teams that get past this stage tend to share one habit: they treat the
+        library as a product with users, not as a spec with compliance. They
+        measure adoption, they read the complaints, and they ship small fixes
+        weekly instead of one large rewrite annually.
+      </p>
+
+      <figure class="figure">
+        <div class="plate one"></div>
+        <figcaption>Plate 1 — the library, before anyone used it.</figcaption>
+      </figure>
+
+      <p>
+        Adoption is not a number on a dashboard. It is the moment someone opens
+        the docs without being told to, because the alternative is slower. Until
+        that happens, every review is a negotiation and every pull request is a
+        small argument about spacing.
+      </p>
+
+      <blockquote class="pull">
+        A system is finished when using it is easier than avoiding it.
+      </blockquote>
+
+      <figure class="figure">
+        <div class="plate two"></div>
+        <figcaption>Plate 2 — the same page, rebuilt from tokens.</figcaption>
+      </figure>
+
+      <p>
+        The practical fix is unglamorous. Name the tokens after intent rather
+        than value, keep the surface area small enough to memorise, and delete
+        anything nobody has imported in a year. Fewer parts, better documented,
+        is the whole strategy.
+      </p>
+
+      <p class="footnote">End of spread · 3 columns</p>
+    </article>
+  </body>
+</html>
+```
+
+Resize the window and the column count drops from three to two to one while the masthead, quote, and footnote stay stretched edge to edge. The spanning elements pin the structure; `columns` handles everything between them.

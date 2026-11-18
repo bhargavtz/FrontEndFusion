@@ -1,0 +1,78 @@
+---
+title: Marking-up Quotes
+description: Use q for inline quotations, blockquote for longer passages, and cite for the source.
+chapter: 35
+category: "HTML"
+order: 45
+---
+
+# Marking-up Quotes
+
+HTML has two quotation elements: `q` for short inline quotes and `blockquote` for longer block-level passages.
+
+## Inline with q
+
+```html
+<p>
+  As the guide says, <q>measure twice, cut once</q>, especially when you are
+  working with expensive material.
+</p>
+```
+
+Browsers usually add quotation marks automatically. Do not type the quotation marks yourself unless you disable them with CSS.
+
+## Block with blockquote
+
+```html
+<blockquote cite="https://example.com/interview">
+  <p>
+    The best interface is the one that disappears. You notice the work, not the
+    machinery behind it.
+  </p>
+  <footer>— A fictional designer, <cite>Studio Notes</cite></footer>
+</blockquote>
+```
+
+- `cite` contains a URL for the source. It is metadata, not visible text.
+- A `footer` inside the blockquote can hold the attribution.
+- Use `cite` for the title of a work, not for the author's name.
+
+## Nested quotations
+
+Nested `q` elements can represent a quote inside a quote. Browsers may alternate quotation styles.
+
+```html
+<p>
+  She said, <q>He told me, <q>start with the smallest version</q>, and he was
+  right.</q>
+</p>
+```
+
+## Styling blockquotes
+
+```html
+<blockquote class="pullquote">
+  <p>Clarity is a feature.</p>
+</blockquote>
+
+<style>
+  .pullquote {
+    margin: 1.5rem 0;
+    padding: 0.75rem 1.25rem;
+    border-left: 4px solid #0f766e;
+    background: #f0fdfa;
+    font-size: 1.15rem;
+  }
+</style>
+```
+
+## Common mistakes
+
+- Using `blockquote` only to indent text.
+- Typing quotation marks inside `q`.
+- Putting the attribution outside the quote without a clear connection.
+- Using `cite` for a person's name.
+
+## Accessibility
+
+Keep the quote and its attribution close together. If the source is a link, make the link text descriptive. Do not rely on visual styling alone to show where the quote ends.

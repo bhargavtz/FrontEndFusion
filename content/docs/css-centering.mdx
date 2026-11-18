@@ -1,0 +1,187 @@
+---
+title: Centering
+description: Center boxes and text horizontally and vertically with flexbox, transforms, auto margins, and a few older fallbacks.
+chapter: 6
+category: "CSS"
+order: 106
+---
+
+# Centering
+
+Centering is the oldest argument in CSS. The good news is that there is now a default answer, and the older techniques are still useful in specific situations.
+
+## The modern answers
+
+For a container, two declarations do the work:
+
+```css
+.stage {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+}
+```
+
+`place-items: center` sets both alignment axes in one go. The flexbox equivalent is `display: flex` with `justify-content: center` and `align-items: center`; add `flex-direction: column` when you want stacked children. Both handle unknown sizes, which makes them safe for dynamic content.
+
+For a single block element with a known width, `margin-inline: auto` still works and needs no flex context. For text and inline children, `text-align: center` is enough. For one line of text inside a fixed-height box, matching `line-height` to the height is the classic trick.
+
+## The older answers, and when they help
+
+- **Absolute plus transform** — position the element at `top: 50%` and `left: 50%`, then `transform: translate(-50%, -50%)`. The transform is based on the element's own size, so it works without knowing the dimensions. This is still the right tool for overlays pinned inside a positioned parent.
+- **Table layout** — `display: table-cell` with `vertical-align: middle` centres content inside a fixed-height box and still appears in email templates.
+- **`calc()`** — useful when the centred element must sit slightly above true centre, for example `top: calc(50% - 40px)`.
+
+One caution: `text-align: center` inherits, so it will also centre every paragraph inside the element. Reset it on children when that is not what you want.
+
+## A complete example
+
+This check-in pass is centred with grid, its seal is centred with a transform, and one chip uses `line-height` for vertical centring.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Check-in pass</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+        display: grid;
+        place-items: center;
+        padding: 40px 20px;
+        font-family: system-ui, sans-serif;
+        background: linear-gradient(160deg, #edf4ff, #e3e9fb 60%, #f6f3ff);
+        color: #1e2a3d;
+      }
+
+      .pass {
+        position: relative;
+        width: 320px;
+        box-sizing: border-box;
+        padding: 34px 26px 0;
+        text-align: center;
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 26px 48px -30px rgba(30, 42, 61, 0.55);
+      }
+
+      .seal {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 48px;
+        height: 48px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: linear-gradient(140deg, #5b8cff, #7a5cf0);
+        color: #ffffff;
+        font-size: 1.1rem;
+        box-shadow: 0 0 0 6px #ffffff;
+      }
+
+      .pass h1 {
+        margin: 0 0 4px;
+        font-size: 1.15rem;
+      }
+
+      .pass > p {
+        margin: 0 0 22px;
+        font-size: 0.82rem;
+        color: #6d7a90;
+      }
+
+      .chip {
+        display: inline-block;
+        height: 26px;
+        padding: 0 12px;
+        line-height: 26px;
+        border-radius: 999px;
+        background: #eef3ff;
+        color: #3558b8;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .details {
+        margin: 20px 0 24px;
+        display: flex;
+        justify-content: space-between;
+        text-align: left;
+        font-size: 0.78rem;
+        color: #44526b;
+      }
+
+      .details span {
+        display: block;
+        font-size: 0.62rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #98a3b6;
+        margin-bottom: 3px;
+      }
+
+      .dots {
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+        margin-bottom: 22px;
+      }
+
+      .dots i {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #d5ddeb;
+      }
+
+      .code {
+        margin: 0 -26px;
+        padding: 16px 26px 20px;
+        border-top: 2px dashed #e4e9f2;
+        border-radius: 0 0 20px 20px;
+        background: #fafbff;
+        font-family: ui-monospace, monospace;
+        font-size: 0.95rem;
+        letter-spacing: 0.22em;
+      }
+
+      .code small {
+        display: block;
+        margin-top: 6px;
+        font-family: system-ui, sans-serif;
+        font-size: 0.64rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #9aa5b8;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="pass">
+      <div class="seal">✓</div>
+      <h1>Checked in</h1>
+      <p>Your desk is ready on the fourth floor.</p>
+      <span class="chip">Confirmed</span>
+      <div class="details">
+        <div><span>Guest</span>Ada Rivera</div>
+        <div><span>Desk</span>4B · 12</div>
+      </div>
+      <div class="dots"><i></i><i></i><i></i><i></i></div>
+      <div class="code">
+        A7K-204
+        <small>Show this code at the door</small>
+      </div>
+    </section>
+  </body>
+</html>
+```
+
+If centring suddenly stops working, look for a parent with `position: relative` that the absolutely positioned child is now measuring against, or a flex child that has been given `margin: auto` on one axis only.

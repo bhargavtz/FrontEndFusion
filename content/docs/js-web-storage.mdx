@@ -1,0 +1,98 @@
+---
+title: Web Storage
+description: Persist key/value data with localStorage and sessionStorage, and react to changes with storage events.
+chapter: 33
+category: "JavaScript"
+order: 333
+---
+
+# Web Storage
+
+Web storage gives JavaScript a simple key/value store that lives entirely in the browser. Unlike cookies, its contents are never sent with HTTP requests and there is far more room to work with. Every value is stored as a string, so objects must be converted before saving and parsed again when read.
+
+There are two flavours. `localStorage` survives tab and browser restarts and is shared across every tab on the same origin. `sessionStorage` lasts only for the lifetime of the tab; a reload keeps it, but closing the tab clears it. Both expose the same methods: `setItem`, `getItem`, `removeItem`, `clear`, and a `length` property.
+
+## Using localStorage and a simpler helper
+
+The verbose method calls can be replaced with property-style access or a tiny wrapper that handles JSON automatically. Because access can throw - when storage is full, disabled, or blocked in a sandbox - it is wise to wrap operations in a `try` block and provide a fallback. The demo below keeps a list of notes and reports whether real storage is available or a memory fallback is in use.
+
+## sessionStorage, events, and error conditions
+
+Storage changes fire a `storage` event, but only in *other* documents on the same origin - the tab that made the change does not receive it. That makes the event useful for keeping multiple tabs in sync. Common errors include quota limits when the store is full and security errors when access is blocked; handling these gracefully keeps the rest of the interface alive.
+
+The example lets you add, list, and clear notes, and shows the item count.
+
+```html
+<div style="background:#f8fafc;border-radius:16px;padding:20px;max-width:560px;font-family:system-ui,sans-serif;color:#0f172a;">
+  <h3 style="margin-top:0;">Notes keeper</h3>
+  <div id="status" style="font-size:13px;color:#64748b;margin-bottom:10px;"></div>
+  <div style="display:flex;gap:8px;margin-bottom:12px;">
+    <input id="noteText" placeholder="Write a note..." style="flex:1;padding:8px;border-radius:8px;border:1px solid #cbd5e1;">
+    <button id="addNote">Add</button>
+    <button id="clearNotes">Clear</button>
+  </div>
+  <div id="count" style="font-size:13px;color:#475569;margin-bottom:6px;"></div>
+  <pre id="out" style="background:#0f172a;color:#e2e8f0;padding:12px;border-radius:10px;min-height:80px;white-space:pre-wrap;"></pre>
+</div>
+<script>
+  (function () {
+    var out = document.getElementById("out");
+    var status = document.getElementById("status");
+    var count = document.getElementById("count");
+    var store = null;
+    var usingMemory = false;
+    try {
+      var probe = "__probe__";
+      localStorage.setItem(probe, "1");
+      localStorage.removeItem(probe);
+      store = localStorage;
+      status.textContent = "Using localStorage (persists across restarts)";
+    } catch (e) {
+      store = null;
+      usingMemory = true;
+      status.textContent = "Storage blocked in this sandbox - using memory fallback.";
+    }
+    var memory = {};
+
+    function save(key, value) {
+      if (usingMemory) memory[key] = value;
+      else store.setItem(key, value);
+    }
+    function load(key) {
+      if (usingMemory) return memory[key] || null;
+      return store.getItem(key);
+    }
+    function keys() {
+      if (usingMemory) return Object.keys(memory).filter(function (k) { return k.indexOf("note_") === 0; });
+      var list = [];
+      for (var i = 0; i < store.length; i++) {
+        var k = store.key(i);
+        if (k && k.indexOf("note_") === 0) list.push(k);
+      }
+      return list;
+    }
+    function render() {
+      var all = keys();
+      count.textContent = "Items stored: " + all.length;
+      var notes = all.map(function (k) { return "• " + load(k); });
+      out.textContent = notes.length ? notes.join("\n") : "(no notes yet)";
+    }
+    document.getElementById("addNote").onclick = function () {
+      var text = document.getElementById("noteText").value.trim();
+      if (!text) return;
+      save("note_" + Date.now(), text);
+      document.getElementById("noteText").value = "";
+      render();
+    };
+    document.getElementById("clearNotes").onclick = function () {
+      if (usingMemory) {
+        keys().forEach(function (k) { delete memory[k]; });
+      } else {
+        keys().forEach(function (k) { store.removeItem(k); });
+      }
+      render();
+    };
+    render();
+  })();
+</script>
+```

@@ -1,0 +1,122 @@
+---
+title: Context (this)
+description: Learn how the call site determines this, and how call, bind, saved references, and arrows change the result.
+chapter: 24
+category: "JavaScript"
+order: 324
+---
+
+# Context (this)
+
+The value of `this` is not fixed where a function is written. It is decided when the function runs, largely by how the call is made. Grasping that single idea removes much of the mystery around method calls and callbacks.
+
+## The call site decides
+
+When a function is called as a method, `this` is the object before the dot. Calling the same body with `call()` or `apply()` lets you choose the object explicitly, which is useful for borrowing a method from one object and using it with another.
+
+Detach the method into a plain variable and call it on its own, and that receiver disappears. In strict mode `this` becomes `undefined`; outside strict mode it falls back to the global object. This is why passing a method directly as an event handler often needs extra care.
+
+## Saving, binding, and arrows
+
+Older code captured the outer value in a variable, commonly named `self` or `that`, then used it inside a nested function. The `bind()` method offers a cleaner answer: it returns a new function permanently tied to the object you pass in.
+
+Arrow functions take a different route. They have no `this` of their own and instead capture it from the surrounding scope, which makes them excellent for nested callbacks inside methods. Constructors are another case: with `new`, `this` points at the freshly created instance.
+
+A frequent trap appears with timers and event listeners. Passing `obj.method` directly to `setTimeout` loses the receiver, so the callback sees the wrong `this`. Wrapping it in an arrow function, or binding it in advance, preserves the object you meant to use.
+
+## Demo: context detective
+
+```html
+<div class="detective">
+  <h2>Context detective</h2>
+  <p>One function body, several call sites. Guess the value of this before you click.</p>
+  <div class="detective__buttons">
+    <button id="run" type="button">Run the checks</button>
+    <button id="clear" type="button">Clear log</button>
+  </div>
+  <pre id="out" class="detective__out">Waiting for the investigation...</pre>
+</div>
+
+<style>
+  body {
+    margin: 0;
+    padding: 2rem 1.25rem;
+    background: #edf1ef;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    color: #263b34;
+  }
+  .detective {
+    max-width: 36rem;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 18px;
+    padding: 1.5rem;
+    box-shadow: 0 18px 40px -28px rgba(20, 60, 45, 0.6);
+  }
+  .detective h2 { margin: 0 0 0.4rem; font-size: 1.25rem; }
+  .detective p { margin: 0 0 1rem; color: #6a8177; font-size: 0.88rem; }
+  .detective__buttons { display: flex; gap: 0.6rem; margin-bottom: 1rem; }
+  button {
+    font: inherit;
+    font-size: 0.82rem;
+    padding: 0.55rem 0.9rem;
+    border: 0;
+    border-radius: 10px;
+    background: #1f7a5c;
+    color: #fff;
+    cursor: pointer;
+  }
+  button:last-child { background: #6b7d76; }
+  button:hover { filter: brightness(1.1); }
+  .detective__out {
+    margin: 0;
+    min-height: 9rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: #14261f;
+    color: #b7f0d2;
+    border-radius: 10px;
+    padding: 0.9rem;
+    font-size: 0.8rem;
+    line-height: 1.6;
+  }
+</style>
+
+<script>
+  "use strict";
+
+  var robot = {
+    name: "R2",
+    identify: function () {
+      return "I am " + ((this && this.name) || "nobody");
+    },
+    lexical: function () {
+      var arrow = () => "the arrow inside me says " + this.name;
+      return arrow();
+    }
+  };
+
+  var other = { name: "C3PO" };
+
+  function Bot(name) { this.name = name; }
+  Bot.prototype.identify = robot.identify;
+
+  var out = document.getElementById("out");
+  function line(text) { out.textContent += "\n" + text; }
+
+  document.getElementById("run").addEventListener("click", function () {
+    var detached = robot.identify;
+    var bound = robot.identify.bind(robot);
+    line("method call:         " + robot.identify());
+    line("borrowed with call:  " + robot.identify.call(other));
+    line("detached function:   " + detached());
+    line("bound function:      " + bound());
+    line("arrow inside method: " + robot.lexical());
+    line("constructor call:    " + new Bot("T1000").identify());
+  });
+
+  document.getElementById("clear").addEventListener("click", function () {
+    out.textContent = "Log cleared. Run the checks again.";
+  });
+</script>
+```

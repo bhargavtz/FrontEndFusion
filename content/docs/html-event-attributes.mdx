@@ -1,0 +1,100 @@
+---
+title: HTML Event Attributes
+description: Handle form and keyboard events, and choose between inline handlers and addEventListener.
+chapter: 39
+category: "HTML"
+order: 49
+---
+
+# HTML Event Attributes
+
+Event attributes run JavaScript when something happens to an element. They are convenient for demos but should be used carefully in production.
+
+## HTML form events
+
+```html
+<form
+  onsubmit="event.preventDefault(); document.getElementById('result').textContent = 'Submitted';"
+>
+  <label for="name">Name</label>
+  <input id="name" name="name" />
+  <button type="submit">Send</button>
+</form>
+<p id="result" role="status"></p>
+```
+
+Common form events:
+
+| Event | Fires when |
+| --- | --- |
+| `submit` | The form is submitted |
+| `reset` | The form is reset |
+| `input` | A control's value changes |
+| `change` | A control loses focus after a change |
+| `focus` / `blur` | A control gains or loses focus |
+| `invalid` | A constraint fails |
+
+## Keyboard events
+
+```html
+<input
+  id="search"
+  type="search"
+  placeholder="Type and press Enter"
+  onkeydown="if (event.key === 'Enter') { document.getElementById('output').textContent = 'Searching for ' + this.value; }"
+/>
+<p id="output" role="status"></p>
+```
+
+Useful keyboard properties:
+
+- `event.key` is the printable value, such as `"Enter"` or `"a"`.
+- `event.code` is the physical key, such as `"KeyA"`.
+- `event.ctrlKey`, `event.shiftKey`, `event.altKey`, and `event.metaKey` report modifiers.
+
+Always check `event.key` for behaviour, not `event.keyCode`, which is deprecated.
+
+## Inline handlers versus addEventListener
+
+```html
+<button id="save" type="button">Save</button>
+
+<script>
+  document.getElementById("save").addEventListener("click", () => {
+    document.getElementById("save").textContent = "Saved";
+  });
+</script>
+```
+
+`addEventListener` is preferred because:
+
+- It keeps behaviour out of the markup.
+- It supports multiple listeners for the same event.
+- It is easier to test and remove.
+- It works with Content Security Policy that blocks inline scripts.
+
+## Delegation
+
+For lists of elements, listen on a parent and check the target:
+
+```html
+<ul id="list">
+  <li><button type="button" data-action="up">Up</button></li>
+  <li><button type="button" data-action="down">Down</button></li>
+</ul>
+
+<script>
+  document.getElementById("list").addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-action]");
+    if (!button) return;
+    button.textContent = button.dataset.action === "up" ? "Moved up" : "Moved down";
+  });
+</script>
+```
+
+## Accessibility notes
+
+- Keyboard handlers must support Enter and Space for button-like controls.
+- Do not rely on hover-only events.
+- Announce asynchronous results with a live region.
+- Keep event handlers small and predictable.

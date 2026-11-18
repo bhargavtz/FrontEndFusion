@@ -1,0 +1,192 @@
+---
+title: Modals - Prompts
+description: Build accessible in-page dialogs for alerts, prompts, and confirmations when native modals are unavailable.
+chapter: 44
+category: "JavaScript"
+order: 344
+---
+
+# Modals - Prompts
+
+Browsers ship three blocking dialogs: `alert()`, `prompt()`, and `confirm()`. They are easy to call, but they freeze the page, cannot be styled, and are frequently disabled inside sandboxed or embedded frames. For anything beyond a quick debug message, an in-page modal gives you control over appearance and behaviour while keeping the rest of the interface responsive.
+
+## Why build your own
+
+Native dialogs are synchronous: `confirm()` stops JavaScript until the user clicks. That is convenient, but it also means you cannot animate, validate, or localise the text. A custom modal is ordinary markup — usually a full-screen overlay with a centered card — shown or hidden by toggling a class. Focus management matters: move focus into the dialog when it opens and return it to the trigger when it closes.
+
+```html
+<div class="overlay" id="dialog" hidden>
+  <div class="dialog" role="dialog">
+    <p id="dialogText"></p>
+    <button id="ok">OK</button>
+  </div>
+</div>
+```
+
+The `hidden` attribute keeps the overlay out of view, and a single handler can be reused for many questions by storing a callback to run when the user confirms.
+
+## Confirm and prompt patterns
+
+Two patterns cover most needs. A *confirm* asks a yes-or-no question before a destructive action such as deleting a row. A *prompt* collects text through an input field. Both can share the same overlay; you simply show or hide the input and change the button labels. Because the modal is not truly blocking, the callback runs later when the user answers, so code must continue inside that callback rather than on the next line.
+
+The demo implements a task list. "Add task" opens a prompt-style modal, and each delete button opens a confirm-style modal. A global wrapper checks whether native dialogs exist and notes the result, but the interaction always uses the custom overlay so it works offline and in a sandbox.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Custom modals</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 40px 18px;
+        font-family: system-ui, sans-serif;
+        background: #f3eefb;
+        color: #2b1c45;
+      }
+      .card {
+        position: relative;
+        max-width: 540px;
+        margin: 0 auto;
+        padding: 28px 30px 30px;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 26px 54px -40px rgba(43, 28, 69, 0.65);
+      }
+      h1 { margin: 0 0 6px; font-size: 1.25rem; }
+      p { margin: 0 0 18px; color: #73658a; font-size: 0.9rem; }
+      ul { list-style: none; margin: 0 0 16px; padding: 0; }
+      li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        background: #f6f2fc;
+        border-radius: 10px;
+        font-size: 0.9rem;
+      }
+      li button {
+        border: 0; border-radius: 8px; padding: 5px 10px; cursor: pointer;
+        font: inherit; font-size: 0.78rem; background: #e3d5f5; color: #5b3f86;
+      }
+      .primary {
+        border: 0; border-radius: 10px; padding: 10px 16px; cursor: pointer;
+        font: inherit; font-size: 0.85rem; font-weight: 600;
+        background: #7b52c4; color: #fff;
+      }
+      .overlay {
+        position: absolute; inset: 0;
+        background: rgba(28, 18, 45, 0.5);
+        display: grid; place-items: center;
+        border-radius: 20px;
+      }
+      .dialog {
+        width: 82%; max-width: 320px; padding: 22px;
+        background: #fff; border-radius: 16px;
+        box-shadow: 0 20px 40px -20px rgba(0,0,0,0.5);
+      }
+      .dialog p { margin: 0 0 14px; font-size: 0.9rem; color: #2b1c45; }
+      .dialog input {
+        width: 100%; box-sizing: border-box; margin-bottom: 14px;
+        border: 1px solid #d7c9ec; border-radius: 9px; padding: 9px 11px;
+        font: inherit; font-size: 0.88rem;
+      }
+      .actions { display: flex; gap: 8px; justify-content: flex-end; }
+      .actions button {
+        border: 0; border-radius: 9px; padding: 8px 14px; cursor: pointer;
+        font: inherit; font-size: 0.82rem; font-weight: 600;
+      }
+      .yes { background: #7b52c4; color: #fff; }
+      .no { background: #ece5f6; color: #5b3f86; }
+      [hidden] { display: none !important; }
+      .out {
+        margin: 16px 0 0; min-height: 44px; padding: 12px 14px;
+        background: #f6f2fc; border-radius: 10px;
+        font-size: 0.8rem; color: #5b3f86;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card" id="card">
+      <h1>Tasks</h1>
+      <p id="support">Checking dialog support...</p>
+      <ul id="list"></ul>
+      <button class="primary" id="add">Add task</button>
+      <pre id="out" class="out">No activity yet.</pre>
+
+      <div class="overlay" id="overlay" hidden>
+        <div class="dialog" role="dialog">
+          <p id="msg"></p>
+          <input id="field" hidden />
+          <div class="actions">
+            <button class="no" id="cancel">Cancel</button>
+            <button class="yes" id="confirm">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      var overlay = document.getElementById("overlay");
+      var msg = document.getElementById("msg");
+      var field = document.getElementById("field");
+      var out = document.getElementById("out");
+      var list = document.getElementById("list");
+      var pending;
+
+      document.getElementById("support").textContent =
+        "Native dialogs " + (typeof window.confirm === "function" ? "available" : "blocked") +
+        " - using a custom overlay for full control.";
+
+      function showDialog(text, needInput, callback) {
+        msg.textContent = text;
+        field.hidden = !needInput;
+        field.value = "";
+        pending = callback;
+        overlay.hidden = false;
+        (needInput ? field : document.getElementById("confirm")).focus();
+      }
+      function close(accepted) {
+        overlay.hidden = true;
+        var value = field.value.trim();
+        if (accepted && pending) pending(value);
+        pending = null;
+      }
+      document.getElementById("confirm").onclick = function () { close(true); };
+      document.getElementById("cancel").onclick = function () { close(false); };
+
+      function render() {
+        list.textContent = "";
+        items.forEach(function (text, index) {
+          var li = document.createElement("li");
+          var span = document.createElement("span");
+          span.textContent = text;
+          var btn = document.createElement("button");
+          btn.textContent = "Delete";
+          btn.onclick = function () {
+            showDialog("Delete '" + text + "'?", false, function () {
+              items.splice(index, 1);
+              out.textContent = "Deleted '" + text + "'.";
+              render();
+            });
+          };
+          li.appendChild(span);
+          li.appendChild(btn);
+          list.appendChild(li);
+        });
+      }
+      var items = ["Write docs", "Review PR"];
+      document.getElementById("add").onclick = function () {
+        showDialog("New task name:", true, function (value) {
+          if (value) { items.push(value); out.textContent = "Added '" + value + "'."; render(); }
+        });
+      };
+      render();
+    </script>
+  </body>
+</html>
+```
+
+The key detail is that `showDialog()` stores a callback in `pending`; the work continues only after the user chooses, because a non-blocking modal cannot return a value on the same line.

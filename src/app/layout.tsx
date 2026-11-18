@@ -6,6 +6,7 @@ import {
   Space_Grotesk,
 } from "next/font/google";
 import "./globals.css";
+import "../styles/platform.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,26 +35,26 @@ const instrumentSerif = Instrument_Serif({
 export const metadata: Metadata = {
   metadataBase: new URL("https://frontendfusion.vercel.app"),
   title: {
-    default: "FrontEndFusion — HTML & CSS Learning Hub",
+    default: "FrontEndFusion — Learn frontend development, from HTML to AI-powered engineering",
     template: "%s — FrontEndFusion",
   },
   description:
-    "An open-source learning hub for HTML5, CSS3, responsive design, and modern frontend techniques — with interactive demos, copy-paste snippets, and in-depth guides.",
+    "Learn every part of frontend development in one place — HTML, CSS, JavaScript, TypeScript, React, Next.js, UI libraries, tooling, architecture and AI-powered development — with runnable code, roadmaps, projects and an AI learning assistant.",
   keywords: [
-    "HTML",
-    "CSS",
-    "frontend",
-    "responsive design",
-    "flexbox",
-    "CSS grid",
-    "accessibility",
-    "web development",
+    "frontend development",
+    "learn HTML CSS JavaScript",
+    "React",
+    "Next.js",
+    "TypeScript",
+    "Tailwind CSS",
+    "frontend roadmap",
+    "AI-assisted development",
   ],
   authors: [{ name: "FrontEndFusion contributors" }],
   openGraph: {
-    title: "FrontEndFusion — HTML & CSS Learning Hub",
+    title: "FrontEndFusion — Learn frontend development",
     description:
-      "Interactive demos, copy-paste form snippets, and a structured learning path for modern frontend development.",
+      "Runnable code, roadmaps, projects, and an AI learning assistant for every part of frontend development.",
     type: "website",
   },
 };
@@ -82,7 +83,7 @@ export default function RootLayout({
               name: "FrontEndFusion",
               url: "https://frontendfusion.vercel.app",
               description:
-                "An open-source learning hub for HTML5, CSS3, responsive design, and modern frontend techniques.",
+                "A free, open-source platform for learning frontend development from HTML fundamentals to AI-powered engineering.",
               publisher: {
                 "@type": "Organization",
                 name: "FrontEndFusion contributors",

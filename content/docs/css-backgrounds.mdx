@@ -1,0 +1,183 @@
+---
+title: Backgrounds
+description: Paint layered gradients, colour washes, and pattern effects behind content using the background shorthand and its longhands.
+chapter: 5
+category: "CSS"
+order: 105
+---
+
+# Backgrounds
+
+The `background` family is where CSS stops feeling like formatting and starts feeling like illustration. With gradients, layers, and blend modes you can build texture and depth without a single image file.
+
+## Colour and gradients
+
+`background-color` accepts any colour, including `rgba()` and `hsl()` with an alpha channel for translucency. `background-image` accepts `url()`, `linear-gradient()`, `radial-gradient()`, and `conic-gradient()`, and a gradient is generated at paint time, so it scales to any box without blurring.
+
+```css
+.wash {
+  background-color: #0f3b34;
+  background-image: linear-gradient(160deg, #2f8f7a, #072a24);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  background-attachment: fixed;
+}
+```
+
+The shorthand packs the common longhands into a single line: `background: #fff url(pattern.svg) center / cover no-repeat;`. Anything omitted resets to its initial value, which is a frequent source of surprises when you mix shorthand and longhands in the same project.
+
+## Layers and placement
+
+`background-image` takes a comma-separated stack. The first gradient sits on top, the last one at the bottom, so a base gradient plus a soft radial highlight plus a pattern is three layers in one declaration. Matching values in `background-position`, `background-size`, and `background-repeat` apply in the same order.
+
+- `background-size: cover` fills the box and crops; `contain` fits the whole image and leaves gaps.
+- `background-position` moves the layer, and `background-origin` decides whether the coordinates start at the border, padding, or content edge.
+- `background-clip` decides where paint is allowed to show, and `background-clip: text` with transparent text produces gradient lettering.
+- `background-blend-mode` mixes layers with modes such as `multiply`, `screen`, or `overlay`.
+- `background-attachment: fixed` pins a layer to the viewport, which is often janky on mobile, so test before shipping it.
+
+## A complete example
+
+This travel card is drawn entirely with gradients: a sun, two overlapping hills, and a dusk sky.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Travel card</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 44px 20px;
+        font-family: system-ui, sans-serif;
+        background: #f1f5f3;
+      }
+
+      .trip {
+        position: relative;
+        max-width: 340px;
+        min-height: 380px;
+        margin: 0 auto;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 24px;
+        border-radius: 24px;
+        overflow: hidden;
+        color: #f3fbf7;
+        background-color: #0d3b33;
+        background-image:
+          radial-gradient(circle at 74% 24%, #ffeaa7 0 26px, rgba(255, 234, 167, 0.3) 27px 42px, transparent 43px),
+          radial-gradient(120% 54% at 8% 114%, #21685a 0 60%, transparent 61%),
+          radial-gradient(135% 58% at 98% 118%, #144b3f 0 62%, transparent 63%),
+          linear-gradient(165deg, #3aa189 0%, #12604f 52%, #06231e 100%);
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center;
+        box-shadow: 0 30px 54px -34px rgba(8, 40, 34, 0.85);
+      }
+
+      .chip {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        font-size: 0.66rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .stamp {
+        position: absolute;
+        top: 18px;
+        right: 18px;
+        width: 54px;
+        height: 54px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        border: 1px dashed rgba(255, 255, 255, 0.45);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        background: rgba(9, 46, 39, 0.35);
+      }
+
+      .trip h1 {
+        margin: 0 0 6px;
+        font-size: 1.9rem;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        background: linear-gradient(90deg, #ffffff, #c8f4e2);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .trip p {
+        margin: 0 0 20px;
+        max-width: 26ch;
+        font-size: 0.82rem;
+        line-height: 1.5;
+        color: rgba(240, 253, 247, 0.82);
+      }
+
+      .bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .price {
+        font-size: 1.15rem;
+        font-weight: 700;
+      }
+
+      .price small {
+        display: block;
+        font-size: 0.64rem;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(233, 250, 243, 0.7);
+      }
+
+      .book {
+        padding: 10px 18px;
+        border: 0;
+        border-radius: 999px;
+        background: #ffeaa7;
+        color: #0b3a31;
+        font: inherit;
+        font-size: 0.8rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <article class="trip">
+      <span class="chip">Portugal</span>
+      <span class="stamp">48h</span>
+      <h1>Lisbon at dusk</h1>
+      <p>Rooftop views, tram bells, and custard tarts still warm from the oven.</p>
+      <div class="bar">
+        <div class="price">$180 <small>4 nights</small></div>
+        <button class="book">Reserve</button>
+      </div>
+    </article>
+  </body>
+</html>
+```
+
+When a background refuses to appear, check the order of the shorthand first: a later `background` declaration wipes earlier layers, including the gradient you carefully stacked.

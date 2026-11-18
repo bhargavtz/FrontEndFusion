@@ -1,0 +1,182 @@
+---
+title: box-shadow
+description: Build depth with outer and inner shadows, stack several of them on one element, and fake a single-edge shadow with a pseudo-element.
+chapter: 32
+category: "CSS"
+order: 132
+---
+
+# box-shadow
+
+A shadow is the fastest way to suggest that one surface floats above another. `box-shadow` accepts a short list of numbers plus a colour, and the order is fixed:
+
+```css
+box-shadow: offset-x offset-y blur spread color;
+```
+
+`offset-x` pushes the shadow sideways, `offset-y` pushes it down, `blur` softens the edge, and `spread` grows or shrinks the silhouette before blurring. Positive offsets place the shadow to the right and below, which matches a light source above and to the left — the convention almost every interface follows. Negative offsets reverse it and look wrong to most people unless the light is explicitly behind the object.
+
+## Outer and inner shadows
+
+An outer shadow is the default and the one you will reach for constantly. Keep it subtle: a large blur with a small offset reads as gentle elevation, while a tight offset with no blur reads as a hard copy of the box and looks like a printing error.
+
+```css
+.card {
+  box-shadow: 0 18px 40px -22px rgba(21, 30, 54, 0.45);
+}
+```
+
+Negative spread is the trick behind most tasteful cards. Shrinking the shadow silhouette pulls it in from the sides so the softness only appears underneath, instead of leaking around the top edge.
+
+Put `inset` first and the shadow is drawn inside the element. This is how you get pressed buttons, recessed wells, and input fields that look carved into the panel. An inset shadow with a light colour and a downward offset makes a hole; the same numbers with a dark colour make a smudge. Combine one of each — one dark from the top, one light from the bottom — and you get a convincing groove.
+
+## Multiple shadows, and one edge only
+
+`box-shadow` takes a comma-separated list. Each entry is painted in order, first on top. Layering three or four shadows with different blurs and offsets produces the soft, contact-plus-ambient look of real objects: a tight dark line for contact, a medium blur for body, and a wide faint haze for the room.
+
+```css
+box-shadow:
+  0 1px 2px rgba(15, 23, 42, 0.08),
+  0 8px 18px -6px rgba(15, 23, 42, 0.18),
+  0 32px 60px -30px rgba(15, 23, 42, 0.35);
+```
+
+There is no `box-shadow-bottom` property, so a single edge needs a helper. Position a pseudo-element at the bottom of the parent, make it shorter than the parent with `left` and `right` insets, blur it, and let the parent clip the overflow. Only the part peeking below the box survives.
+
+```css
+.edge { position: relative; }
+.edge::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 0;
+  height: 60%;
+  box-shadow: 0 14px 18px -8px rgba(15, 23, 42, 0.55);
+  z-index: -1;
+}
+```
+
+Because the pseudo-element sits behind the parent, the shadow above the bottom edge is hidden by the parent's own background. What remains is a clean line of shade under the element, with no halo at the sides.
+
+## A complete example
+
+Three cards demonstrate the outer, inset, and layered versions, and a floating bar uses the pseudo-element to shade only its base.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shadow study</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 48px 20px;
+        font-family: system-ui, sans-serif;
+        background: #eef1f7;
+        color: #182136;
+      }
+
+      .wrap {
+        max-width: 700px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        margin: 0 0 26px;
+        font-size: 1rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: #7a879f;
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 18px;
+      }
+
+      .card {
+        padding: 22px 20px 24px;
+        background: #fff;
+        border-radius: 18px;
+      }
+
+      .card strong {
+        display: block;
+        font-size: 1.5rem;
+        margin-bottom: 4px;
+      }
+
+      .card span {
+        font-size: 0.78rem;
+        color: #6b7a94;
+      }
+
+      .outer {
+        box-shadow: 0 18px 40px -22px rgba(21, 30, 54, 0.55);
+      }
+
+      .inner {
+        background: #f1f4fa;
+        box-shadow:
+          inset 0 3px 8px rgba(21, 30, 54, 0.16),
+          inset 0 -2px 0 rgba(255, 255, 255, 0.9);
+      }
+
+      .stacked {
+        box-shadow:
+          0 1px 2px rgba(15, 23, 42, 0.08),
+          0 8px 18px -6px rgba(15, 23, 42, 0.18),
+          0 32px 56px -28px rgba(15, 23, 42, 0.4);
+      }
+
+      .bar {
+        position: relative;
+        margin-top: 40px;
+        padding: 16px 22px;
+        background: linear-gradient(135deg, #33415c, #1f2b44);
+        color: #eaf0ff;
+        border-radius: 14px;
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+
+      .bar::after {
+        content: "";
+        position: absolute;
+        left: 18px;
+        right: 18px;
+        bottom: 0;
+        height: 55%;
+        box-shadow: 0 16px 20px -8px rgba(31, 43, 68, 0.85);
+        z-index: -1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Three ways to cast a shadow</h1>
+      <div class="row">
+        <div class="card outer">
+          <strong>Outer</strong>
+          <span>Soft lift, negative spread</span>
+        </div>
+        <div class="card inner">
+          <strong>Inset</strong>
+          <span>Carved well, two directions</span>
+        </div>
+        <div class="card stacked">
+          <strong>Stacked</strong>
+          <span>Contact, body, and haze</span>
+        </div>
+      </div>
+      <div class="bar">Only the bottom edge is shaded</div>
+    </div>
+  </body>
+</html>
+```
+
+Turn the pseudo-element's `z-index` off in your head and the shadow jumps in front of the bar, covering the text. That single line is what keeps the shade behind the surface it belongs to.

@@ -1,0 +1,76 @@
+---
+title: Comments
+description: Document markup with comments and remove unwanted inline whitespace without breaking the layout.
+chapter: 9
+category: "HTML"
+order: 19
+---
+
+# Comments
+
+HTML comments are notes for humans. The browser ignores them when it renders the page.
+
+## Creating a comment
+
+```html
+<!-- The hero section starts here -->
+<section class="hero">
+  <h2>Build something small today</h2>
+  <p>Ten focused minutes beat an hour of scrolling.</p>
+</section>
+<!-- End hero section -->
+```
+
+Comments can span multiple lines:
+
+```html
+<!--
+  TODO: replace the placeholder image with the final artwork.
+  Keep the alt text descriptive until then.
+-->
+<img src="/images/placeholder.svg" alt="Placeholder artwork" />
+```
+
+## What not to put in comments
+
+- Passwords, API keys, or internal URLs.
+- Large blocks of commented-out code that will never be restored.
+- Instructions that duplicate what the markup already says.
+
+Comments are visible in the page source, so treat them as public.
+
+## Commenting out whitespace between inline elements
+
+Inline elements such as `inline-block` links can show an unwanted gap when there is whitespace between them in the source. One old technique is to remove that whitespace with a comment:
+
+```html
+<nav class="pills">
+  <a href="#one">One</a><!--
+  --><a href="#two">Two</a><!--
+  --><a href="#three">Three</a>
+</nav>
+```
+
+Modern layouts usually avoid the problem with Flexbox or Grid, which do not create gaps from source whitespace:
+
+```html
+<nav class="pills" style="display:flex; gap:0">
+  <a href="#one">One</a>
+  <a href="#two">Two</a>
+  <a href="#three">Three</a>
+</nav>
+```
+
+Prefer the layout-based fix. The comment trick is useful when you must support an older inline-block layout.
+
+## Conditional comments
+
+Old versions of Internet Explorer used conditional comments to load fallback styles. Modern projects do not need them:
+
+```html
+<!--[if lt IE 9]>
+  <script src="html5shiv.js"></script>
+<![endif]-->
+```
+
+Do not add this to a new project. It is included here only so you recognise it in legacy code.

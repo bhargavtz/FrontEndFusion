@@ -1,0 +1,119 @@
+---
+title: Symbols
+description: Use the symbol primitive for unique property keys, share them through the global symbol registry, and convert them to strings safely.
+chapter: 67
+category: "JavaScript"
+order: 367
+---
+
+# Symbols
+
+A symbol is a primitive value that is guaranteed to be unique. Each call to `Symbol()` produces a value that cannot equal any other symbol, even when both are created with the same description. That makes symbols ideal as property keys when you want to avoid collisions with code you do not control, such as a library adding metadata to your objects.
+
+## The symbol primitive
+
+Symbols are created by calling `Symbol`, optionally with a description used only for debugging. They can be used as object keys with computed property syntax or added after creation. Symbol-keyed properties are intentionally skipped by `Object.keys` and `for...in`, so they behave like hidden fields. To list them you must ask for `Object.getOwnPropertySymbols` or use `Reflect.ownKeys`.
+
+Because symbols are not automatically converted to strings, trying to concatenate one with a string throws a `TypeError`. Use `String(symbol)` or the `symbol.description` property when you need a readable form.
+
+## The global symbol registry
+
+Sometimes two independent pieces of code need to share the *same* symbol. `Symbol.for(key)` looks up a symbol in a global registry and reuses it if present, or creates it if not. Calling `Symbol.for("id")` twice returns the identical value, unlike two calls to `Symbol("id")`. You can reverse the lookup with `Symbol.keyFor`, which returns the registry key or `undefined`.
+
+Well-known symbols such as `Symbol.iterator` and `Symbol.toPrimitive` are built into the language and let your objects participate in core behaviours like iteration and coercion.
+
+The demo creates private symbol keys, compares local and global symbols, and prints what different inspection methods reveal.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Symbols</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px 18px;
+        font-family: system-ui, sans-serif;
+        color: #2a2b3d;
+        background: radial-gradient(circle at 20% 0%, #eef0ff, #f6f6fa 60%);
+      }
+      .card {
+        max-width: 540px;
+        margin: 0 auto;
+        padding: 22px;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 20px 42px -30px rgba(50, 50, 100, 0.5);
+      }
+      h1 { margin: 0 0 14px; font-size: 1.15rem; }
+      .row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+      button {
+        padding: 8px 12px;
+        border: 1px solid #dcdffa;
+        border-radius: 9px;
+        background: #f8f9ff;
+        color: #4249a8;
+        font: inherit;
+        font-size: 0.8rem;
+        cursor: pointer;
+      }
+      pre {
+        margin: 0;
+        padding: 14px;
+        border-radius: 12px;
+        background: #1d1f33;
+        color: #cfd3ff;
+        font-size: 0.78rem;
+        line-height: 1.65;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Symbol lab</h1>
+      <div class="row">
+        <button id="local">Compare local symbols</button>
+        <button id="global">Compare registry symbols</button>
+        <button id="inspect">Inspect object keys</button>
+      </div>
+      <pre id="out"></pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      var id = Symbol("id");
+      var token = Symbol("token");
+      var product = { name: "Notebook", price: 4 };
+      product[id] = "SKU-77";
+      product[token] = "secret";
+      document.getElementById("local").addEventListener("click", function () {
+        var another = Symbol("id");
+        out.textContent =
+          "Symbol('id') === Symbol('id'): " + (Symbol("id") === Symbol("id")) + "\n" +
+          "id === another: " + (id === another) + "\n" +
+          "Description: " + id.description + "\n" +
+          "As string: " + String(id);
+      });
+      document.getElementById("global").addEventListener("click", function () {
+        var g1 = Symbol.for("shared.id");
+        var g2 = Symbol.for("shared.id");
+        out.textContent =
+          "Symbol.for twice is same: " + (g1 === g2) + "\n" +
+          "Registry key: " + Symbol.keyFor(g1) + "\n" +
+          "Local symbol in registry: " + Symbol.keyFor(id) + "\n" +
+          "Well-known iterator: " + String(Symbol.iterator);
+      });
+      document.getElementById("inspect").addEventListener("click", function () {
+        out.textContent =
+          "Object.keys: " + JSON.stringify(Object.keys(product)) + "\n" +
+          "Symbol keys: " + Object.getOwnPropertySymbols(product).map(String).join(", ") + "\n" +
+          "Symbol value: " + product[id] + "\n" +
+          "Reflect.ownKeys count: " + Reflect.ownKeys(product).length;
+      });
+      document.getElementById("inspect").click();
+    </script>
+  </body>
+</html>
+```

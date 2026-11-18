@@ -1,0 +1,68 @@
+---
+title: Marking up Computer Code
+description: Use pre and code for blocks and inline snippets, and keep code readable for humans and machines.
+chapter: 34
+category: "HTML"
+order: 44
+---
+
+# Marking up Computer Code
+
+HTML provides `code` for code fragments and `pre` for content where whitespace matters. Together they mark up source listings.
+
+## Block with pre and code
+
+```html
+<pre><code>function greet(name) {
+  return `Hello, ${name}!`;
+}
+
+console.log(greet("Mira"));</code></pre>
+```
+
+- `pre` preserves spaces and line breaks.
+- `code` marks the content as code.
+- The combination is the standard for multiline snippets.
+
+Do not put the opening `<code>` on a new line if it would add an unwanted blank line. Whitespace inside `pre` is literal.
+
+## Inline with code
+
+```html
+<p>
+  Use the <code>&lt;button&gt;</code> element for actions, and the
+  <code>&lt;a&gt;</code> element for navigation.
+</p>
+```
+
+Escape `<` as `&lt;` and `>` as `&gt;` when you want to show a tag as text. If you are writing inline code inside a code block, escape the ampersand as `&amp;`.
+
+## Language hints
+
+Add a class to the code element to help syntax highlighters:
+
+```html
+<pre><code class="language-css">.card {
+  display: grid;
+  gap: 1rem;
+}</code></pre>
+```
+
+The class has no visual effect by itself. A highlighter reads it and adds spans.
+
+## Keyboard input and output
+
+Use `kbd` for keys, `samp` for program output, and `var` for variables in prose:
+
+```html
+<p>Press <kbd>Ctrl</kbd> + <kbd>K</kbd> to open the command palette.</p>
+<p>The terminal prints <samp>Build complete</samp>.</p>
+<p>The variable <var>total</var> starts at zero.</p>
+```
+
+## Accessibility
+
+- Keep code blocks short enough to scan.
+- Provide a text description for complex snippets.
+- Do not rely on colour alone in syntax highlighting.
+- Make sure horizontal scrolling works for long lines.

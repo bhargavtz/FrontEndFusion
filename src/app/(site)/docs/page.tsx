@@ -53,6 +53,9 @@ function DocLink({ slug }: { slug: string }) {
 
 export default function DocsIndexPage() {
   const learningDocs = docs.filter((doc) => doc.category === "Learning Path");
+  const htmlDocs = docs.filter((doc) => doc.category === "HTML");
+  const cssDocs = docs.filter((doc) => doc.category === "CSS");
+  const jsDocs = docs.filter((doc) => doc.category === "JavaScript");
   const referenceDocs = docs.filter((doc) => doc.category === "Reference");
 
   return (
@@ -74,8 +77,10 @@ export default function DocsIndexPage() {
         </p>
         <h1 className="section-title">Guide Library</h1>
         <p className="mt-3 text-lg" style={{ color: "var(--text-muted)" }}>
-          {docs.length} in-depth guides covering the HTML, CSS, and JavaScript
-          you need to build accessible, responsive interfaces.
+          {learningDocs.length + referenceDocs.length} in-depth guides plus two
+          complete references: {htmlDocs.length} HTML5 chapters and{" "}
+          {cssDocs.length} CSS chapters, with live previews for every
+          example.
         </p>
       </header>
 
@@ -91,6 +96,117 @@ export default function DocsIndexPage() {
             <DocLink key={doc.slug} slug={doc.slug} />
           ))}
         </div>
+      </section>
+
+      <section className="mt-14">
+        <div className="mb-5 flex items-end justify-between gap-4">
+          <h2 className="text-xl font-bold">HTML</h2>
+          <span className="text-sm" style={{ color: "var(--text-muted)" }}>
+            {htmlDocs.length} chapters
+          </span>
+        </div>
+        <p className="mb-5 max-w-3xl text-sm" style={{ color: "var(--text-muted)" }}>
+          A complete HTML reference rewritten with fresh examples. Every
+          chapter includes runnable code previews, from doctypes and headings
+          to forms, canvas, SVG, and ARIA.
+        </p>
+        <ol className="m-0 grid list-none grid-cols-1 gap-3 p-0 md:grid-cols-2">
+          {htmlDocs.map((doc, index) => (
+            <li key={doc.slug}>
+              <Link
+                href={`/docs/${doc.slug}`}
+                className="hub-card flex items-center gap-3 no-underline"
+                style={{ color: "var(--text)" }}
+              >
+                <span
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
+                  style={{
+                    background: "var(--bg-subtle)",
+                    border: "1px solid var(--border)",
+                    color: "var(--secondary)",
+                  }}
+                >
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <span className="text-sm font-semibold">{doc.title}</span>
+              </Link>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="mt-14">
+        <div className="mb-5 flex items-end justify-between gap-4">
+          <h2 className="text-xl font-bold">CSS</h2>
+          <span className="text-sm" style={{ color: "var(--text-muted)" }}>
+            {cssDocs.length} chapters
+          </span>
+        </div>
+        <p className="mb-5 max-w-3xl text-sm" style={{ color: "var(--text-muted)" }}>
+          A complete CSS reference rebuilt around visual examples. Every chapter
+          pairs the CSS with a small HTML demo so you can see the result in the
+          live preview.
+        </p>
+        <ol className="m-0 grid list-none grid-cols-1 gap-3 p-0 md:grid-cols-2">
+          {cssDocs.map((doc, index) => (
+            <li key={doc.slug}>
+              <Link
+                href={`/docs/${doc.slug}`}
+                className="hub-card flex items-center gap-3 no-underline"
+                style={{ color: "var(--text)" }}
+              >
+                <span
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
+                  style={{
+                    background: "var(--bg-subtle)",
+                    border: "1px solid var(--border)",
+                    color: "var(--secondary)",
+                  }}
+                >
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <span className="text-sm font-semibold">{doc.title}</span>
+              </Link>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="mt-14">
+        <div className="mb-5 flex items-end justify-between gap-4">
+          <h2 className="text-xl font-bold">JavaScript</h2>
+          <span className="text-sm" style={{ color: "var(--text-muted)" }}>
+            {jsDocs.length} chapters
+          </span>
+        </div>
+        <p className="mb-5 max-w-3xl text-sm" style={{ color: "var(--text-muted)" }}>
+          A complete JavaScript reference rebuilt with runnable examples. Every
+          chapter pairs the code with a small HTML demo so you can see the result
+          in the live preview.
+        </p>
+        <ol className="m-0 grid list-none grid-cols-1 gap-3 p-0 md:grid-cols-2">
+          {jsDocs.map((doc, index) => (
+            <li key={doc.slug}>
+              <Link
+                href={`/docs/${doc.slug}`}
+                className="hub-card flex items-center gap-3 no-underline"
+                style={{ color: "var(--text)" }}
+              >
+                <span
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
+                  style={{
+                    background: "var(--bg-subtle)",
+                    border: "1px solid var(--border)",
+                    color: "var(--secondary)",
+                  }}
+                >
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <span className="text-sm font-semibold">{doc.title}</span>
+              </Link>
+            </li>
+          ))}
+        </ol>
       </section>
 
       <section className="mt-14">

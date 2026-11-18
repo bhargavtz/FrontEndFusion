@@ -1,282 +1,285 @@
 import Link from "next/link";
-import { hero } from "@/data/hero";
-import { features } from "@/data/features";
-import { projects } from "@/data/projects";
-import { snippets } from "@/data/snippets";
-import { resourceGroups } from "@/data/resources";
-import { learningPath } from "@/data/learning-path";
+import { HeroSearch } from "@/components/search-palette";
+import { Playground } from "@/components/playground/playground";
+import { OpenAssistantButton } from "@/components/assistant/open-assistant-button";
+import { LevelPill } from "@/components/level-pill";
+import { domains } from "@/data/curriculum";
 import { docs } from "@/data/docs";
-import { books } from "@/data/books";
-import { SectionHeading } from "@/components/section-heading";
-import { GradientShowcase } from "@/components/gradient-showcase";
-import GradientASCII from "@/components/react-bits/gradient-ascii";
-import SplitText from "@/components/SplitText";
+import { projectBriefs } from "@/data/project-briefs";
+import { roadmaps } from "@/data/roadmaps";
+import { featuredTechnologies, technologies, technologiesByDomain } from "@/data/technologies";
 
-const explore = [
-  {
-    href: "/projects",
-    icon: "🧩",
-    title: "Projects",
-    description: "Hands-on HTML and CSS demos, filterable by difficulty.",
-    count: `${projects.length} demos`,
-    cta: "Browse projects",
-  },
-  {
-    href: "/snippets",
-    icon: "🔐",
-    title: "Snippets",
-    description: "Copy-paste ready, accessible form templates.",
-    count: `${snippets.length} snippets`,
-    cta: "Browse snippets",
-  },
-  {
-    href: "/resources",
-    icon: "📖",
-    title: "Resources",
-    description: "Official docs, accessibility tools, and in-project guides.",
-    count: `${resourceGroups.reduce((n, g) => n + g.items.length, 0)} links`,
-    cta: "Open resources",
-  },
-  {
-    href: "/learning",
-    icon: "🗺️",
-    title: "Learning Path",
-    description: "A structured route from HTML basics to advanced CSS.",
-    count: `${learningPath.length} steps`,
-    cta: "Start the path",
-  },
-  {
-    href: "/library",
-    icon: "📚",
-    title: "Book Library",
-    description: "Programming books and PDFs with search and category filters.",
-    count: `${books.length} books`,
-    cta: "Browse the library",
-  },
+const heroExample = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<style>
+  body { font-family: system-ui, sans-serif; display: grid; place-items: center; min-height: 100vh; margin: 0; background: #f8fafc; }
+  .counter { text-align: center; }
+  output { display: block; font-size: 4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  button { font: inherit; padding: .6rem 1.1rem; margin: 0 .25rem; border-radius: 10px; border: 1px solid #16a34a; background: #16a34a; color: #fff; cursor: pointer; }
+  button.ghost { background: transparent; color: #16a34a; }
+  button:focus-visible { outline: 3px solid #86efac; outline-offset: 2px; }
+</style>
+</head>
+<body>
+  <main class="counter">
+    <output id="count" aria-live="polite">0</output>
+    <button id="inc">Add one</button>
+    <button id="reset" class="ghost">Reset</button>
+  </main>
+  <script>
+    let count = 0;
+    const out = document.getElementById('count');
+    document.getElementById('inc').addEventListener('click', () => {
+      count += 1;
+      out.textContent = count;
+      console.log('count is now', count);
+    });
+    document.getElementById('reset').addEventListener('click', () => {
+      count = 0;
+      out.textContent = count;
+    });
+  </script>
+</body>
+</html>`;
+
+const heroExplanation = [
+  "The HTML defines a <main> landmark with an <output> that screen readers announce when it changes (aria-live).",
+  "The CSS centres the counter with Grid and styles the buttons, including a visible keyboard focus ring.",
+  "The script keeps the count in a variable and updates the DOM from two click handlers.",
+  "Change a colour, rename a button, or edit the script — the preview reloads as you type.",
 ];
 
-const MONO_FONT =
-  '"Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
-
 export default function HomePage() {
-  return (
-    <>
-      {/* ── Hero ─────────────────────────────────────────────── */}
-      <header className="hero-stage relative isolate overflow-hidden">
-        <div className="hero-ascii-wrap absolute inset-0 -z-10" aria-hidden="true">
-          <GradientASCII
-            colors={["#0b3b24", "#15803d", "#4ade80", "#a7f3d0"]}
-            shape="eclipse"
-            characters=" .:-=+*#%@"
-            cellSize={14}
-            density={0.7}
-            glyphOpacity={0.55}
-            gradientOpacity={0.55}
-            glow={0.4}
-            flicker={0.18}
-            softness={0.6}
-            scale={2.2}
-            flow={0.45}
-            speed={0.45}
-            grain={0.2}
-            variation={3}
-            clickEffect="wave"
-            intro
-            dpr={1.75}
-            fontFamily={MONO_FONT}
-            className="hero-ascii"
-          />
-        </div>
-        <div
-          className="hero-scrim pointer-events-none absolute inset-0 -z-10"
-          aria-hidden="true"
-        />
-        <div
-          className="hero-grid pointer-events-none absolute inset-0 -z-10"
-          aria-hidden="true"
-        />
+  const careerPaths = roadmaps.filter((r) => ["frontend", "ai-frontend", "advanced-frontend"].includes(r.slug));
+  const skillPaths = roadmaps.filter((r) => !careerPaths.includes(r));
+  const exampleCount = technologies.reduce((n, t) => n + (t.examples?.length ?? 0), 0);
+  const featuredProjects = ["calculator", "todo-app", "dashboard-ui", "ai-chat-interface"]
+    .map((slug) => projectBriefs.find((b) => b.slug === slug))
+    .filter((b): b is NonNullable<typeof b> => Boolean(b));
+  const tools = technologiesByDomain("tooling").concat(technologiesByDomain("ui-libraries"));
 
-        <div className="relative mx-auto flex min-h-[clamp(38rem,82vh,48rem)] max-w-6xl flex-col items-center justify-center px-4 py-24 text-center sm:py-28">
-          <p className="hero-badge">
-            <span className="hero-badge-dot" aria-hidden="true" />
-            Open-source learning hub
-          </p>
-          <h1 className="hero-title font-display text-[clamp(2.9rem,7.5vw,5.1rem)] font-bold leading-[0.94] tracking-[-0.045em] text-balance">
-            {hero.title}
+  return (
+    <main id="main-content">
+      {/* ── Hero ───────────────────────────────────────────── */}
+      <section className="hero" aria-labelledby="hero-title">
+        <div className="wrap hero__inner">
+          <p className="eyebrow">Free · Open source · No account needed</p>
+          <h1 id="hero-title">
+            Learn frontend. <span className="hero__em">Understand the code.</span> Preview the result. Build real projects.
           </h1>
-          <SplitText
-            text={hero.subtitle}
-            tag="p"
-            splitType="words"
-            effect="blur"
-            trigger="load"
-            delay={24}
-            duration={1.1}
-            aria="none"
-            className="hero-subtitle mx-auto mt-5 max-w-xl text-lg leading-relaxed"
-          />
-          <div className="mt-9 flex flex-wrap justify-center gap-3">
-            {hero.actions.map((action) => (
-              <Link
-                key={action.href}
-                href={action.href}
-                className={
-                  action.variant === "primary"
-                    ? "hero-cta hero-cta-primary font-display no-underline"
-                    : "hero-cta hero-cta-ghost font-display no-underline"
-                }
-              >
-                {action.label} <span aria-hidden="true">→</span>
-              </Link>
-            ))}
+          <p className="hero__lead">
+            One place for everything frontend — HTML, CSS, JavaScript, TypeScript, React, Next.js, UI libraries, tooling, architecture, and AI-powered development. Every concept comes with code you can run and change.
+          </p>
+
+          <HeroSearch />
+
+          <div className="hero__cta">
+            <Link href="/roadmaps/frontend" className="btn btn--primary">
+              Start learning
+            </Link>
+            <Link href="/learn" className="btn btn--ghost">
+              Browse the curriculum
+            </Link>
           </div>
 
-          <dl className="hero-stats">
-            <div className="hero-stat">
-              <dt>In-app guides</dt>
+          <dl className="stats">
+            <div>
+              <dt>Technologies</dt>
+              <dd>{technologies.length}</dd>
+            </div>
+            <div>
+              <dt>In-depth lessons</dt>
               <dd>{docs.length}</dd>
             </div>
-            <div className="hero-stat">
-              <dt>Interactive demos</dt>
-              <dd>{projects.length}</dd>
+            <div>
+              <dt>Runnable examples</dt>
+              <dd>{exampleCount}</dd>
             </div>
-            <div className="hero-stat">
-              <dt>Form snippets</dt>
-              <dd>{snippets.length}</dd>
-            </div>
-            <div className="hero-stat">
-              <dt>License</dt>
-              <dd>MIT</dd>
+            <div>
+              <dt>Project briefs</dt>
+              <dd>{projectBriefs.length}</dd>
             </div>
           </dl>
-
-          <a href="#intro" className="hero-scroll" aria-label="Scroll to content">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.6}
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 4v14m0 0l-5-5m5 5l5-5"
-              />
-            </svg>
-          </a>
         </div>
-      </header>
+      </section>
 
-      {/* ── Main ─────────────────────────────────────────────── */}
-      <main id="main-content" className="mx-auto max-w-6xl px-4 py-16">
-        {/* Introduction */}
-        <section id="intro" className="mb-20 scroll-mt-24 fade-in">
-          <SectionHeading title="What Is FrontEndFusion?" />
-          <p
-            className="mt-4 max-w-3xl text-lg leading-relaxed"
-            style={{ color: "var(--text-muted)" }}
-          >
-            FrontEndFusion is an open-source collection of HTML &amp; CSS
-            demos, code snippets, and learning guides. Whether you&apos;re a
-            beginner exploring semantic HTML or an intermediate developer
-            mastering CSS Grid and animations — this hub has something for you.
-          </p>
-
-          <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
-            {features.map((feature) => (
-              <div key={feature.title} className="hub-card text-center">
-                <div className="mb-2 text-2xl" aria-hidden="true">
-                  {feature.icon}
-                </div>
-                <p className="text-sm font-semibold">{feature.title}</p>
-                <p
-                  className="mt-1 text-xs"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  {feature.detail}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Visual lab */}
-        <section id="visual-lab" className="mb-20 scroll-mt-24 fade-in">
-          <SectionHeading
-            title="Interactive Visual Lab"
-            description="A live WebGL light field made of characters, powered by the GradientASCII component from React Bits. Swap the shape, palette, and density — then move your cursor across it and click for a wave."
-          />
-          <GradientShowcase />
-        </section>
-
-        {/* Explore: one card per section page */}
-        <section id="explore" className="mb-20 scroll-mt-24 fade-in">
-          <SectionHeading
-            title="Explore the hub"
-            description="Each section has its own page. Pick one to start."
-          />
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {explore.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="hub-card flex h-full flex-col no-underline"
-                style={{ color: "var(--text)" }}
-              >
-                <div className="mb-3 flex items-center justify-between gap-3">
-                  <span className="text-2xl" aria-hidden="true">
-                    {item.icon}
-                  </span>
-                  <span
-                    className="rounded-full border px-2.5 py-0.5 text-xs font-semibold tabular-nums"
-                    style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
-                  >
-                    {item.count}
-                  </span>
-                </div>
-                <h3 className="mb-1.5 text-lg font-semibold">{item.title}</h3>
-                <p
-                  className="mb-4 flex-1 text-sm leading-relaxed"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  {item.description}
-                </p>
-                <span className="text-sm font-semibold" style={{ color: "var(--secondary)" }}>
-                  {item.cta} <span aria-hidden="true">→</span>
+      {/* ── Roadmaps ───────────────────────────────────────── */}
+      <section className="wrap block" aria-labelledby="roadmaps-h">
+        <div className="block__head">
+          <p className="eyebrow">Roadmaps</p>
+          <h2 id="roadmaps-h">Pick a path, from first tag to professional</h2>
+          <p>Each roadmap has stages, milestones, exercises, and projects. Start with the Frontend path if you are new.</p>
+        </div>
+        <ul className="rows">
+          {careerPaths.map((r) => (
+            <li key={r.slug}>
+              <Link href={`/roadmaps/${r.slug}`} className="row">
+                <span className="row__main">
+                  <span className="row__title">{r.title}</span>
+                  <span className="row__desc">{r.summary}</span>
+                </span>
+                <span className="row__meta">
+                  <span className="row__count">{r.stages.length} stages</span>
+                  <span className="row__count">{r.duration}</span>
                 </span>
               </Link>
-            ))}
-          </div>
-        </section>
+            </li>
+          ))}
+        </ul>
+        <ul className="chips">
+          {skillPaths.map((r) => (
+            <li key={r.slug}>
+              <Link href={`/roadmaps/${r.slug}`}>{r.title}</Link>
+            </li>
+          ))}
+        </ul>
+      </section>
 
-        {/* Docs CTA */}
-        <section
-          className="hub-card flex flex-col items-start justify-between gap-5 sm:flex-row sm:items-center"
-          style={{
-            background:
-              "linear-gradient(120deg, var(--bg-card) 0%, var(--bg-subtle) 100%)",
-          }}
-        >
+      {/* ── Curriculum ─────────────────────────────────────── */}
+      <section className="wrap block" aria-labelledby="curriculum-h">
+        <div className="block__head">
+          <p className="eyebrow">Curriculum</p>
+          <h2 id="curriculum-h">Ten domains, one consistent structure</h2>
+          <p>Every technology page answers the same questions: what it is, why it exists, how it works — then shows runnable code, common mistakes, and interview questions.</p>
+        </div>
+        <ol className="domains">
+          {domains.map((d) => (
+            <li key={d.id}>
+              <Link href={d.href}>
+                <span className="domains__letter" aria-hidden="true">
+                  {d.letter}
+                </span>
+                <span>
+                  <span className="domains__title">{d.title}</span>
+                  <span className="domains__desc">{d.tagline}</span>
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {/* ── Popular technologies ───────────────────────────── */}
+      <section className="wrap block" aria-labelledby="popular-h">
+        <div className="block__head">
+          <p className="eyebrow">Popular</p>
+          <h2 id="popular-h">Where most people start</h2>
+        </div>
+        <ul className="chips chips--wide">
+          {featuredTechnologies.map((t) => (
+            <li key={t.slug}>
+              <Link href={`/technologies/${t.slug}`}>{t.name}</Link>
+            </li>
+          ))}
+          <li>
+            <Link href="/technologies" className="chips__more">
+              All {technologies.length} technologies →
+            </Link>
+          </li>
+        </ul>
+      </section>
+
+      {/* ── Learn by coding ────────────────────────────────── */}
+      <section className="wrap block" aria-labelledby="coding-h">
+        <div className="block__head">
+          <p className="eyebrow">Learn by coding</p>
+          <h2 id="coding-h">Read it, edit it, see it run</h2>
+          <p>
+            HTML, CSS, JavaScript, and React examples run in an isolated sandbox right in the page. Copy the whole file or just the lines you select, reset when you break it, and ask the AI assistant about the exact code you highlighted.
+          </p>
+        </div>
+        <Playground id="home-counter" title="A counter in HTML, CSS and JavaScript" language="html" code={heroExample} explanation={heroExplanation} topic="HTML, CSS and JavaScript basics" previewFirst />
+        <p className="muted small">
+          Examples that need npm packages or a build step are shown read-only and labelled as not runnable here — nothing pretends to run when it cannot.
+        </p>
+      </section>
+
+      {/* ── AI ─────────────────────────────────────────────── */}
+      <section className="wrap block" aria-labelledby="ai-h">
+        <div className="split">
           <div>
-            <h2 className="text-xl font-bold">Browse the full guide library</h2>
-            <p
-              className="mt-1 text-sm"
-              style={{ color: "var(--text-muted)" }}
-            >
-              Every tutorial is rendered in-app with a table of contents, code
-              samples, and previous/next navigation.
+            <p className="eyebrow">AI-powered development</p>
+            <h2 id="ai-h">Use AI professionally — and still understand your code</h2>
+            <p>
+              Prompting for UI, Claude Code, Cursor, Copilot, MCP, design-to-code, AI review — taught alongside the fundamentals that let you verify what a model gives you.
+            </p>
+            <p className="hero__cta">
+              <Link href="/ai" className="btn btn--primary">
+                Explore the AI track
+              </Link>
+              <OpenAssistantButton label="Try the assistant" />
             </p>
           </div>
-          <Link
-            href="/docs"
-            className="font-display whitespace-nowrap rounded-xl px-5 py-2.5 text-sm font-semibold no-underline transition hover:brightness-110"
-            style={{ background: "#2e7d32", color: "#fff" }}
-          >
-            Open Docs <span aria-hidden="true">→</span>
-          </Link>
-        </section>
-      </main>
-    </>
+          <ul className="plain-list">
+            <li>Explain, debug, or convert the code you have selected</li>
+            <li>Line-by-line walkthroughs and beginner-friendly explanations</li>
+            <li>Generate exercises and project ideas for any topic</li>
+            <li>Bring your own key: Anthropic Claude or any OpenAI-compatible endpoint</li>
+          </ul>
+        </div>
+      </section>
+
+      {/* ── Projects ───────────────────────────────────────── */}
+      <section className="wrap block" aria-labelledby="projects-h">
+        <div className="block__head">
+          <p className="eyebrow">Projects</p>
+          <h2 id="projects-h">Build to learn</h2>
+          <p>{projectBriefs.length} briefs from beginner to advanced, each with requirements, structure, steps, and challenges.</p>
+        </div>
+        <ul className="rows">
+          {featuredProjects.map((b) => (
+            <li key={b.slug}>
+              <Link href={`/projects/briefs/${b.slug}`} className="row">
+                <span className="row__main">
+                  <span className="row__title">{b.title}</span>
+                  <span className="row__desc">{b.summary}</span>
+                </span>
+                <LevelPill level={b.level} />
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <p className="next-link">
+          <Link href="/projects">See all projects →</Link>
+        </p>
+      </section>
+
+      {/* ── Tools ──────────────────────────────────────────── */}
+      <section className="wrap block" aria-labelledby="tools-h">
+        <div className="block__head">
+          <p className="eyebrow">Tools &amp; libraries</p>
+          <h2 id="tools-h">The ecosystem around the code</h2>
+        </div>
+        <ul className="chips chips--wide">
+          {tools.map((t) => (
+            <li key={t.slug}>
+              <Link href={`/technologies/${t.slug}`}>{t.name}</Link>
+            </li>
+          ))}
+          <li>
+            <Link href="/resources" className="chips__more">
+              Official docs &amp; resources →
+            </Link>
+          </li>
+        </ul>
+      </section>
+
+      {/* ── Contribute ─────────────────────────────────────── */}
+      <section className="wrap block" aria-labelledby="contribute-h">
+        <div className="callout callout--row">
+          <div>
+            <h2 id="contribute-h">Built in the open</h2>
+            <p>
+              FrontEndFusion is MIT-licensed. Found a mistake or want a topic added? Every page is an MDX or data file in the repository.
+            </p>
+          </div>
+          <a className="btn btn--ghost" href="https://github.com/bhargavtz/FrontEndFusion" target="_blank" rel="noopener noreferrer">
+            Contribute on GitHub ↗
+          </a>
+        </div>
+      </section>
+    </main>
   );
 }

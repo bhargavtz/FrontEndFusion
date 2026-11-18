@@ -1,0 +1,64 @@
+---
+title: Headings
+description: Use h1 to h6 to create a meaningful outline instead of just making text big.
+chapter: 3
+category: "HTML"
+order: 13
+---
+
+# Headings
+
+Headings create the outline of a document. Screen readers, search engines, and reader modes all use them to understand structure.
+
+## The six levels
+
+HTML provides `h1` through `h6`. Level one is the most important; level six is the least.
+
+```html
+<h1>Gardening for beginners</h1>
+<h2>Choosing a spot</h2>
+<p>Most vegetables need at least six hours of direct sunlight.</p>
+<h2>Preparing the soil</h2>
+<h3>Testing drainage</h3>
+<p>Dig a small hole, fill it with water, and check how quickly it drains.</p>
+<h3>Adding compost</h3>
+<p>Mix compost into the top layer before planting.</p>
+```
+
+## Structure, not size
+
+Do not choose a heading level because of its default size. Choose it because of its place in the outline. Use CSS when you need a different visual size.
+
+```html
+<h2 class="eyebrow">Seasonal guide</h2>
+<h3>Spring planting calendar</h3>
+```
+
+A common mistake is skipping levels because the design calls for smaller text. A better approach is to keep the semantic level and adjust the style.
+
+## One main heading
+
+A page should normally have one `h1` that describes its main topic. Subsections use `h2`, and details under those use `h3`.
+
+```html
+<h1>Weekend bread baking</h1>
+<h2>Ingredients</h2>
+<h2>Method</h2>
+<h3>Mixing</h3>
+<h3>Folding</h3>
+<h3>Baking</h3>
+```
+
+## Headings and accessibility
+
+- A heading must describe the content that follows.
+- Do not use an empty heading as a spacer.
+- Do not use bold paragraphs as fake headings.
+- Keep the wording short and specific.
+
+## Quick checklist
+
+1. Start with exactly one `h1`.
+2. Move down one level at a time.
+3. Use CSS for visual size.
+4. Read the headings alone; they should still tell a coherent story.

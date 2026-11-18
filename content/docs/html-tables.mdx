@@ -1,0 +1,131 @@
+---
+title: Tables
+description: Build accessible data tables with captions, headers, spanning cells, and column groups.
+chapter: 8
+category: "HTML"
+order: 18
+---
+
+# Tables
+
+Tables are for **tabular data**, not page layout. A good table has a caption, a header row, and clear relationships between cells.
+
+## A simple table
+
+```html
+<table>
+  <caption>Weekly study plan</caption>
+  <thead>
+    <tr>
+      <th scope="col">Day</th>
+      <th scope="col">Topic</th>
+      <th scope="col">Minutes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Monday</td>
+      <td>HTML structure</td>
+      <td>45</td>
+    </tr>
+    <tr>
+      <td>Wednesday</td>
+      <td>CSS layout</td>
+      <td>60</td>
+    </tr>
+  </tbody>
+</table>
+```
+
+The `scope="col"` attribute tells assistive technology that the header applies to its column.
+
+## Spanning columns and rows
+
+Use `colspan` to stretch a cell across columns and `rowspan` to stretch it down rows.
+
+```html
+<table>
+  <caption>Workshop rooms</caption>
+  <tr>
+    <th scope="col">Room</th>
+    <th scope="col">Morning</th>
+    <th scope="col">Afternoon</th>
+  </tr>
+  <tr>
+    <th scope="row">Studio A</th>
+    <td colspan="2">Photography all day</td>
+  </tr>
+  <tr>
+    <th scope="row">Studio B</th>
+    <td>Illustration</td>
+    <td>Printmaking</td>
+  </tr>
+</table>
+```
+
+## Column groups
+
+`colgroup` and `col` let you style or describe whole columns.
+
+```html
+<table>
+  <colgroup>
+    <col style="width: 40%" />
+    <col span="2" style="background: #f5f5f5" />
+  </colgroup>
+  <tr>
+    <th scope="col">Item</th>
+    <th scope="col">Qty</th>
+    <th scope="col">Price</th>
+  </tr>
+  <tr>
+    <td>Notebook</td>
+    <td>2</td>
+    <td>$8</td>
+  </tr>
+</table>
+```
+
+## Header, body, and footer
+
+Group rows with `thead`, `tbody`, and `tfoot`. This helps browsers and assistive technology understand the table's structure.
+
+```html
+<table>
+  <caption>Monthly budget</caption>
+  <thead>
+    <tr>
+      <th scope="col">Category</th>
+      <th scope="col">Planned</th>
+      <th scope="col">Actual</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">Food</th>
+      <td>$400</td>
+      <td>$382</td>
+    </tr>
+    <tr>
+      <th scope="row">Transport</th>
+      <td>$120</td>
+      <td>$141</td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <th scope="row">Total</th>
+      <td>$520</td>
+      <td>$523</td>
+    </tr>
+  </tfoot>
+</table>
+```
+
+## Accessibility rules
+
+- Use `caption` to name the table.
+- Use `th` for headers, not bold `td` cells.
+- Set `scope` to `col`, `row`, `colgroup`, or `rowgroup`.
+- Do not use tables for layout.
+- Keep the reading order logical when the table is linearised.

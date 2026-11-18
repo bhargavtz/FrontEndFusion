@@ -1,0 +1,191 @@
+---
+title: "CSS Fundamentals"
+description: "Selectors, the box model, positioning, Flexbox, and CSS Grid \u2014 the foundation of every layout."
+category: "Learning Path"
+order: 2
+---
+
+# CSS Fundamentals
+
+> **Complete CSS reference:** this guide is the starting point. The documentation includes a 56-chapter CSS reference with visual HTML demos in every chapter. [Start with Getting Started with CSS](/docs/css-getting-started).
+
+## Introduction to CSS
+- **What is CSS?**
+  - Definition and purpose of CSS in web development.
+  - Importance of separation of content (HTML) and presentation (CSS).
+
+- **History of CSS**
+  - Brief overview of the evolution of CSS from its inception to the latest version (CSS3).
+
+## Basic Syntax
+- **CSS Rules**
+  - Structure of a CSS rule: selector, property, and value.
+  - Example: 
+    ```css
+    h1 {
+      color: blue;
+      font-size: 24px;
+    }
+    ```
+
+- **Selectors**
+  - Types of selectors: element, class, ID, attribute, pseudo-class, and pseudo-element.
+  - Examples:
+    - Element Selector: `p`
+    - Class Selector: `.class-name`
+    - ID Selector: `#id-name`
+
+## CSS Box Model
+- **Understanding the Box Model**
+  - Components: content, padding, border, and margin.
+  - Visual representation of the box model.
+
+- **Box Model Properties**
+  - `width`, `height`, `padding`, `border`, `margin`.
+  - Example of box model properties in use:
+    ```css
+    .box {
+      width: 300px;
+      padding: 20px;
+      border: 5px solid black;
+      margin: 10px;
+    }
+    ```
+
+## Layout Techniques
+- **Positioning**
+  - Static, relative, absolute, fixed, and sticky positioning.
+  - Examples and use cases for each type.
+
+- **Flexbox**
+  - Introduction to Flexbox layout.
+  - Key properties: `display`, `flex-direction`, `justify-content`, `align-items`.
+  - Example:
+    ```css
+    .container {
+      display: flex;
+      justify-content: space-between;
+    }
+    ```
+
+- **Grid Layout**
+  - Overview of CSS Grid layout.
+  - Key properties: `display`, `grid-template-columns`, `grid-template-rows`.
+  - Example:
+    ```css
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+    }
+    ```
+
+## Styling Text
+- **Text Properties**
+  - Font family, size, weight, style, line height.
+  - Example:
+    ```css
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    ```
+
+- **Text Alignment and Decoration**
+  - Properties for alignment (`text-align`) and decoration (`text-decoration`).
+
+## Colors and Backgrounds
+- **Color Values**
+  - Different ways to specify colors: named colors, HEX, RGB, RGBA, HSL.
+  
+- **Background Properties**
+  - Background color, image, position, size.
+  - Example:
+    ```css
+    .background {
+      background-color: lightblue;
+      background-image: url('image.jpg');
+      background-size: cover;
+    }
+    ```
+
+## Responsive Design
+- **Media Queries**
+  - Definition and purpose of media queries in responsive design.
+  - Example:
+    ```css
+    @media (max-width: 600px) {
+      body {
+        background-color: lightgrey;
+      }
+    }
+    ```
+
+## Conclusion
+- **Best Practices in CSS**
+  - Importance of organization and commenting.
+  - Use of external stylesheets for maintainability.
+
+- **Further Learning Resources**
+  - Recommended books, online courses, and documentation for advanced CSS techniques.
+
+## Complete CSS reference
+
+This guide is the starting point. The documentation now includes the full 56-chapter CSS reference, rebuilt with visual HTML demos and live previews:
+
+1. [Getting Started with CSS](/docs/css-getting-started)
+2. [Structure and Formatting of a CSS Rule](/docs/css-structure-and-formatting)
+3. [Comments](/docs/css-comments)
+4. [Selectors](/docs/css-selectors)
+5. [Backgrounds](/docs/css-backgrounds)
+6. [Centering](/docs/css-centering)
+7. [The Box Model](/docs/css-box-model)
+8. [Margins](/docs/css-margins)
+9. [Padding](/docs/css-padding)
+10. [Border](/docs/css-border)
+11. [Outlines](/docs/css-outlines)
+12. [Overflow](/docs/css-overflow)
+13. [Media Queries](/docs/css-media-queries)
+14. [Floats](/docs/css-floats)
+15. [Typography](/docs/css-typography)
+16. [Flexible Box Layout (Flexbox)](/docs/css-flexbox)
+17. [Cascading and Specificity](/docs/css-cascade-and-specificity)
+18. [Colors](/docs/css-colors)
+19. [Opacity](/docs/css-opacity)
+20. [Length Units](/docs/css-length-units)
+21. [Pseudo-Elements](/docs/css-pseudo-elements)
+22. [Positioning](/docs/css-positioning)
+23. [Layout Control](/docs/css-layout-control)
+24. [Grid](/docs/css-grid)
+25. [Tables](/docs/css-tables)
+26. [Transitions](/docs/css-transitions)
+27. [Animations](/docs/css-animations)
+28. [2D Transforms](/docs/css-2d-transforms)
+29. [3D Transforms](/docs/css-3d-transforms)
+30. [Filter Property](/docs/css-filter-property)
+31. [Cursor Styling](/docs/css-cursor-styling)
+32. [box-shadow](/docs/css-box-shadow)
+33. [Shapes for Floats](/docs/css-shapes-for-floats)
+34. [List Styles](/docs/css-list-styles)
+35. [Counters](/docs/css-counters)
+36. [Functions](/docs/css-functions)
+37. [Custom Properties (Variables)](/docs/css-custom-properties)
+38. [Single Element Shapes](/docs/css-single-element-shapes)
+39. [Columns](/docs/css-columns)
+40. [Multiple columns](/docs/css-multiple-columns)
+41. [Inline-Block Layout](/docs/css-inline-block-layout)
+42. [Inheritance](/docs/css-inheritance)
+43. [CSS Image Sprites](/docs/css-image-sprites)
+44. [Clipping and Masking](/docs/css-clipping-and-masking)
+45. [Fragmentation](/docs/css-fragmentation)
+46. [CSS Object Model (CSSOM)](/docs/css-cssom)
+47. [Feature Queries](/docs/css-feature-queries)
+48. [Stacking Context](/docs/css-stacking-context)
+49. [Block Formatting Contexts](/docs/css-block-formatting-contexts)
+50. [Vertical Centering](/docs/css-vertical-centering)
+51. [Object Fit and Placement](/docs/css-object-fit-and-placement)
+52. [CSS Design Patterns](/docs/css-css-design-patterns)
+53. [Browser Support & Prefixes](/docs/css-browser-support-prefixes)
+54. [Normalizing Browser Styles](/docs/css-normalizing-browser-styles)
+55. [Internet Explorer Hacks](/docs/css-internet-explorer-hacks)
+56. [Performance](/docs/css-performance)

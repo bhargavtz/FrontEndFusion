@@ -1,0 +1,220 @@
+---
+title: Input Control Elements
+description: Every HTML input type — text, choices, files, dates, ranges, buttons, and validation.
+chapter: 17
+category: "HTML"
+order: 27
+---
+
+# Input Control Elements
+
+The `input` element is the most versatile form control. Its `type` attribute changes both the interface and the validation rules.
+
+## Text
+
+```html
+<label for="name">Full name</label>
+<input id="name" name="name" type="text" autocomplete="name" placeholder="Ada Lovelace" />
+```
+
+Use `autocomplete` values that match the field. They help browsers and password managers fill forms correctly.
+
+## Checkbox and radio buttons
+
+Checkboxes allow zero or more selections. Radio buttons allow exactly one selection within a named group.
+
+```html
+<fieldset>
+  <legend>Notifications</legend>
+  <label><input type="checkbox" name="news" checked /> Product news</label>
+  <label><input type="checkbox" name="events" /> Event invites</label>
+</fieldset>
+
+<fieldset>
+  <legend>Plan</legend>
+  <label><input type="radio" name="plan" value="monthly" checked /> Monthly</label>
+  <label><input type="radio" name="plan" value="yearly" /> Yearly</label>
+</fieldset>
+```
+
+## Input validation
+
+HTML provides built-in constraints: `required`, `minlength`, `maxlength`, `min`, `max`, `step`, and `pattern`.
+
+```html
+<form>
+  <label for="handle">Handle</label>
+  <input
+    id="handle"
+    name="handle"
+    type="text"
+    required
+    minlength="3"
+    maxlength="16"
+    pattern="[a-z0-9_]+"
+    title="Lowercase letters, digits, and underscores only"
+  />
+  <button type="submit">Create account</button>
+</form>
+```
+
+Always validate on the server as well. Client-side validation is a convenience, not a security boundary.
+
+## Color
+
+```html
+<label for="accent">Accent colour</label>
+<input id="accent" name="accent" type="color" value="#0f766e" />
+```
+
+The value is a seven-character hex string such as `#0f766e`.
+
+## Password
+
+```html
+<label for="password">Password</label>
+<input id="password" name="password" type="password" autocomplete="new-password" />
+```
+
+A password input masks characters. It does not encrypt anything; use HTTPS.
+
+## File
+
+```html
+<label for="resume">Upload a PDF</label>
+<input id="resume" name="resume" type="file" accept="application/pdf" />
+```
+
+Add `multiple` to allow several files. Use `accept` to filter the picker, but validate the file type again on the server.
+
+## Buttons
+
+```html
+<input type="button" value="Preview" onclick="alert('Preview only')" />
+<input type="submit" value="Send" />
+<input type="reset" value="Clear" />
+<button type="button">A real button element</button>
+```
+
+Prefer the `button` element for new code. It can contain icons and markup, and its default type is `submit` only inside forms.
+
+## Hidden
+
+```html
+<input type="hidden" name="campaign" value="spring-2026" />
+```
+
+Hidden inputs are visible in the page source. Never use them for secrets or trust their values on the server.
+
+## Telephone
+
+```html
+<label for="phone">Phone</label>
+<input id="phone" name="phone" type="tel" autocomplete="tel" />
+```
+
+`tel` does not enforce a format because phone numbers vary by country. Use `pattern` only when you are certain about the expected format.
+
+## Email
+
+```html
+<label for="email">Email</label>
+<input id="email" name="email" type="email" autocomplete="email" multiple />
+```
+
+With `multiple`, the field accepts a comma-separated list of addresses.
+
+## Number
+
+```html
+<label for="tickets">Tickets</label>
+<input id="tickets" name="tickets" type="number" min="1" max="10" step="1" value="2" />
+```
+
+Number inputs show stepper controls and reject non-numeric input. Do not use them for phone numbers or postal codes; those are strings even when they contain digits.
+
+## Range
+
+```html
+<label for="volume">Volume</label>
+<input id="volume" name="volume" type="range" min="0" max="100" step="5" value="40" />
+<output for="volume">40</output>
+```
+
+Range inputs are useful for approximate values. Always pair them with a visible value or label.
+
+## Search
+
+```html
+<label for="q">Search</label>
+<input id="q" name="q" type="search" placeholder="Search chapters" />
+```
+
+Some browsers add a clear button to search fields.
+
+## Image submit button
+
+```html
+<input
+  type="image"
+  src="https://picsum.photos/seed/submit/120/40"
+  alt="Submit the form"
+  width="120"
+  height="40"
+/>
+```
+
+The coordinates of the click are submitted as `name.x` and `name.y`.
+
+## Date and time types
+
+```html
+<label for="date">Date</label>
+<input id="date" name="date" type="date" />
+
+<label for="time">Time</label>
+<input id="time" name="time" type="time" />
+
+<label for="week">Week</label>
+<input id="week" name="week" type="week" />
+
+<label for="month">Month</label>
+<input id="month" name="month" type="month" />
+
+<label for="local">Local date and time</label>
+<input id="local" name="local" type="datetime-local" />
+```
+
+The obsolete `datetime` type was removed from HTML. Use `datetime-local` for a local date and time, or separate `date` and `time` fields.
+
+## URL
+
+```html
+<label for="site">Website</label>
+<input id="site" name="site" type="url" placeholder="https://example.com" />
+```
+
+The browser checks for a valid absolute URL.
+
+## A complete example
+
+```html
+<form>
+  <p>
+    <label for="email-demo">Email</label>
+    <input id="email-demo" type="email" required />
+  </p>
+  <p>
+    <label for="date-demo">Start date</label>
+    <input id="date-demo" type="date" required />
+  </p>
+  <p>
+    <label for="range-demo">Experience (years)</label>
+    <input id="range-demo" type="range" min="0" max="20" value="3" />
+  </p>
+  <p>
+    <label><input type="checkbox" required /> I accept the terms</label>
+  </p>
+  <button type="submit">Apply</button>
+</form>
+```

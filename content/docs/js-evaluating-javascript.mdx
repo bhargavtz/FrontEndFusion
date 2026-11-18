@@ -1,0 +1,91 @@
+---
+title: Evaluating JavaScript
+description: See how strings can be executed as code with eval and the Function constructor, and why careful validation is essential.
+chapter: 101
+category: "JavaScript"
+order: 401
+---
+
+# Evaluating JavaScript
+
+JavaScript can turn a string into executable code at runtime. This is powerful for things like expression editors or template engines, but it is also one of the easiest ways to introduce a security hole. Understanding exactly what each evaluation mechanism does is the first step to using it safely.
+
+## eval and the Function constructor
+
+`eval(code)` runs a string in the **current scope**, so the code can read and even modify local variables. That scope access is what makes it dangerous: injected text is no longer just data. Direct `eval` also defeats many optimizations because the engine cannot know ahead of time which names will be touched.
+
+The `Function` constructor is slightly more contained. `new Function("a", "b", "return a + b")` builds a function whose body cannot see the surrounding local scope, only globals. It still runs arbitrary code, so it is not a security boundary. Both approaches should be avoided for untrusted input and, in most application code, replaced with a direct expression or a parser.
+
+## Evaluation, math, and JSON
+
+A common use is evaluating arithmetic typed by a user. The safe pattern is to validate the string against a strict allowlist of digits, operators, spaces, and parentheses, and only then evaluate it. Anything else is rejected before execution. For structured data, `JSON.parse()` is always preferable to evaluating a string: it accepts data syntax only and never calls functions.
+
+Evaluation also follows the language's normal rules: division by zero yields `Infinity`, and malformed code throws a `SyntaxError`. Wrap the call in `try`/`catch` and surface a clear message.
+
+The demo compares a raw `eval` path with a validated calculator that rejects anything outside a safe character set.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Evaluation playground</title>
+    <style>
+      body { margin: 0; padding: 24px 16px; font-family: system-ui, sans-serif;
+        color: #2b2b36; background: linear-gradient(135deg, #f2f1fb, #eef8f6 80%); }
+      .card { max-width: 640px; margin: 0 auto; padding: 22px; background: #fff;
+        border-radius: 18px; box-shadow: 0 20px 40px -28px rgba(45,40,80,.42); }
+      h1 { margin: 0 0 6px; font-size: 1.15rem; }
+      p.hint { margin: 0 0 14px; font-size: .82rem; color: #6b6f80; }
+      input { width: 100%; box-sizing: border-box; padding: 9px 11px; border: 1px solid #d7d9e8;
+        border-radius: 9px; font: inherit; font-size: .85rem; }
+      .row { display: flex; gap: 8px; margin-top: 10px; }
+      button { padding: 8px 11px; border: 0; border-radius: 9px; color: #fff;
+        background: #5566b0; font: inherit; font-size: .76rem; cursor: pointer; }
+      pre { margin: 14px 0 0; padding: 12px; min-height: 110px; border-radius: 10px;
+        background: #202231; color: #e2e0ff; font-size: .78rem; line-height: 1.6;
+        white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Expression evaluator</h1>
+      <p class="hint">Try <code>2 + 3 * 4</code>, then try <code>alert(1)</code>.</p>
+      <input id="expr" value="2 + 3 * 4" />
+      <div class="row">
+        <button id="safe">Validated eval</button>
+        <button id="raw">Raw eval</button>
+      </div>
+      <pre id="out">Result appears here.</pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      var input = document.getElementById("expr");
+      var SAFE = /^[0-9+\-*/().\s]+$/;
+
+      document.getElementById("safe").addEventListener("click", function () {
+        var text = input.value;
+        if (!SAFE.test(text)) {
+          out.textContent = "Rejected: only numbers and arithmetic operators are allowed.";
+          return;
+        }
+        try {
+          var value = Function('"use strict"; return (' + text + ');')();
+          out.textContent = "Evaluated safely -> " + value;
+        } catch (err) {
+          out.textContent = "Syntax problem: " + err.message;
+        }
+      });
+      document.getElementById("raw").addEventListener("click", function () {
+        try {
+          var value = eval(input.value);
+          out.textContent = "Raw eval result -> " + value;
+        } catch (err) {
+          out.textContent = "Raw eval threw: " + err.name + ": " + err.message;
+        }
+      });
+    </script>
+  </body>
+</html>
+```

@@ -1,0 +1,141 @@
+---
+title: Prototypes, objects
+description: See how objects share behavior by delegating to a prototype instead of copying methods onto every instance.
+chapter: 21
+category: "JavaScript"
+order: 321
+---
+
+# Prototypes, objects
+
+Every JavaScript object carries a hidden link to another object called its prototype. When you ask for a property the object does not own, the engine follows that link and keeps looking. This is delegation, and it is the reason thousands of objects can share one method without each storing a private copy.
+
+## Every object has a prototype
+
+An object literal links to `Object.prototype`, which is why methods like `toString()` work even though you never wrote them. A function receives a `prototype` property the moment it is declared. When that function runs as a constructor with `new`, the fresh object's internal link points at the function's `prototype` object.
+
+Instance data therefore lives on the instance, while shared behavior lives one level up. The `hasOwnProperty()` method tells you which is which. Assigning a property directly to an instance shadows the inherited one rather than changing it for everyone, so customization stays local.
+
+## Creating and initialising a prototype
+
+The classic recipe is to declare a constructor function, attach methods to its `prototype`, then build instances with `new`. You can also set the link directly with `Object.create()`, which skips constructors entirely and is handy when you want a plain object with chosen ancestors.
+
+The link is live. Add a method to the prototype after instances exist and they all gain it immediately, because none of them copied anything. That makes prototypes a compact place to patch a whole family of objects at once, though it also means a careless edit can change behavior for objects far away from the line you touched.
+
+One more detail matters in practice. `Object.create(null)` produces an object with no prototype at all. Such an object cannot use `toString()` or `hasOwnProperty()`, which makes it useful as a dictionary whose keys might collide with inherited names. Choosing the right starting prototype is part of designing the object.
+
+## Demo: the creature lab
+
+```html
+<div class="lab">
+  <h2>Creature lab</h2>
+  <p class="lab__intro">One constructor, many creatures. Methods are stored once on the shared prototype.</p>
+  <div class="lab__buttons">
+    <button id="addCreature" type="button">Add a creature</button>
+    <button id="addSkill" type="button">Teach a new skill</button>
+  </div>
+  <ul id="roster" class="lab__roster"></ul>
+  <pre id="out" class="lab__out">Ready. Add a creature to begin.</pre>
+</div>
+
+<style>
+  body {
+    margin: 0;
+    padding: 2rem 1.25rem;
+    background: #eef2f7;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    color: #263445;
+  }
+  .lab {
+    max-width: 34rem;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 18px;
+    padding: 1.5rem;
+    box-shadow: 0 18px 40px -28px rgba(30, 50, 80, 0.7);
+  }
+  .lab h2 { margin: 0 0 0.4rem; font-size: 1.25rem; }
+  .lab__intro { margin: 0 0 1rem; color: #5f7085; font-size: 0.88rem; line-height: 1.5; }
+  .lab__buttons { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  button {
+    font: inherit;
+    font-size: 0.82rem;
+    padding: 0.55rem 0.9rem;
+    border: 0;
+    border-radius: 10px;
+    cursor: pointer;
+    background: #3457a6;
+    color: #fff;
+  }
+  button:last-child { background: #0e8a6a; }
+  button:hover { filter: brightness(1.08); }
+  .lab__roster { list-style: none; margin: 0 0 1rem; padding: 0; display: grid; gap: 0.5rem; }
+  .lab__roster li {
+    background: #f4f7fc;
+    border: 1px solid #dde6f2;
+    border-radius: 10px;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
+  }
+  .lab__out {
+    margin: 0;
+    min-height: 4.5rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: #13233c;
+    color: #cfe4ff;
+    border-radius: 10px;
+    padding: 0.85rem;
+    font-size: 0.8rem;
+    line-height: 1.5;
+  }
+</style>
+
+<script>
+  function Creature(name, sound) {
+    this.name = name;
+    this.sound = sound;
+  }
+  Creature.prototype.speak = function () {
+    return this.name + " says " + this.sound + "!";
+  };
+
+  var out = document.getElementById("out");
+  var roster = document.getElementById("roster");
+  var creatures = [];
+  var seed = [["Momo", "meep"], ["Bramble", "grrr"], ["Pip", "tweet"], ["Nori", "blub"]];
+  var next = 0;
+
+  function render() {
+    roster.innerHTML = "";
+    creatures.forEach(function (c) {
+      var li = document.createElement("li");
+      li.textContent = c.speak() + "    own speak: " + c.hasOwnProperty("speak");
+      roster.appendChild(li);
+    });
+  }
+
+  document.getElementById("addCreature").addEventListener("click", function () {
+    if (next >= seed.length) {
+      out.textContent = "All four creatures are already in the lab.";
+      return;
+    }
+    var c = new Creature(seed[next][0], seed[next][1]);
+    creatures.push(c);
+    next += 1;
+    out.textContent = "Created " + c.name + ". The speak method lives on Creature.prototype, not on the instance.";
+    render();
+  });
+
+  document.getElementById("addSkill").addEventListener("click", function () {
+    Creature.prototype.dance = function () {
+      return this.name + " does a little spin.";
+    };
+    var sample = creatures.length ? creatures[0] : new Creature("Momo", "meep");
+    out.textContent = "dance was added to the prototype. Existing creatures gain it at once: " + sample.dance();
+    render();
+  });
+
+  render();
+</script>
+```

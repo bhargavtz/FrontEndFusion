@@ -1,0 +1,90 @@
+---
+title: Text Formatting
+description: Highlight, emphasise, abbreviate, edit, and position text with semantic inline elements.
+chapter: 5
+category: "HTML"
+order: 15
+---
+
+# Text Formatting
+
+HTML has two kinds of inline formatting elements: those that describe **meaning** and those that describe **appearance**. Prefer the semantic ones.
+
+## Highlighting
+
+`mark` marks text as relevant to the current context, like a search result or a key phrase.
+
+```html
+<p>
+  The workshop starts at <mark>09:30</mark>, not 10:00 as the old flyer said.
+</p>
+```
+
+## Bold, italic, and underline
+
+- `strong` indicates importance.
+- `em` indicates stress emphasis.
+- `b` draws attention without implying importance.
+- `i` sets text apart, such as a technical term or a ship name.
+- `u` marks text with a non-textual annotation, such as a spelling error.
+
+```html
+<p>
+  <strong>Warning:</strong> the bridge is closed after <em>heavy rain</em>.
+</p>
+<p>
+  The <i>HMS Endeavour</i> sailed from Plymouth in 1768.
+</p>
+<p>
+  Please fix the <u class="spelling">recieve</u> typo.
+</p>
+```
+
+## Abbreviations
+
+Use `abbr` with a `title` attribute to expand an abbreviation on hover or focus.
+
+```html
+<p>
+  The <abbr title="World Wide Web Consortium">W3C</abbr> publishes the
+  specifications that browsers implement.
+</p>
+```
+
+## Inserted, deleted, and struck text
+
+- `ins` marks content added to a document.
+- `del` marks content removed from a document.
+- `s` marks content that is no longer accurate but is not a document edit.
+
+```html
+<p>
+  The meeting moved from <del>Tuesday</del> <ins>Wednesday</ins>.
+</p>
+<p>
+  <s>Free shipping on all orders</s> — offer ended.
+</p>
+```
+
+## Superscript and subscript
+
+`sup` raises text; `sub` lowers it. Both are common in maths, chemistry, and footnotes.
+
+```html
+<p>Water is H<sub>2</sub>O.</p>
+<p>The area is 12 m<sup>2</sup>.</p>
+<p>See note 4<sup><a href="#note-4">4</a></sup>.</p>
+```
+
+## Choosing the right element
+
+| Element | Meaning | Typical use |
+| --- | --- | --- |
+| `strong` | Importance | Warnings, key terms |
+| `em` | Stress emphasis | A word that changes the sentence |
+| `mark` | Relevance | Search matches, highlighted passages |
+| `b` | Attention | Product names in a list |
+| `i` | Alternate voice | Technical terms, foreign phrases |
+| `u` | Annotation | Spelling errors, proper-name marks |
+
+Avoid using these elements only to make text look bold or italic. Use CSS for pure presentation.

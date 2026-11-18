@@ -1,0 +1,79 @@
+---
+title: Div Element
+description: Use div as a generic container when no semantic element fits, and nest it without losing meaning.
+chapter: 19
+category: "HTML"
+order: 29
+---
+
+# Div Element
+
+The `div` element is a generic block container. It carries no meaning of its own, which makes it useful as a styling hook when no semantic element applies.
+
+## Basic usage
+
+```html
+<div class="card">
+  <h2>Weekly digest</h2>
+  <p>Three short reads about HTML, CSS, and accessibility.</p>
+  <a href="/digest">Read the digest</a>
+</div>
+```
+
+The `div` groups the content for layout and styling. The heading and paragraph still provide the meaning.
+
+## Nesting
+
+Divs can contain other divs. Keep the nesting shallow and purposeful.
+
+```html
+<div class="layout">
+  <div class="layout__main">
+    <h2>Article body</h2>
+    <p>The main column holds the primary content.</p>
+  </div>
+  <div class="layout__aside">
+    <h2>Related</h2>
+    <p>Secondary links and notes.</p>
+  </div>
+</div>
+```
+
+Deeply nested divs make CSS harder to reason about. Before adding another wrapper, check whether the layout can be solved with Grid or Flexbox on an existing parent.
+
+## When not to use div
+
+Prefer semantic elements when they fit:
+
+| Instead of | Use |
+| --- | --- |
+| `<div class="header">` | `<header>` |
+| `<div class="nav">` | `<nav>` |
+| `<div class="main">` | `<main>` |
+| `<div class="article">` | `<article>` |
+| `<div class="footer">` | `<footer>` |
+| `<div class="button">` | `<button>` |
+
+Semantic elements give assistive technology and search engines more information at no extra cost.
+
+## Divs and buttons
+
+Do not use a div as a button:
+
+```html
+<!-- Avoid: not keyboard accessible by default -->
+<div class="button" onclick="save()">Save</div>
+
+<!-- Prefer -->
+<button type="button" onclick="save()">Save</button>
+```
+
+If you must use a non-button element as a control, add `role="button"`, `tabindex="0"`, and keyboard handlers. Using the real element is almost always simpler.
+
+## Practical guidance
+
+1. Start with semantic elements.
+2. Add a div only when you need a generic wrapper.
+3. Give wrappers descriptive class names.
+4. Keep nesting shallow.
+5. Do not put interactive behaviour on a div when a native control exists.

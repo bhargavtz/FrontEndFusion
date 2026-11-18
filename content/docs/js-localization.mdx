@@ -1,0 +1,127 @@
+---
+title: Localization
+description: Format numbers, currencies, dates, and times for different locales with the built-in Intl API instead of hand-written rules.
+chapter: 70
+category: "JavaScript"
+order: 370
+---
+
+# Localization
+
+Localization adapts data to the conventions of a particular locale. Decimal separators, thousands grouping, currency placement, and calendar formats differ widely: the same number or date can look completely different in two regions. Hard-coding these rules is error-prone, so JavaScript provides the `Intl` object to handle them.
+
+## Numbers and currencies
+
+`Intl.NumberFormat` formats numbers with the correct grouping and decimal separator. You pass a locale tag and an options object, then call `format`. Options control details such as minimum and maximum fraction digits, and whether to use compact notation.
+
+For money, give the formatter a `style` of `currency` plus a `currency` code such as `USD` or `EUR`. The formatter places the symbol, handles spacing, and applies the right number of decimal places for that currency. Reusing one formatter for many values is faster than creating a new one each time.
+
+## Dates and times
+
+`Intl.DateTimeFormat` renders dates and times according to locale conventions. Options such as `year`, `month`, `day`, `hour`, and `minute` select which parts appear, while `dateStyle` and `timeStyle` offer convenient presets. You can also supply a `timeZone` to display an instant in a specific city.
+
+Locale tags accept a language and optional region, for example `en-US`, `de-DE`, `fr-FR`, or `ja-JP`. When a requested locale is unavailable, the API falls back gracefully. Related helpers include `Intl.Collator` for locale-aware string sorting and `Intl.PluralRules` for choosing plural forms.
+
+The demo lets you switch locales and watches a number, a price, and a date change together.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Localization</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px 18px;
+        font-family: system-ui, sans-serif;
+        color: #2a2a38;
+        background: radial-gradient(circle at 10% 0%, #e8f6f8, #f6f6fa 60%);
+      }
+      .card {
+        max-width: 540px;
+        margin: 0 auto;
+        padding: 22px;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 20px 42px -30px rgba(30, 70, 85, 0.5);
+      }
+      h1 { margin: 0 0 14px; font-size: 1.15rem; }
+      .row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; align-items: center; }
+      label { font-size: 0.82rem; color: #4a5568; }
+      select, input {
+        padding: 7px 9px;
+        border: 1px solid #d5e3e8;
+        border-radius: 9px;
+        background: #f9fdfd;
+        font: inherit;
+        font-size: 0.82rem;
+        color: #25404a;
+      }
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .tile { padding: 12px; border-radius: 12px; background: #f4fafb; }
+      .tile small { display: block; color: #6a7d86; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; }
+      .tile b { display: block; margin-top: 6px; font-size: 0.95rem; color: #14424f; }
+      pre {
+        grid-column: 1 / -1;
+        margin: 0;
+        padding: 12px;
+        border-radius: 12px;
+        background: #16282d;
+        color: #b7e9ef;
+        font-size: 0.75rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Locale switcher</h1>
+      <div class="row">
+        <label for="locale">Locale</label>
+        <select id="locale">
+          <option value="en-US">en-US</option>
+          <option value="de-DE">de-DE</option>
+          <option value="fr-FR">fr-FR</option>
+          <option value="ja-JP">ja-JP</option>
+          <option value="ar-EG">ar-EG</option>
+        </select>
+        <label for="amount">Amount</label>
+        <input id="amount" type="number" value="1234567.5" step="0.01" />
+      </div>
+      <div class="grid">
+        <div class="tile"><small>Number</small><b id="num"></b></div>
+        <div class="tile"><small>Currency (EUR)</small><b id="cur"></b></div>
+        <div class="tile"><small>Date</small><b id="date"></b></div>
+        <div class="tile"><small>Date &amp; time</small><b id="datetime"></b></div>
+        <pre id="out"></pre>
+      </div>
+    </div>
+    <script>
+      var when = new Date(2026, 10, 18, 14, 30, 0);
+      function update() {
+        var locale = document.getElementById("locale").value;
+        var amount = Number(document.getElementById("amount").value) || 0;
+        var num = new Intl.NumberFormat(locale).format(amount);
+        var cur = new Intl.NumberFormat(locale, { style: "currency", currency: "EUR" }).format(amount);
+        var date = new Intl.DateTimeFormat(locale, { year: "numeric", month: "long", day: "numeric" }).format(when);
+        var datetime = new Intl.DateTimeFormat(locale, { dateStyle: "short", timeStyle: "short" }).format(when);
+        document.getElementById("num").textContent = num;
+        document.getElementById("cur").textContent = cur;
+        document.getElementById("date").textContent = date;
+        document.getElementById("datetime").textContent = datetime;
+        document.getElementById("out").textContent =
+          "locale: " + locale + "\n" +
+          "Intl.NumberFormat -> " + num + "\n" +
+          "currency EUR        -> " + cur + "\n" +
+          "Intl.DateTimeFormat -> " + date;
+      }
+      document.getElementById("locale").addEventListener("change", update);
+      document.getElementById("amount").addEventListener("input", update);
+      update();
+    </script>
+  </body>
+</html>
+```

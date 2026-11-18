@@ -1,0 +1,97 @@
+---
+title: Inline-Block Layout
+description: Lay elements out in a row with inline-block, tame the whitespace gap, and justify a navigation bar edge to edge.
+chapter: 41
+category: "CSS"
+order: 141
+---
+
+# Inline-Block Layout
+
+An `inline-block` box is a hybrid. Internally it behaves like a block: `width`, `height`, vertical margins, and padding all apply. Externally it behaves like an inline box, so it sits on a text baseline beside other content and wraps when the line runs out of room.
+
+Long before flexbox, this was the standard recipe for navigation bars, button rows, and thumbnail strips. It still appears in older codebases and is handy when you want text-like flow with block-like sizing.
+
+## The whitespace gap
+
+If your markup has a newline or a space between two `inline-block` children, the browser renders that as a word space — roughly a quarter of an em. A row of five items can pick up 20–30px of phantom spacing.
+
+Three ways out:
+
+- Delete the whitespace between tags, or comment it out. Effective, ugly.
+- Set `font-size: 0` on the parent and restore `font-size` on the children. The space collapses because it has no size.
+- Use `display: flex` or `display: grid` with `gap` and stop worrying about markup.
+
+`letter-spacing` and `word-spacing` on the parent can leak into the gaps too, so reset them if a row looks mysteriously wide.
+
+## Justifying a navigation bar
+
+`text-align: justify` stretches a line of inline content to fill its container — but it deliberately skips the final line. An empty `::after` pseudo-element with `width: 100%` turns the real line into a non-final line, so the browser has to spread the items from edge to edge. Add `vertical-align: middle` so mixed icon and text sizes line up on their centres rather than their baselines.
+
+The demo below uses that trick for a sticky-looking nav, plus a highlighted call-to-action item.
+
+```html
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    background: radial-gradient(circle at 25% 15%, #eef4ff, #dbe6fb 55%, #c9d9f6);
+    font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  }
+  .nav {
+    width: min(680px, 92vw);
+    margin: 0;
+    padding: 12px 22px;
+    list-style: none;
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 24px 48px -28px rgba(23, 43, 77, 0.6);
+    text-align: justify;
+    line-height: 2.7;
+  }
+  /* forces the items to be treated as a non-final line */
+  .nav::after {
+    content: "";
+    display: inline-block;
+    width: 100%;
+  }
+  .nav li { display: inline-block; vertical-align: middle; }
+  .nav a {
+    display: block;
+    padding: 9px 18px;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: #1f3a63;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .nav a:hover { background: #eaf0fb; }
+  .nav .cta a { background: #1f3a63; color: #ffffff; }
+  .nav .cta a:hover { background: #33558a; }
+  .note {
+    margin: 18px auto 0;
+    max-width: 620px;
+    text-align: center;
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #5b7196;
+  }
+</style>
+
+<ul class="nav">
+  <li><a href="#">Home</a></li>
+  <li><a href="#">Guides</a></li>
+  <li><a href="#">Reference</a></li>
+  <li><a href="#">Examples</a></li>
+  <li class="cta"><a href="#">Start here</a></li>
+</ul>
+<p class="note">inline-block items · justified line · vertical-align: middle</p>
+```
+
+Watch the row at narrow widths: the items wrap, and the justification applies per line, which is usually what you want for a tag cloud but rarely for a nav. In that case switch to flexbox with `flex-wrap: wrap` and `gap`.

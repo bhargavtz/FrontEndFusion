@@ -1,0 +1,62 @@
+---
+title: Enumerations
+description: Model a fixed set of named constants with frozen objects, computed values, and symbols.
+chapter: 37
+category: "JavaScript"
+order: 337
+---
+
+# Enumerations
+
+JavaScript has no built-in `enum` keyword, but the job of an enumeration - a closed set of named constants - is easy to reproduce. The go-to pattern is a plain object frozen with `Object.freeze`, which prevents anyone from adding, removing, or rewriting members at runtime. Frozen objects give you readable names instead of "magic numbers" scattered through the code.
+
+## Defining an enum with Object.freeze
+
+A frozen object pairs each name with a value. Values can be strings, numbers, or objects. Freezing is shallow, so nested objects inside the enum can still change unless they are frozen too. An alternate, older definition uses a function that returns a frozen object, which keeps each enum in its own scope. To print an enum variable, log the object itself or look up the name whose value matches a given constant.
+
+## Computed values and symbol members
+
+Enum values do not have to be written by hand. A small helper can assign automatic increasing integers, which is handy when the numeric value is irrelevant and only uniqueness matters. For truly private, non-colliding keys, `Symbol` values work well: two symbols are never equal even if they share a description, so they cannot be confused with strings from elsewhere.
+
+The demo below builds a frozen status enum, lets you choose a key, and prints both the stored value and its type. It also shows an auto-numbered enum built with a reduce.
+
+```html
+<div style="background:#f8fafc;border-radius:16px;padding:20px;max-width:560px;font-family:system-ui,sans-serif;color:#0f172a;">
+  <h3 style="margin-top:0;">Status enum demo</h3>
+  <label>Pick a status
+    <select id="statusKey" style="padding:6px;border-radius:8px;border:1px solid #cbd5e1;">
+      <option>Pending</option><option>Active</option><option>Archived</option>
+    </select>
+  </label>
+  <button id="showEnum" style="margin-left:8px;">Inspect</button>
+  <div id="badge" style="margin-top:12px;font-weight:600;"></div>
+  <pre id="out" style="background:#0f172a;color:#e2e8f0;padding:12px;border-radius:10px;min-height:80px;white-space:pre-wrap;"></pre>
+</div>
+<script>
+  (function () {
+    var out = document.getElementById("out");
+    var badge = document.getElementById("badge");
+    var Status = Object.freeze({
+      Pending: "pending",
+      Active: "active",
+      Archived: "archived"
+    });
+    var colors = Object.freeze({
+      pending: "#f59e0b", active: "#16a34a", archived: "#64748b"
+    });
+    var auto = ["A", "B", "C"].reduce(function (acc, name, i) {
+      acc[name] = i + 1;
+      return acc;
+    }, Object.freeze({}));
+    document.getElementById("showEnum").onclick = function () {
+      var key = document.getElementById("statusKey").value;
+      var value = Status[key];
+      badge.textContent = key;
+      badge.style.color = colors[value];
+      out.textContent = key + " = " + value
+        + "\nis frozen: " + Object.isFrozen(Status)
+        + "\nauto values: " + JSON.stringify(auto);
+    };
+  })();
+</script>
+```

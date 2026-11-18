@@ -1,0 +1,142 @@
+---
+title: Web Cryptography API
+description: Hash text, generate random bytes and export RSA keys with the asynchronous Web Cryptography API.
+chapter: 94
+category: "JavaScript"
+order: 394
+---
+
+# Web Cryptography API
+
+The Web Cryptography API gives scripts access to cryptographic primitives that are fast and reviewed by the browser vendor. Everything lives under `crypto.subtle`, and almost every operation is asynchronous and returns a promise. The API only works in secure contexts, which means HTTPS or localhost, so a sandboxed preview may need to fall back to an explanatory message.
+
+## Digests and randomness
+
+`crypto.subtle.digest("SHA-256", data)` takes an `ArrayBuffer` (or typed array) and resolves to an `ArrayBuffer` containing the hash. To display it, wrap the buffer in a `Uint8Array` and format each byte as two hexadecimal digits. A digest is one-way: the same input always produces the same output, while changing a single character changes it completely.
+
+For random data, use `crypto.getRandomValues(typedArray)`, which fills the array with cryptographically strong bytes. It is synchronous and is the right choice for tokens, salts and nonces — `Math.random()` is not suitable for security purposes.
+
+## Keys and PEM
+
+`crypto.subtle.generateKey({ name: "RSASSA-PKCS1-v1_5", modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: "SHA-256" }, true, ["sign", "verify"])` produces an RSA key pair. With `extractable` set to `true`, `exportKey("spki", publicKey)` and `exportKey("pkcs8", privateKey)` return buffers that can be base64-encoded into the familiar PEM format. `importKey()` reverses the process. The demo exercises hashing, randomness and a full export/import round trip, with feature detection and a visible fallback.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Web Crypto lab</title>
+    <style>
+      body { margin: 0; padding: 24px 16px; font-family: system-ui, sans-serif; color: #26303e; background: linear-gradient(135deg, #eaf1fa, #f8edf2 80%); }
+      .card { max-width: 560px; margin: 0 auto; padding: 22px; background: #fff; border-radius: 20px; box-shadow: 0 20px 42px -30px rgba(30, 50, 90, .5); }
+      h1 { margin: 0 0 6px; font-size: 1.15rem; }
+      .lead { margin: 0 0 12px; font-size: .84rem; color: #626d7e; }
+      .badge { display: inline-block; padding: 6px 10px; border-radius: 999px; background: #e9eef8; color: #46527a; font-size: .74rem; font-weight: 600; }
+      input { width: 100%; box-sizing: border-box; margin-top: 12px; padding: 9px 10px; border: 1px solid #d2dae8; border-radius: 9px; font: inherit; font-size: .82rem; }
+      .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+      button { padding: 8px 11px; border: 0; border-radius: 9px; background: #3a568f; color: #fff; font: inherit; font-size: .76rem; cursor: pointer; }
+      button:hover { background: #2c4374; }
+      pre { margin: 14px 0 0; min-height: 210px; padding: 12px; border-radius: 11px; background: #1c2433; color: #d9e5f7; font-size: .73rem; line-height: 1.6; white-space: pre-wrap; word-break: break-all; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Web Crypto lab</h1>
+      <p class="lead">Hashing, randomness and an RSA export/import round trip.</p>
+      <span id="badge" class="badge">checking…</span>
+      <input id="text" value="hello crypto" aria-label="text to hash" />
+      <div class="row">
+        <button data-act="hash">SHA-256 digest</button>
+        <button data-act="rand">Random bytes</button>
+        <button data-act="rsa">Generate RSA keys</button>
+      </div>
+      <pre id="out"></pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      var badge = document.getElementById("badge");
+      var subtle = window.crypto && window.crypto.subtle;
+      var hasSubtle = !!(subtle && typeof subtle.digest === "function");
+
+      function line(s) { out.textContent += s + "\n"; }
+      function hex(buf) {
+        return Array.prototype.map.call(new Uint8Array(buf), function (b) {
+          return ("0" + b.toString(16)).slice(-2);
+        }).join("");
+      }
+      function toBuffer(str) {
+        if (window.TextEncoder) return new TextEncoder().encode(str);
+        var a = new Uint8Array(str.length);
+        for (var i = 0; i < str.length; i++) a[i] = str.charCodeAt(i) & 255;
+        return a;
+      }
+      function bufToB64(buf) {
+        var bytes = new Uint8Array(buf), s = "";
+        for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+        return btoa(s);
+      }
+      function toPem(buf, label) {
+        var b64 = bufToB64(buf);
+        var wrapped = b64.match(/.{1,64}/g).join("\n");
+        return "-----BEGIN " + label + "-----\n" + wrapped + "\n-----END " + label + "-----";
+      }
+      function pemToBuffer(pem) {
+        var b64 = pem.replace(/-----[^-]+-----/g, "").replace(/\s+/g, "");
+        var bin = atob(b64);
+        var a = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i);
+        return a.buffer;
+      }
+
+      badge.textContent = hasSubtle ? "SubtleCrypto available" : "SubtleCrypto unavailable — secure context required";
+      line(hasSubtle ? "crypto.subtle is ready." : "This sandbox does not expose crypto.subtle; cryptographic steps cannot run here.");
+
+      document.querySelector(".row").addEventListener("click", function (e) {
+        var btn = e.target.closest("button[data-act]");
+        if (!btn) return;
+        var act = btn.dataset.act;
+
+        if (act === "hash") {
+          var text = document.getElementById("text").value;
+          if (!hasSubtle) { line("SHA-256 skipped: SubtleCrypto unavailable."); return; }
+          subtle.digest("SHA-256", toBuffer(text)).then(function (buf) {
+            line("SHA-256(" + JSON.stringify(text) + ") = " + hex(buf));
+          }).catch(function (err) { line("digest failed: " + err.name); });
+        }
+
+        if (act === "rand") {
+          if (!(window.crypto && crypto.getRandomValues)) { line("getRandomValues unavailable."); return; }
+          var bytes = new Uint8Array(16);
+          crypto.getRandomValues(bytes);
+          line("16 random bytes = " + hex(bytes.buffer));
+        }
+
+        if (act === "rsa") {
+          if (!hasSubtle) { line("RSA demo skipped: SubtleCrypto unavailable."); return; }
+          line("Generating a 2048-bit RSA key pair…");
+          subtle.generateKey({
+            name: "RSASSA-PKCS1-v1_5",
+            modulusLength: 2048,
+            publicExponent: new Uint8Array([1, 0, 1]),
+            hash: "SHA-256"
+          }, true, ["sign", "verify"]).then(function (pair) {
+            return Promise.all([
+              subtle.exportKey("spki", pair.publicKey),
+              subtle.exportKey("pkcs8", pair.privateKey)
+            ]).then(function (keys) {
+              var pubPem = toPem(keys[0], "PUBLIC KEY");
+              var privPem = toPem(keys[1], "PRIVATE KEY");
+              line("public PEM (first 100 chars): " + pubPem.slice(0, 100) + "…");
+              line("private PEM length: " + privPem.length + " characters");
+              return subtle.importKey("spki", pemToBuffer(pubPem), { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, true, ["verify"]);
+            }).then(function (key) {
+              line("re-imported key: type=" + key.type + ", algorithm=" + key.algorithm.name);
+            });
+          }).catch(function (err) { line("RSA step failed: " + err.name + " — " + err.message); });
+        }
+      });
+    </script>
+  </body>
+</html>
+```

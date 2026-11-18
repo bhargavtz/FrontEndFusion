@@ -1,0 +1,154 @@
+---
+title: requestAnimationFrame
+description: Schedule callbacks that run just before the browser repaints, add a fallback for older browsers, and cancel frames you no longer need.
+chapter: 64
+category: "JavaScript"
+order: 364
+---
+
+# requestAnimationFrame
+
+A screen is redrawn many times each second. If you animate with `setInterval`, your changes can land at odd moments relative to those redraws, which produces jitter and wasted work. `requestAnimationFrame` solves this by asking the browser to call a function right before the next paint. The callback receives a timestamp, and the browser naturally pauses the loop when the tab is hidden.
+
+## Scheduling a frame
+
+You pass a callback to `requestAnimationFrame`. To keep an animation going, the callback schedules another frame from inside itself, forming a loop that runs at the display's refresh rate. Because the browser controls the timing, motion looks smooth and stops automatically when the page is in the background.
+
+Each callback receives a high-resolution timestamp. Subtracting the previous timestamp gives the elapsed time, which lets you move objects based on real time rather than a fixed number of pixels per frame. That keeps animation speed consistent on fast and slow displays.
+
+## Compatibility and cancellation
+
+Older browsers used prefixed names such as `webkitRequestAnimationFrame`. A small compatibility shim picks the available method and falls back to a timer, so the same code runs everywhere.
+
+`requestAnimationFrame` returns an identifier. Pass it to `cancelAnimationFrame` to stop a pending frame. This is essential when you restart an animation or remove an element, otherwise old loops keep running and fight with new ones. Always guard the loop with a `running` flag so a cancelled callback does not schedule itself again.
+
+The demo animates a ball across a track, fading it in over the first few frames. Start, stop, and reset exercise scheduling and cancellation, while the shim keeps it working in sandboxed browsers.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>requestAnimationFrame</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px 18px;
+        font-family: system-ui, sans-serif;
+        color: #243044;
+        background: radial-gradient(circle at 80% 0%, #e7f0ff, #f4f6fb 60%);
+      }
+      .card {
+        max-width: 520px;
+        margin: 0 auto;
+        padding: 22px;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 20px 42px -30px rgba(30, 50, 90, 0.5);
+      }
+      h1 { margin: 0 0 14px; font-size: 1.15rem; }
+      .track {
+        position: relative;
+        height: 56px;
+        border-radius: 14px;
+        background: linear-gradient(90deg, #eef3ff, #e3ecff);
+        overflow: hidden;
+        margin-bottom: 14px;
+      }
+      .ball {
+        position: absolute;
+        top: 12px;
+        left: 0;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #4f6df5;
+        opacity: 0;
+        box-shadow: 0 6px 14px -6px #4f6df5;
+      }
+      .row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+      button {
+        padding: 8px 13px;
+        border: 1px solid #d5def5;
+        border-radius: 9px;
+        background: #f7f9ff;
+        color: #33489e;
+        font: inherit;
+        font-size: 0.82rem;
+        cursor: pointer;
+      }
+      button.primary { background: #4f6df5; color: #fff; border-color: #4f6df5; }
+      pre {
+        margin: 0;
+        padding: 12px;
+        border-radius: 12px;
+        background: #1b2336;
+        color: #bcd0ff;
+        font-size: 0.78rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Frame-by-frame animation</h1>
+      <div class="track"><div class="ball" id="ball"></div></div>
+      <div class="row">
+        <button class="primary" id="start">Start</button>
+        <button id="stop">Stop / Cancel</button>
+        <button id="reset">Reset</button>
+      </div>
+      <pre id="out"></pre>
+    </div>
+    <script>
+      var raf = window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        function (cb) { return setTimeout(function () { cb(Date.now()); }, 16); };
+      var caf = window.cancelAnimationFrame ||
+        window.webkitCancelAnimationFrame || clearTimeout;
+      var ball = document.getElementById("ball");
+      var out = document.getElementById("out");
+      var id = null, x = 0, frames = 0, running = false;
+
+      function render() {
+        ball.style.transform = "translateX(" + x + "px)";
+        ball.style.opacity = String(Math.min(1, frames / 30));
+        out.textContent =
+          "Status: " + (running ? "animating" : "idle") + "\n" +
+          "Frames drawn: " + frames + "\n" +
+          "Position: " + Math.round(x) + "px";
+      }
+      function step() {
+        if (!running) return;
+        x += 2;
+        frames++;
+        if (x > 460) x = 0;
+        render();
+        id = raf(step);
+      }
+      document.getElementById("start").addEventListener("click", function () {
+        if (running) return;
+        running = true;
+        render();
+        id = raf(step);
+      });
+      document.getElementById("stop").addEventListener("click", function () {
+        running = false;
+        caf(id);
+        render();
+      });
+      document.getElementById("reset").addEventListener("click", function () {
+        running = false;
+        caf(id);
+        x = 0;
+        frames = 0;
+        ball.style.opacity = "0";
+        render();
+      });
+      render();
+    </script>
+  </body>
+</html>
+```

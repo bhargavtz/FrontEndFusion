@@ -1,0 +1,146 @@
+---
+title: Promises
+description: Represent work that finishes later with promises, chain asynchronous steps, and handle success or failure predictably.
+chapter: 42
+category: "JavaScript"
+order: 342
+---
+
+# Promises
+
+A promise is an object that stands in for a value which will arrive later. It begins in a pending state, then settles exactly once: either it is fulfilled with a value, or it is rejected with a reason. Promises give asynchronous code a readable shape. Instead of passing callbacks into callbacks, you attach handlers with `.then()` and `.catch()` and let the result flow forward.
+
+## Creating and chaining
+
+You build a promise with the `Promise` constructor. Its executor receives two functions, usually called `resolve` and `reject`, and you call one of them when the work completes. Because `.then()` returns a *new* promise, you can chain steps one after another. Returning a plain value from a handler passes it to the next handler; returning another promise makes the chain wait for that promise before continuing. This is how a sequence of dependent network requests stays flat instead of nesting.
+
+```js
+new Promise(function (resolve, reject) {
+  setTimeout(function () { resolve("done"); }, 100);
+}).then(function (msg) {
+  return msg.toUpperCase();
+}).then(console.log); // "DONE"
+```
+
+## Combining and cleaning up
+
+Several helpers coordinate multiple promises. `Promise.all()` fulfills when every input fulfills, but rejects as soon as any one rejects. `Promise.race()` settles with whichever promise finishes first, which is useful for timeouts. `Promise.any()` fulfills with the first successful result, and `Promise.allSettled()` waits for everything and reports each outcome. The `finally()` method runs regardless of the result, making it the natural place to hide a loading indicator.
+
+Most modern code reaches for `async` and `await`, which are built on promises. Awaiting an expression pauses the surrounding `async` function until the promise settles, without freezing the page.
+
+The demo below loads a mock dashboard. Each request is simulated with a timer and local data, so nothing touches the network.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Promise dashboard</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 40px 18px;
+        font-family: system-ui, sans-serif;
+        background: #eef2fb;
+        color: #1b2440;
+      }
+      .card {
+        max-width: 560px;
+        margin: 0 auto;
+        padding: 28px 30px 30px;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 26px 54px -40px rgba(27, 36, 64, 0.7);
+      }
+      h1 { margin: 0 0 6px; font-size: 1.25rem; }
+      p { margin: 0 0 20px; color: #6b7896; font-size: 0.9rem; }
+      .row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+      button {
+        border: 0;
+        border-radius: 10px;
+        padding: 10px 16px;
+        font: inherit;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        background: #4b6cf5;
+        color: #fff;
+      }
+      button.alt { background: #e7ecfb; color: #33509e; }
+      button:hover { filter: brightness(1.05); }
+      .out {
+        margin: 0;
+        min-height: 150px;
+        max-height: 220px;
+        overflow: auto;
+        padding: 16px 18px;
+        background: #111a33;
+        color: #b9c8ef;
+        border-radius: 12px;
+        font-size: 0.82rem;
+        line-height: 1.7;
+      }
+      .ok { color: #6ee7a8; }
+      .err { color: #ff9b9b; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Async dashboard</h1>
+      <p>Three mock requests settle at different times. Watch the order of the log.</p>
+      <div class="row">
+        <button id="chain">Chain with .then()</button>
+        <button id="all" class="alt">Wait with Promise.all()</button>
+        <button id="clear" class="alt">Clear</button>
+      </div>
+      <pre id="out" class="out">Ready.</pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      function log(msg, cls) {
+        var line = document.createElement("div");
+        line.textContent = msg;
+        if (cls) line.className = cls;
+        out.appendChild(line);
+      }
+      function fakeFetch(name, ms, value) {
+        return new Promise(function (resolve, reject) {
+          setTimeout(function () {
+            if (value === null) reject(new Error(name + " failed"));
+            else resolve(value);
+          }, ms);
+        });
+      }
+      function jobs() {
+        return [
+          fakeFetch("users", 300, "12 users"),
+          fakeFetch("orders", 650, "5 orders"),
+          fakeFetch("stats", 150, "98% uptime")
+        ];
+      }
+      document.getElementById("chain").onclick = function () {
+        log("> starting sequential chain");
+        jobs().reduce(function (chain, p) {
+          return chain.then(function () { return p; }).then(function (v) {
+            log("  got " + v, "ok");
+          });
+        }, Promise.resolve()).then(function () {
+          log("chain complete", "ok");
+        });
+      };
+      document.getElementById("all").onclick = function () {
+        log("> starting Promise.all()", "");
+        Promise.all(jobs()).then(function (results) {
+          log("all settled: " + results.join(", "), "ok");
+        }).catch(function (e) {
+          log("error: " + e.message, "err");
+        });
+      };
+      document.getElementById("clear").onclick = function () { out.textContent = ""; };
+    </script>
+  </body>
+</html>
+```
+
+The chained version logs results one at a time as each timer fires, while `Promise.all()` waits for the slowest request before printing a single summary line.

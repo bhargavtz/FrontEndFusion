@@ -1,0 +1,108 @@
+---
+title: Functional JavaScript
+description: Apply a functional style with pure functions, higher-order functions, and composed map/filter/reduce pipelines.
+chapter: 20
+category: "JavaScript"
+order: 320
+---
+
+# Functional JavaScript
+
+Functional programming treats computation as the evaluation of functions while avoiding shared state and mutable data. JavaScript supports this style because functions are first-class values you can pass around and combine.
+
+## Pure functions
+
+A pure function depends only on its inputs and returns the same result for the same arguments every time. It has no side effects: it does not change outside variables, mutate its parameters, or write to the DOM. For example, a function that doubles a number is pure, while one that increments a global counter is not. Purity makes code easier to test and reason about because behavior is local and predictable. When you need to change data, create a copy instead of editing the original.
+
+## Higher-order functions
+
+A higher-order function either accepts a function as an argument or returns one. Array methods such as `map`, `filter`, and `reduce` are higher-order: you supply the behavior and they supply the traversal. A function can also build another function, as in a factory that returns a tax calculator configured with a rate. A related idea is the identity monad, a simple wrapper that carries a value and lets you apply functions to it while keeping the wrapper intact.
+
+## Composition and pipelines
+
+Composition means feeding the output of one function into the next. A small `compose` helper can combine several functions into a single step, applying them right to left. This lets you describe a data pipeline as a series of clear transformations: filter the records you want, map them to new values, then reduce to a summary. Keeping each step small and pure makes the whole pipeline easy to change.
+
+## Demo: order analyzer
+
+The demo runs an order list through a pipeline of pure functions, with a toggle for adding tax.
+
+```html
+<div class="wrap">
+  <div class="card">
+    <h2>Order analyzer</h2>
+    <p class="hint">Filter, map, and reduce form a small functional pipeline.</p>
+    <div class="row">
+      <button id="plain">Plain total</button>
+      <button id="tax" class="alt">With 8% tax</button>
+    </div>
+    <pre class="out" id="out"></pre>
+  </div>
+</div>
+
+<style>
+  .wrap {
+    min-height: 70vh; display: grid; place-items: center;
+    padding: 2rem 1rem; background: #eef2f7;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+  .card {
+    width: min(100%, 27rem); background: #fff; border-radius: 18px;
+    padding: 1.75rem; box-shadow: 0 18px 40px -24px rgba(45, 65, 100, 0.5);
+  }
+  h2 { margin: 0 0 0.35rem; font-size: 1.2rem; color: #263651; }
+  .hint { margin: 0 0 1.1rem; font-size: 0.85rem; color: #74849c; }
+  .row { display: flex; gap: 0.5rem; }
+  button {
+    flex: 1; padding: 0.6rem; border: 0; border-radius: 10px;
+    background: #3c5fa8; color: #fff; font-weight: 600; cursor: pointer;
+  }
+  button.alt { background: #7a66b5; }
+  button:hover { filter: brightness(0.95); }
+  .out {
+    margin: 1rem 0 0; padding: 0.9rem; border-radius: 12px;
+    background: #f3f6fb; color: #2c3c58; font-size: 0.85rem; white-space: pre-wrap;
+  }
+</style>
+
+<script>
+  var orders = [
+    { id: 1, total: 120, status: "complete" },
+    { id: 2, total: 85, status: "pending" },
+    { id: 3, total: 200, status: "complete" },
+    { id: 4, total: 45, status: "complete" }
+  ];
+
+  function isComplete(order) { return order.status === "complete"; }
+  function withRate(rate) {
+    return function (order) { return order.total * (1 + rate); };
+  }
+  function add(a, b) { return a + b; }
+  function compose(...fns) {
+    return function (value) {
+      return fns.reduceRight(function (acc, fn) { return fn(acc); }, value);
+    };
+  }
+  var round2 = function (n) { return Math.round(n * 100) / 100; };
+
+  function analyze(rate, label) {
+    var totals = orders.filter(isComplete).map(withRate(rate));
+    var sum = totals.reduce(add, 0);
+    var largest = totals.reduce(function (best, n) { return n > best ? n : best; }, 0);
+    var display = compose(round2)(sum);
+    document.getElementById("out").textContent =
+      label + "\n" +
+      "Completed orders: " + totals.length + "\n" +
+      "Totals: " + totals.join(", ") + "\n" +
+      "Sum (piped through compose): " + display + "\n" +
+      "Largest order: " + round2(largest);
+  }
+
+  document.getElementById("plain").addEventListener("click", function () {
+    analyze(0, "Plain totals");
+  });
+  document.getElementById("tax").addEventListener("click", function () {
+    analyze(0.08, "Totals with 8% tax");
+  });
+  analyze(0, "Plain totals");
+</script>
+```

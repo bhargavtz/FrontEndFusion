@@ -1,0 +1,86 @@
+---
+title: "Outlines"
+description: "Draw rings that never disturb layout, control their style and offset, and turn them into accessible focus indicators."
+chapter: 11
+category: "CSS"
+order: 111
+---
+
+# Outlines
+
+An outline is a line drawn around a box without taking part in the layout. That single fact explains almost everything else about the property: nothing reflows when an outline appears, and the line can sit entirely outside the element it decorates.
+
+## Outline versus border
+
+A `border` is part of the box model. Adding one changes the element's rendered size unless `box-sizing: border-box` absorbs it, and it can be styled per side with `border-top`, `border-left`, and friends. An `outline` has no sides. It wraps the whole box, is painted on top of neighbouring content, and always follows the border radius in current browsers.
+
+`outline-offset` is the useful difference. A positive value pushes the ring outward, leaving a gap of background between element and line; a negative value pulls the ring inward so it overlaps the element's own edge. Because the outline is painted in the foreground, it stays visible even when the element sits against a busy background. It also means an outline never triggers a reflow or a repaint of its neighbours, which is why it is the right primitive for transient states such as focus, hover, and validation errors.
+
+## Styles and focus rings
+
+`outline-style` accepts `solid`, `dashed`, `dotted`, `double`, `groove`, `ridge`, `inset`, `outset`, `none`, and the browser-managed `auto`. The shorthand follows the familiar pattern: `outline: 2px dashed currentColor`.
+
+The most common use is focus feedback. Browsers already draw a default ring, so `outline: none` without a replacement is an accessibility bug. Replace it rather than delete it, and prefer `:focus-visible` over `:focus` so the ring appears for keyboard users but not after every mouse click. Pair it with `outline-offset` so the ring clears rounded corners.
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Outline lab</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 26px;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      background: #eef3f2;
+      color: #16232b;
+    }
+    h2 { margin: 0 0 6px; font-size: 1.05rem; }
+    .lede { margin: 0 0 18px; font-size: .85rem; color: #5a6c75; }
+    .row { display: flex; flex-wrap: wrap; gap: 16px; }
+    .btn {
+      padding: .6rem 1.1rem;
+      border: 1px solid #cfdbd7;
+      border-radius: 10px;
+      background: #fff;
+      color: #16232b;
+      font: inherit;
+      font-size: .9rem;
+      cursor: pointer;
+    }
+    .btn-a { outline: 3px solid #2f7d6f; outline-offset: 3px; }
+    .btn-b { outline: 2px dashed #b4693f; outline-offset: 5px; }
+    .btn-c { outline: 3px solid #4a6fa5; outline-offset: -3px; }
+    .btn:focus-visible { outline: 3px solid #16232b; outline-offset: 3px; }
+    .panel {
+      margin-top: 24px;
+      padding: 16px 18px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #ffffff, #f6faf9);
+      border: 1px solid #dde7e4;
+      font-size: .88rem;
+      line-height: 1.6;
+    }
+    .panel:focus-visible, .panel.mock-focus {
+      outline: 3px solid #4a6fa5;
+      outline-offset: 4px;
+    }
+    .panel strong { color: #2f7d6f; }
+  </style>
+</head>
+<body>
+  <h2>Outline lab</h2>
+  <p class="lede">Outlines paint over the page, so they never push neighbours around. Tab through the buttons to compare.</p>
+  <div class="row">
+    <button class="btn btn-a">Offset ring</button>
+    <button class="btn btn-b">Dashed ring</button>
+    <button class="btn btn-c">Inset ring</button>
+  </div>
+  <div class="panel mock-focus" tabindex="0">
+    <strong>Focusable panel.</strong> Three pixels of ring with <code>outline-offset: 4px</code> read as a halo instead of a border.
+  </div>
+</body>
+</html>
+```

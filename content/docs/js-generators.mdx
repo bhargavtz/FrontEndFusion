@@ -1,0 +1,61 @@
+---
+title: Generators
+description: Pause and resume functions with generators, send values back in, and delegate to other generators.
+chapter: 41
+category: "JavaScript"
+order: 341
+---
+
+# Generators
+
+A generator is a function that can pause and resume. Declared with `function*` and using `yield`, it produces a sequence of values on demand rather than computing them all at once. Calling a generator does not run its body; it returns an iterator object whose `next()` method runs code up to the next `yield` and hands back a result of the form `value` plus `done`.
+
+## Generator functions
+
+Each `yield` suspends execution. When `next()` is called again, the function continues right where it stopped, keeping its local variables intact. This makes generators ideal for lazy sequences, such as an endless stream of identifiers, because values are produced only when requested. When the function returns, `done` becomes `true` and further calls return `undefined`.
+
+## Sending values in and delegating
+
+`next` can take an argument, which becomes the value of the last `yield` expression. This two-way channel lets a generator receive data as well as emit it. The `yield*` expression delegates to another iterable, flattening its output into the outer generator - a clean way to compose sequences. Generators also underpin older async-flow patterns, where `yield` hands a promise to a runner that resumes the generator on completion, a technique that predates `async` and `await`.
+
+The demo steps through a generator that yields colour names. Buttons advance it and send a value back in, with each result printed to the panel.
+
+```html
+<div style="background:#f8fafc;border-radius:16px;padding:20px;max-width:560px;font-family:system-ui,sans-serif;color:#0f172a;">
+  <h3 style="margin-top:0;">Generator stepper</h3>
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+    <button id="next">next()</button>
+    <input id="sendVal" placeholder="value to send" style="padding:8px;border-radius:8px;border:1px solid #cbd5e1;">
+    <button id="send">next(value)</button>
+    <button id="reset">Reset</button>
+  </div>
+  <pre id="out" style="background:#0f172a;color:#e2e8f0;padding:12px;border-radius:10px;min-height:120px;white-space:pre-wrap;"></pre>
+</div>
+<script>
+  (function () {
+    var out = document.getElementById("out");
+    var gen;
+    function build() {
+      return (function* colors() {
+        var first = yield "red";
+        var second = yield "green" + (first ? " (got " + first + ")" : "");
+        yield "blue" + (second ? " (got " + second + ")" : "");
+        return "done";
+      })();
+    }
+    gen = build();
+    function log(step, result) {
+      out.textContent += step + " -> " + JSON.stringify(result) + "\n";
+    }
+    document.getElementById("next").onclick = function () { log("next()", gen.next()); };
+    document.getElementById("send").onclick = function () {
+      log("next(value)", gen.next(document.getElementById("sendVal").value));
+    };
+    document.getElementById("reset").onclick = function () {
+      gen = build();
+      out.textContent = "Generator reset.\n";
+    };
+    out.textContent = "Generator ready. Step through it:\n";
+  })();
+</script>
+```

@@ -1,0 +1,197 @@
+---
+title: List Styles
+description: Control where markers sit, swap in ready-made marker types, remove them cleanly, and draw your own with a pseudo-element.
+chapter: 34
+category: "CSS"
+order: 134
+---
+
+# List Styles
+
+A bullet is a generated box, not part of the text. That distinction explains everything about list styling: the marker has its own colour, font, and position, and it lives outside or inside the content box depending on one keyword.
+
+## Position and marker types
+
+`list-style-position: outside` is the default. The marker hangs to the left of the content edge and does not take part in wrapping, so a long item keeps its second line flush with the first. `inside` pulls the marker into the content box, which means wrapped lines start under the bullet rather than under the text. That indentation looks sloppy in prose but is genuinely useful when the list sits inside a bordered box and you cannot afford the overhang.
+
+```css
+.steps {
+  list-style-position: inside;
+}
+```
+
+`list-style-type` takes dozens of keywords. The everyday ones are `disc`, `circle`, and `square` for unordered lists, and `decimal`, `decimal-leading-zero`, `lower-alpha`, `upper-roman`, and `lower-roman` for ordered lists.
+
+```css
+.roman { list-style-type: upper-roman; }
+.alpha { list-style-type: lower-alpha; }
+```
+
+Two more are worth remembering. `none` removes the marker entirely while keeping the list's semantics — the right way to kill bullets, rather than turning the `ul` into a stack of divs. And `list-style-type: "→"` accepts a string, though browser support for arbitrary strings as markers is uneven, so a custom pseudo-element is the safer route for anything decorative.
+
+## Removing markers and drawing your own
+
+`list-style: none` plus `padding: 0` and `margin: 0` is the standard reset. If the list is a navigation bar or a set of cards, that is the whole job. If it is content, restore some rhythm with a little padding on each item so the absence of bullets does not make the text feel cramped.
+
+One caution: `list-style: none` on a `ul` can strip list semantics in older Safari versions. If accessibility matters, add `role="list"` to the element, or style the marker into invisibility rather than deleting it.
+
+When the built-in shapes are not enough, take the marker away and paint your own with `::before`. Because the pseudo-element is a real generated box, you get full control: size, colour, background, border, even a gradient chip.
+
+```css
+.tag-list { list-style: none; padding: 0; }
+.tag-list li { position: relative; padding-left: 24px; }
+.tag-list li::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 0.62em;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: #4b6cf5;
+  transform: rotate(45deg);
+}
+```
+
+For changing the colour of the default marker only, you do not need a pseudo-element at all — `::marker` accepts `color`, `font-size`, and `content`. That is the lightest touch and it keeps the native numbering intact.
+
+## A complete example
+
+A recipe card mixes three treatments: a custom diamond for ingredients, roman numerals for the method, and an inside-positioned note list.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Recipe card</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 44px 20px;
+        font-family: system-ui, sans-serif;
+        background: #f4f1ea;
+        color: #2b2620;
+        line-height: 1.6;
+      }
+
+      .card {
+        max-width: 560px;
+        margin: 0 auto;
+        padding: 30px 32px 34px;
+        background: #fffdf8;
+        border: 1px solid #e8e1d3;
+        border-radius: 20px;
+        box-shadow: 0 26px 50px -38px rgba(80, 64, 40, 0.55);
+      }
+
+      h1 {
+        margin: 0 0 2px;
+        font-size: 1.3rem;
+      }
+
+      .meta {
+        margin: 0 0 24px;
+        font-size: 0.72rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #a08c68;
+      }
+
+      h2 {
+        margin: 24px 0 10px;
+        font-size: 0.7rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #8a7a5e;
+      }
+
+      .ingredients {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .ingredients li {
+        position: relative;
+        padding: 5px 0 5px 22px;
+        font-size: 0.9rem;
+      }
+
+      .ingredients li::before {
+        content: "";
+        position: absolute;
+        left: 4px;
+        top: 0.78em;
+        width: 7px;
+        height: 7px;
+        background: #c98b3f;
+        border-radius: 2px;
+        transform: rotate(45deg);
+      }
+
+      .method {
+        margin: 0;
+        padding-left: 26px;
+        list-style-type: upper-roman;
+        font-size: 0.9rem;
+      }
+
+      .method li {
+        padding: 4px 0;
+      }
+
+      .method li::marker {
+        color: #c98b3f;
+        font-weight: 700;
+        font-size: 0.8rem;
+      }
+
+      .notes {
+        margin: 0;
+        padding: 14px 16px;
+        list-style-position: inside;
+        list-style-type: circle;
+        background: #f7f2e7;
+        border-radius: 12px;
+        font-size: 0.82rem;
+        color: #6b6152;
+      }
+
+      .notes li { padding: 2px 0; }
+    </style>
+  </head>
+  <body>
+    <article class="card">
+      <h1>Brown butter cookies</h1>
+      <p class="meta">Makes 12 · 40 minutes</p>
+
+      <h2>Ingredients</h2>
+      <ul class="ingredients">
+        <li>115 g butter, browned and cooled</li>
+        <li>100 g dark brown sugar</li>
+        <li>1 egg plus one yolk</li>
+        <li>160 g plain flour</li>
+        <li>Flaked salt, to finish</li>
+      </ul>
+
+      <h2>Method</h2>
+      <ol class="method">
+        <li>Brown the butter until it smells of hazelnuts, then cool.</li>
+        <li>Whisk the sugars in, then the egg, then fold in the flour.</li>
+        <li>Chill for twenty minutes and heat the oven to 180°C.</li>
+        <li>Bake for eleven minutes, salting while still hot.</li>
+      </ol>
+
+      <h2>Notes</h2>
+      <ul class="notes">
+        <li>Markers sit inside the tinted panel, so the text wraps beneath them.</li>
+        <li>Doubling the batch works; add two minutes to the bake.</li>
+      </ul>
+    </article>
+  </body>
+</html>
+```
+
+The roman numerals stay genuine list markers, which means screen readers announce them as an ordered list. Only their colour and size were touched, through `::marker`.

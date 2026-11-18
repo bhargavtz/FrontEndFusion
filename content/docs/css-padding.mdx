@@ -1,0 +1,168 @@
+---
+title: Padding
+description: Add breathing room inside a box, use the shorthand safely, and understand how padding changes the rendered size.
+chapter: 9
+category: "CSS"
+order: 109
+---
+
+# Padding
+
+Padding is the cushion inside a box. It sits between the content and the border, it carries the element's background, and it is the property that most often turns a cramped component into a comfortable one.
+
+## Shorthand and longhands
+
+Like margin, `padding` follows a clockwise shorthand:
+
+```css
+.tag   { padding: 6px 12px; }          /* vertical, horizontal */
+.card  { padding: 24px 26px 20px; }    /* top, horizontal, bottom */
+.panel { padding: 18px 20px 22px 34px; }
+```
+
+The longhands are `padding-top`, `padding-right`, `padding-bottom`, and `padding-left`, plus logical forms such as `padding-inline` for direction-aware spacing. Padding cannot be negative: if you need to pull something inward, use a negative margin or a transform instead.
+
+Percentage padding resolves against the **width** of the containing block, including `padding-top` and `padding-bottom`. That behaviour powers the classic aspect-ratio trick:
+
+```css
+.thumb {
+  position: relative;
+  padding-top: 56.25%; /* 16:9 */
+}
+```
+
+Modern CSS has `aspect-ratio`, which is easier to read, but the padding trick still appears in older codebases and email templates.
+
+## Padding and the box
+
+By default, padding is added to the declared width and height. A 300-pixel box with 20 pixels of padding occupies 340 pixels. With `box-sizing: border-box`, the padding is absorbed into the 300 pixels and the content area shrinks. Padding on an inline element adds space horizontally and visually, but it will not push lines apart vertically, so switch to `inline-block` when vertical padding must affect layout.
+
+Padding also enlarges the clickable area of links and buttons, which is a genuine accessibility improvement. A 44-pixel tap target is much easier to hit than a bare line of text.
+
+## A complete example
+
+This coupon uses asymmetric padding to clear a decorative stripe, generous internal padding for the code box, and two buttons whose different padding produces different hit areas.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Coupon</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 44px 20px;
+        font-family: system-ui, sans-serif;
+        background: #f5f1ea;
+        color: #2f2820;
+      }
+
+      .coupon {
+        position: relative;
+        max-width: 340px;
+        margin: 0 auto;
+        padding: 26px 26px 24px 34px;
+        background: #fffdf9;
+        border-radius: 18px;
+        box-shadow: 0 22px 44px -30px rgba(68, 50, 30, 0.55);
+        overflow: hidden;
+      }
+
+      .coupon::before {
+        content: "";
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 10px;
+        background: linear-gradient(180deg, #ffb26b, #e4572e);
+      }
+
+      .brand {
+        margin: 0 0 14px;
+        font-size: 0.64rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #a08b74;
+      }
+
+      .coupon h1 {
+        margin: 0 0 6px;
+        font-size: 1.5rem;
+        letter-spacing: -0.01em;
+      }
+
+      .coupon p {
+        margin: 0;
+        font-size: 0.83rem;
+        line-height: 1.5;
+        color: #7c6b58;
+      }
+
+      .code {
+        margin: 20px 0 18px;
+        padding: 14px 16px;
+        border: 2px dashed #e8d5bf;
+        border-radius: 12px;
+        background: #fff6ea;
+        font-family: ui-monospace, monospace;
+        font-size: 0.95rem;
+        letter-spacing: 0.2em;
+        text-align: center;
+        color: #a8431f;
+      }
+
+      .actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .btn {
+        padding: 12px 22px;
+        border: 0;
+        border-radius: 10px;
+        background: #2f2820;
+        color: #fff6ea;
+        font: inherit;
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .btn--ghost {
+        padding: 6px 12px;
+        background: transparent;
+        border: 1px solid #ded0bd;
+        color: #7c6b58;
+        font-weight: 500;
+      }
+
+      .fine {
+        margin: 18px 0 0;
+        padding-top: 14px;
+        border-top: 1px solid #f1e6d7;
+        font-size: 0.68rem;
+        letter-spacing: 0.02em;
+        color: #a5947f;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="coupon">
+      <p class="brand">Roasted &amp; Co.</p>
+      <h1>20% off your next bag</h1>
+      <p>Valid on any single-origin roast, in store or online.</p>
+      <div class="code">BEANS20</div>
+      <div class="actions">
+        <button class="btn">Claim offer</button>
+        <button class="btn btn--ghost">Details</button>
+      </div>
+      <p class="fine">Expires at the end of the month. One use per customer.</p>
+    </section>
+  </body>
+</html>
+```
+
+A useful habit: when a card feels tight, increase the padding before changing the font size. Most cramped layouts are a spacing problem, not a type problem.

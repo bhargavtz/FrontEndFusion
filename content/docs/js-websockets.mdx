@@ -1,0 +1,107 @@
+---
+title: WebSockets
+description: Open a persistent two-way connection and exchange messages with a WebSocket.
+chapter: 61
+category: "JavaScript"
+order: 361
+---
+
+# WebSockets
+
+A WebSocket keeps a single connection open between the browser and a server so both sides can send data at any time. Unlike request and response traffic, this is a full-duplex channel, which makes it a good fit for chat, live scores, and notifications.
+
+## Opening a connection
+
+You create a socket by passing a URL to the `WebSocket` constructor. Use the `ws` scheme for plain connections and `wss` for encrypted ones; a secure page should use `wss` to avoid mixed-content blocks. The `onopen` handler runs once the handshake completes, while `onerror` and `onclose` let you react to failures. The `readyState` property reports where the connection is in its lifecycle.
+
+## Sending and receiving messages
+
+Call `send()` with a string to transmit data. Incoming frames fire the `onmessage` event, whose `data` property holds the payload. Registering handlers with `addEventListener` is equivalent to assigning `onopen` and friends, and it allows multiple listeners. Always close a socket you no longer need with `close()` so the server can free the resource.
+
+```js
+const socket = new WebSocket('wss://example.com/chat');
+socket.addEventListener('open', function(){ socket.send('hello'); });
+socket.addEventListener('message', function(event){
+  console.log('From server:', event.data);
+});
+```
+
+## Binary data and secure connections
+
+Besides strings, `send()` accepts a `Blob`, an `ArrayBuffer`, or a typed array, and `binaryType` controls what incoming binary frames become. For mixed formats, agree on a small protocol with the server, such as a short text tag followed by bytes. Not every environment permits live sockets, so feature-detect the constructor and show a graceful message if it is missing.
+
+The mock chat below implements the same event surface locally, so it works offline. It echoes your messages after a short delay to imitate a round trip.
+
+```html
+<div class="ws-wrap">
+  <div class="ws-card">
+    <h2>Mock WebSocket Chat</h2>
+    <p id="status" class="ws-status"></p>
+    <div id="log" class="ws-log"></div>
+    <div class="ws-bar">
+      <input id="msg" type="text" placeholder="Type a message" style="flex:1">
+      <button id="send" type="button">Send</button>
+    </div>
+    <pre id="out" class="ws-out"></pre>
+  </div>
+</div>
+<style>
+  .ws-wrap{font-family:system-ui,sans-serif;background:#f0fdfa;padding:18px;border-radius:14px;}
+  .ws-card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 6px 18px rgba(10,90,80,.08);}
+  .ws-card h2{margin:0 0 4px;font-size:18px;color:#115e59;}
+  .ws-status{margin:0 0 12px;color:#0f766e;font-size:12px;}
+  .ws-log{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;height:130px;overflow:auto;padding:8px;margin-bottom:10px;}
+  .ws-log div{font-size:13px;margin-bottom:5px;color:#334155;}
+  .ws-bar{display:flex;gap:8px;margin-bottom:12px;}
+  .ws-bar input{border:1px solid #99f6e4;border-radius:8px;padding:8px;font-size:13px;}
+  .ws-bar button{border:0;background:#0d9488;color:#fff;padding:8px 14px;border-radius:8px;cursor:pointer;font-weight:600;}
+  .ws-out{background:#0f172a;color:#5eead4;padding:10px;border-radius:8px;font-size:11px;white-space:pre-wrap;margin:0;}
+</style>
+<script>
+  const log = document.getElementById('log');
+  const out = document.getElementById('out');
+  function line(who, text){
+    const row = document.createElement('div');
+    row.textContent = who + ': ' + text;
+    log.appendChild(row);
+    log.scrollTop = log.scrollHeight;
+  }
+  function makeMockSocket(){
+    const ws = {
+      onopen: null, onmessage: null, onclose: null, readyState: 0,
+      send: function(data){
+        line('you', data);
+        const self = this;
+        setTimeout(function(){
+          if (self.onmessage) self.onmessage({ data: 'Echo: ' + data });
+        }, 400);
+      },
+      close: function(){ this.readyState = 3; if (this.onclose) this.onclose(); }
+    };
+    setTimeout(function(){
+      ws.readyState = 1;
+      if (ws.onopen) ws.onopen();
+      if (ws.onmessage) ws.onmessage({ data: 'Connected to the mock server.' });
+    }, 450);
+    return ws;
+  }
+  const supported = typeof window.WebSocket === 'function';
+  document.getElementById('status').textContent = supported
+    ? 'WebSocket API present - preview uses a local mock connection.'
+    : 'WebSocket API unavailable - fallback mock connection active.';
+  const socket = makeMockSocket();
+  socket.onopen = function(){ out.textContent = 'readyState = OPEN (1)'; };
+  socket.onmessage = function(event){ line('server', event.data); };
+  function submit(){
+    const field = document.getElementById('msg');
+    if (!field.value.trim()) return;
+    socket.send(field.value);
+    field.value = '';
+  }
+  document.getElementById('send').addEventListener('click', submit);
+  document.getElementById('msg').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') submit();
+  });
+  out.textContent = 'Connecting ...';
+</script>
+```

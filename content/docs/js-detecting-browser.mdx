@@ -1,0 +1,118 @@
+---
+title: Detecting browser
+description: Prefer feature detection over user-agent sniffing, and know when a detection library or polyfill is the better tool.
+chapter: 66
+category: "JavaScript"
+order: 366
+---
+
+# Detecting browser
+
+Older JavaScript often branched on the browser name. Today that approach is fragile: browsers share engines, user-agent strings are deliberately misleading, and a feature can appear or disappear between versions. What matters is not *which* browser is running but *what* it can do.
+
+## Feature detection
+
+Feature detection checks for the existence of an API before using it. The simplest form tests whether a property exists on `window` or a prototype, then provides a fallback. For CSS features you can inspect `CSS.supports`. For syntax features, a guarded `new Function` or `eval` test wrapped in `try`/`catch` tells you whether the engine parses it.
+
+This approach is resilient because it answers the real question. A future browser that supports the feature works automatically, while an old one gets a graceful fallback. It also avoids maintaining a long list of version numbers.
+
+## User-agent detection and libraries
+
+Reading `navigator.userAgent` is sometimes unavoidable, for example when a bug only affects one engine or when you need a coarse platform label for analytics. Treat it as a last resort: parse it into broad families, never assume exact capabilities, and keep the parsing isolated so it is easy to update.
+
+A detection library such as Modernizr centralises hundreds of checks and adds CSS classes to the document, letting you style fallbacks directly. The trade-off is an extra dependency and the need to keep it current. Many projects now combine a small set of hand-written checks with targeted polyfills instead of shipping a full library.
+
+The demo runs several live capability checks and prints the user-agent string, so you can compare what each method actually reveals.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Detecting browser</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px 18px;
+        font-family: system-ui, sans-serif;
+        color: #22313a;
+        background: radial-gradient(circle at 75% 0%, #e3f7f3, #f5f8f8 60%);
+      }
+      .card {
+        max-width: 540px;
+        margin: 0 auto;
+        padding: 22px;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 20px 42px -30px rgba(20, 80, 70, 0.45);
+      }
+      h1 { margin: 0 0 14px; font-size: 1.15rem; }
+      ul { list-style: none; margin: 0 0 14px; padding: 0; }
+      li {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 9px 12px;
+        margin-bottom: 6px;
+        border-radius: 10px;
+        background: #f4faf8;
+        font-size: 0.84rem;
+      }
+      .yes { color: #12805f; font-weight: 700; }
+      .no { color: #b4493f; font-weight: 700; }
+      pre {
+        margin: 0;
+        padding: 12px;
+        border-radius: 12px;
+        background: #162926;
+        color: #b9f0e1;
+        font-size: 0.74rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Capability report</h1>
+      <ul id="checks"></ul>
+      <pre id="out"></pre>
+    </div>
+    <script>
+      function parses(code) {
+        try { new Function(code); return true; }
+        catch (e) { return false; }
+      }
+      var tests = {
+        "Canvas 2D": !!document.createElement("canvas").getContext,
+        "localStorage": (function () { try { return !!window.localStorage; } catch (e) { return false; } })(),
+        "Geolocation": "geolocation" in navigator,
+        "requestAnimationFrame": !!window.requestAnimationFrame,
+        "CSS.supports": !!(window.CSS && CSS.supports),
+        "Arrow functions": parses("var f = () => 1;"),
+        "Template literals": parses("var s = `hi`;"),
+        "Flexbox": !!(window.CSS && CSS.supports && CSS.supports("display", "flex"))
+      };
+      var list = document.getElementById("checks");
+      Object.keys(tests).forEach(function (name) {
+        var ok = tests[name];
+        var li = document.createElement("li");
+        var label = document.createElement("span");
+        label.textContent = name;
+        var value = document.createElement("span");
+        value.className = ok ? "yes" : "no";
+        value.textContent = ok ? "supported" : "missing";
+        li.appendChild(label);
+        li.appendChild(value);
+        list.appendChild(li);
+      });
+      document.getElementById("out").textContent =
+        "userAgent:\n" + navigator.userAgent + "\n\n" +
+        "Note: the user-agent string describes the browser, not its abilities.\n" +
+        "Feature detection above is the reliable signal.";
+    </script>
+  </body>
+</html>
+```

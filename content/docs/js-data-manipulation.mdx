@@ -1,0 +1,163 @@
+---
+title: Data Manipulation
+description: Transform everyday values — currency formatting, file extensions, and dynamic object properties — with plain JavaScript.
+chapter: 52
+category: "JavaScript"
+order: 352
+---
+
+# Data Manipulation
+
+A large share of day-to-day JavaScript is reshaping values: turning a number into money, pulling a piece out of a string, or writing a property whose name you only know at runtime. These small transformations come up in forms, reports, and API glue code. The standard library covers most of them without any external package.
+
+## Formatting numbers as money
+
+`Intl.NumberFormat` localises numeric output. Give it a locale and an options object with `style: "currency"` and a `currency` code, and its `format()` method returns a correctly grouped, symbol-prefixed string. Unlike manual string concatenation, it handles decimals, separators, and placement rules for each locale.
+
+```js
+const usd = new Intl.NumberFormat("en-US", {
+  style: "currency", currency: "USD"
+});
+usd.format(1234.5); // "$1,234.50"
+```
+
+## Strings and dynamic properties
+
+To find a file extension, locate the last dot with `lastIndexOf(".")` and slice after it. Guard against a missing dot and against dotfiles so a name like `.env` does not report `env` as an extension. For dynamic properties, square-bracket notation evaluates the expression inside the brackets, so `obj[key]` reads or writes the property named by `key`. Dot notation cannot do this. When the key contains dots representing a path, split it and walk the object one level at a time, creating intermediate objects as needed.
+
+```js
+function setPath(obj, path, value) {
+  const parts = path.split(".");
+  let ref = obj;
+  parts.forEach((part, i) => {
+    if (i === parts.length - 1) ref[part] = value;
+    else ref = ref[part] || (ref[part] = {});
+  });
+}
+```
+
+The demo combines all three tools in one panel: a currency formatter, an extension extractor, and a path-based property setter. Results appear live as you type and click.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Data toolkit</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 40px 18px;
+        font-family: system-ui, sans-serif;
+        background: #eff4f3;
+        color: #17332f;
+      }
+      .card {
+        max-width: 580px;
+        margin: 0 auto;
+        padding: 28px 30px 30px;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 26px 54px -40px rgba(23, 51, 47, 0.6);
+      }
+      h1 { margin: 0 0 6px; font-size: 1.25rem; }
+      p { margin: 0 0 18px; color: #688680; font-size: 0.9rem; }
+      .tool {
+        padding: 14px 16px; margin-bottom: 12px;
+        background: #f4faf8; border-radius: 12px; border: 1px solid #dceee8;
+      }
+      .tool h2 { margin: 0 0 8px; font-size: 0.82rem; color: #1c7a63; }
+      .row { display: flex; gap: 8px; flex-wrap: wrap; }
+      input {
+        flex: 1; min-width: 90px;
+        border: 1px solid #cfe4dc; border-radius: 9px;
+        padding: 9px 11px; font: inherit; font-size: 0.86rem;
+      }
+      button {
+        border: 0; border-radius: 9px; padding: 9px 14px; cursor: pointer;
+        font: inherit; font-size: 0.82rem; font-weight: 600;
+        background: #1c8a6c; color: #fff;
+      }
+      .out {
+        margin: 4px 0 0; font-size: 0.86rem; color: #215c4c;
+        word-break: break-word;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Data toolkit</h1>
+      <p>Three common transformations, each with a visible result.</p>
+
+      <div class="tool">
+        <h2>Format as currency</h2>
+        <div class="row">
+          <input id="amount" type="number" value="1234.5" />
+          <button id="fmt">Format</button>
+        </div>
+        <pre id="outMoney" class="out">-</pre>
+      </div>
+
+      <div class="tool">
+        <h2>Extract file extension</h2>
+        <div class="row">
+          <input id="filename" value="report.final.pdf" />
+          <button id="ext">Extract</button>
+        </div>
+        <pre id="outExt" class="out">-</pre>
+      </div>
+
+      <div class="tool">
+        <h2>Set property by path</h2>
+        <div class="row">
+          <input id="path" value="user.address.city" />
+          <input id="value" value="Lisbon" />
+          <button id="set">Set</button>
+        </div>
+        <pre id="outObj" class="out">{}</pre>
+      </div>
+    </div>
+    <script>
+      var data = {};
+      var money = new Intl.NumberFormat("en-US", {
+        style: "currency", currency: "USD"
+      });
+
+      document.getElementById("fmt").onclick = function () {
+        var n = Number(document.getElementById("amount").value);
+        document.getElementById("outMoney").textContent =
+          isFinite(n) ? money.format(n) : "Enter a valid number.";
+      };
+
+      document.getElementById("ext").onclick = function () {
+        var name = document.getElementById("filename").value.trim();
+        var dot = name.lastIndexOf(".");
+        var result;
+        if (dot <= 0 || dot === name.length - 1) result = "(no extension)";
+        else result = "." + name.slice(dot + 1);
+        document.getElementById("outExt").textContent = result;
+      };
+
+      function setPath(obj, path, value) {
+        var parts = path.split(".").filter(Boolean);
+        var ref = obj;
+        parts.forEach(function (part, i) {
+          if (i === parts.length - 1) ref[part] = value;
+          else ref = ref[part] || (ref[part] = {});
+        });
+      }
+      document.getElementById("set").onclick = function () {
+        var path = document.getElementById("path").value.trim();
+        var value = document.getElementById("value").value;
+        if (!path) return;
+        setPath(data, path, value);
+        document.getElementById("outObj").textContent =
+          JSON.stringify(data, null, 2);
+      };
+    </script>
+  </body>
+</html>
+```
+
+Each tool keeps its state separate, so you can try several paths in a row and watch the object grow. The extension check deliberately rejects a leading dot, which is why `.env` reports no extension.

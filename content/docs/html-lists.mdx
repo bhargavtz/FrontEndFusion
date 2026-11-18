@@ -1,0 +1,101 @@
+---
+title: Lists
+description: Ordered steps, unordered groups, nested outlines, and description lists with terms and definitions.
+chapter: 7
+category: "HTML"
+order: 17
+---
+
+# Lists
+
+HTML has three list types: ordered, unordered, and description lists. Each has a different meaning, not just a different bullet style.
+
+## Ordered lists
+
+Use `ol` when the order matters, such as steps in a recipe or a ranked result.
+
+```html
+<h2>Brewing coffee</h2>
+<ol>
+  <li>Heat water to about 93°C.</li>
+  <li>Rinse the paper filter.</li>
+  <li>Add 18 g of medium-ground coffee.</li>
+  <li>Pour slowly and let the bed drain.</li>
+</ol>
+```
+
+Use the `start` attribute to begin at another number and `reversed` to count down.
+
+```html
+<ol start="3">
+  <li>Third step</li>
+  <li>Fourth step</li>
+</ol>
+```
+
+## Unordered lists
+
+Use `ul` when the items form a group but have no inherent order.
+
+```html
+<h2>Packing list</h2>
+<ul>
+  <li>Water bottle</li>
+  <li>Sun hat</li>
+  <li>Map and compass</li>
+</ul>
+```
+
+Navigation menus are commonly marked up as lists of links. That gives assistive technology an item count.
+
+## Nested lists
+
+Place a nested list inside an `li`, not directly inside the parent list.
+
+```html
+<ul>
+  <li>
+    Frontend
+    <ul>
+      <li>HTML</li>
+      <li>CSS</li>
+      <li>JavaScript</li>
+    </ul>
+  </li>
+  <li>
+    Backend
+    <ul>
+      <li>HTTP</li>
+      <li>Databases</li>
+    </ul>
+  </li>
+</ul>
+```
+
+## Description lists
+
+Use `dl` for name-value pairs. Each term is a `dt`; each description is a `dd`.
+
+```html
+<dl>
+  <dt>HTML</dt>
+  <dd>The structure of a web page.</dd>
+  <dt>CSS</dt>
+  <dd>The presentation and layout of a page.</dd>
+  <dt>JavaScript</dt>
+  <dd>Behaviour and interactivity in the browser.</dd>
+</dl>
+```
+
+A single term can have multiple descriptions, and multiple terms can share a description.
+
+## Styling lists
+
+CSS controls markers with `list-style-type`, `list-style-position`, and `list-style-image`. For navigation menus, `list-style: none` is common, but keep the list semantics.
+
+## Common mistakes
+
+- Using `ul` for steps that have a required order.
+- Nesting a list directly inside another list instead of inside an `li`.
+- Using `br` between items instead of separate `li` elements.
+- Removing list markers without providing another visual cue.

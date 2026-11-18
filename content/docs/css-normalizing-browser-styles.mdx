@@ -1,0 +1,189 @@
+---
+title: Normalizing Browser Styles
+description: Compare normalize.css with a hard reset, then even out box sizing, margins, and form controls with a short practical snippet.
+chapter: 54
+category: "CSS"
+order: 154
+---
+
+# Normalizing Browser Styles
+
+Browsers ship a default stylesheet, and no two agree on the details. Headings arrive with different margins, lists with different indentation, buttons with different fonts. Before your design system starts, you have to decide which of those defaults to keep and which to erase.
+
+## Normalize versus reset
+
+A **reset** removes everything. Margins go to zero, lists lose their bullets, headings lose their size, and every element starts as a blank box. It produces perfect predictability and a completely flat starting point — you then restyle every semantic element by hand.
+
+**Normalize.css** takes the opposite approach. It keeps useful defaults and only repairs the inconsistencies: it makes `html` line heights consistent, corrects font inheritance in form controls, fixes `sub` and `sup`, and removes the grey tap highlight on mobile. Your `h1` still looks like a heading.
+
+Most modern projects land in between and call it a *small reset*:
+
+- Keep heading sizes and list markers, because they carry meaning.
+- Zero out margins and padding where layout depends on them.
+- Set `box-sizing: border-box` globally.
+- Make media elements behave predictably.
+- Normalize form controls, which are the wildest defaults of all.
+
+## Box sizing and form controls
+
+```css
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+```
+
+With `border-box`, a declared `width` includes padding and border, so a `200px` card with `20px` padding is still 200px wide. The alternative, `content-box`, adds padding on top of the width and constantly breaks grid math. The universal selector is acceptable here because the declaration is inherited-safe and cheap.
+
+Form controls need the most attention of all. `button`, `input`, `select`, and `textarea` do not inherit `font-family` or `font-size` by default. A button will happily render in the operating system's UI font while the rest of your page uses your typeface. Setting `font: inherit` on those elements fixes it in one line. Also remove the default `appearance` where you are styling a control yourself, and always leave a visible `:focus-visible` outline — normalizing must not delete accessibility.
+
+```css
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+```
+
+## A complete example
+
+The sign-up card below opens with a compact reset, then styles the form. Notice that the reset does not touch heading sizes or remove list markers; it only removes the margins that would interfere with the card's own spacing.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Normalized form</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 32px 20px;
+        font-family: system-ui, sans-serif;
+        background: #f2f5f0;
+        color: #1e2a22;
+      }
+
+      h1,
+      h2,
+      p {
+        margin: 0;
+      }
+
+      button,
+      input,
+      select {
+        font: inherit;
+        color: inherit;
+      }
+
+      .signup {
+        width: min(380px, 100%);
+        padding: 30px 28px;
+        background: #ffffff;
+        border: 1px solid #dfe6da;
+        border-radius: 20px;
+        box-shadow: 0 26px 50px -34px rgba(30, 42, 34, 0.5);
+      }
+
+      .signup h1 {
+        font-size: 1.3rem;
+        letter-spacing: -0.015em;
+      }
+
+      .signup p {
+        margin-top: 6px;
+        font-size: 0.83rem;
+        line-height: 1.5;
+        color: #63735f;
+      }
+
+      .field {
+        display: block;
+        margin-top: 18px;
+      }
+
+      .field span {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #55654f;
+      }
+
+      .field input,
+      .field select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #d3dccd;
+        border-radius: 10px;
+        background: #fbfdfa;
+        font-size: 0.88rem;
+        appearance: none;
+      }
+
+      .field input:focus-visible,
+      .field select:focus-visible {
+        outline: 2px solid #4f8a5b;
+        outline-offset: 1px;
+      }
+
+      .submit {
+        width: 100%;
+        margin-top: 22px;
+        padding: 11px;
+        border: 0;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #3f7a4d, #67a86f);
+        color: #ffffff;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <form class="signup">
+      <h1>Join the harvest list</h1>
+      <p>One email each Friday with what is in season.</p>
+
+      <label class="field">
+        <span>Name</span>
+        <input type="text" placeholder="Ada Lovelace" />
+      </label>
+
+      <label class="field">
+        <span>Email</span>
+        <input type="email" placeholder="ada@example.com" />
+      </label>
+
+      <label class="field">
+        <span>Box size</span>
+        <select>
+          <option>Small — 6 items</option>
+          <option>Large — 12 items</option>
+        </select>
+      </label>
+
+      <button class="submit" type="button">Subscribe</button>
+    </form>
+  </body>
+</html>
+```
+
+Everything in that stylesheet assumes `border-box`, including the `100%` wide inputs sitting inside padded containers. Getting that assumption in place once at the top is what prevents the "why is this input 4 pixels too wide" conversation later.

@@ -1,0 +1,156 @@
+---
+title: Set
+description: Store unique values with Set and use its methods to add, test, combine, and iterate members.
+chapter: 43
+category: "JavaScript"
+order: 343
+---
+
+# Set
+
+A `Set` is a collection of unique values. It remembers insertion order, ignores duplicates automatically, and provides methods that make membership questions cheap. If you have ever built a list of names and then written an extra check to avoid adding the same name twice, a set removes that bookkeeping. Sets work with any data type, including objects, and compare values using same-value equality.
+
+## Creating and editing a set
+
+You create one with `new Set()`, optionally passing an iterable to seed it. The `add()` method inserts a value and returns the set itself, so calls can be chained. `has()` reports whether a value is present, `delete()` removes one, `clear()` empties the whole set, and the `size` property gives the current count. Because `add()` silently ignores a value that already exists, de-duplicating an array is as short as spreading a set built from it.
+
+```js
+const tags = new Set(["js", "css"]);
+tags.add("js");        // still two items
+tags.add("html");
+tags.has("css");       // true
+tags.size;             // 3
+tags.delete("css");    // true
+```
+
+## Combining and iterating
+
+Sets do not have built-in union or intersection methods, but the operations are easy to express. Convert a set to an array with `Array.from(set)` or the spread syntax, then use `filter()` together with `has()` to compute an intersection or a difference. Iteration is equally direct: `for...of` walks values in insertion order, and the `forEach()` method visits each one. The `keys()`, `values()`, and `entries()` methods exist for consistency with `Map`, though for a set both keys and values are the same.
+
+The demo below is a tag manager. Add tags to see duplicates rejected, click a chip to remove it, and compare your tags against a built-in popular set.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Set tag manager</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 40px 18px;
+        font-family: system-ui, sans-serif;
+        background: #eef8f4;
+        color: #14332c;
+      }
+      .card {
+        max-width: 560px;
+        margin: 0 auto;
+        padding: 28px 30px 30px;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 26px 54px -40px rgba(20, 51, 44, 0.6);
+      }
+      h1 { margin: 0 0 6px; font-size: 1.25rem; }
+      p { margin: 0 0 18px; color: #5c7d73; font-size: 0.9rem; }
+      .entry { display: flex; gap: 8px; margin-bottom: 16px; }
+      input {
+        flex: 1;
+        border: 1px solid #cfe3da;
+        border-radius: 10px;
+        padding: 10px 12px;
+        font: inherit;
+        font-size: 0.9rem;
+      }
+      button {
+        border: 0;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font: inherit;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        background: #159f78;
+        color: #fff;
+      }
+      button.alt { background: #dcf1e8; color: #147056; }
+      .chips { display: flex; flex-wrap: wrap; gap: 8px; min-height: 42px; margin-bottom: 16px; }
+      .chip {
+        background: #147056;
+        color: #fff;
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 0.8rem;
+        cursor: pointer;
+      }
+      .out {
+        margin: 0;
+        min-height: 96px;
+        padding: 14px 16px;
+        background: #f1faf6;
+        border: 1px solid #d5ece1;
+        border-radius: 12px;
+        font-size: 0.83rem;
+        line-height: 1.7;
+        color: #235043;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Tag manager</h1>
+      <p>Duplicates are ignored automatically. Click a tag to remove it.</p>
+      <div class="entry">
+        <input id="tagInput" placeholder="e.g. javascript" />
+        <button id="add">Add</button>
+        <button id="compare" class="alt">Compare</button>
+        <button id="clear" class="alt">Clear</button>
+      </div>
+      <div class="chips" id="chips"></div>
+      <pre id="out" class="out">Your tags: (none)</pre>
+    </div>
+    <script>
+      var tags = new Set();
+      var popular = new Set(["javascript", "html", "css", "react"]);
+      var chips = document.getElementById("chips");
+      var out = document.getElementById("out");
+      function render() {
+        chips.textContent = "";
+        tags.forEach(function (t) {
+          var chip = document.createElement("span");
+          chip.className = "chip";
+          chip.textContent = t + "  x";
+          chip.onclick = function () { tags.delete(t); render(); };
+          chips.appendChild(chip);
+        });
+        out.textContent = "Your tags: " + tags.size + " -> " +
+          (tags.size ? Array.from(tags).join(", ") : "(none)");
+      }
+      document.getElementById("add").onclick = function () {
+        var input = document.getElementById("tagInput");
+        var value = input.value.trim().toLowerCase();
+        if (!value) return;
+        var before = tags.size;
+        tags.add(value);
+        out.textContent = tags.size > before
+          ? "Added '" + value + "'."
+          : "'" + value + "' was already present (duplicates ignored).";
+        input.value = "";
+        render();
+      };
+      document.getElementById("compare").onclick = function () {
+        var arr = Array.from(tags);
+        var shared = arr.filter(function (t) { return popular.has(t); });
+        var unique = arr.filter(function (t) { return !popular.has(t); });
+        out.textContent = "In common: " + (shared.join(", ") || "none") +
+          "\nOnly yours: " + (unique.join(", ") || "none");
+      };
+      document.getElementById("clear").onclick = function () { tags.clear(); render(); };
+      render();
+    </script>
+  </body>
+</html>
+```
+
+Notice that the "Compare" button rebuilds arrays with `Array.from()` before filtering; that is the bridge between set membership and array transformations.

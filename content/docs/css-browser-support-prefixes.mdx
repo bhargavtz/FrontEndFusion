@@ -1,0 +1,141 @@
+---
+title: Browser Support & Prefixes
+description: Decide when a CSS feature needs a vendor prefix, test capability at runtime with @supports, and read caniuse data without panic.
+chapter: 53
+category: "CSS"
+order: 153
+---
+
+# Browser Support & Prefixes
+
+Every CSS feature has a timeline: it ships in one engine, then another, then the last one catches up. During that gap you have three tools — vendor prefixes, feature queries, and browser data — and knowing which to reach for is most of the skill.
+
+## What vendor prefixes actually do
+
+A vendor prefix is a namespaced alias of a property, invented while the specification was still moving. The familiar ones are `-webkit-` for Safari and older Chrome, `-moz-` for Firefox, and `-ms-` for Internet Explorer. The rule was always: write the prefixed version first, then the standard version, so a browser that understands both uses the last one.
+
+```css
+.panel {
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+```
+
+The important change is that prefixes are now rare. Modern browsers ship most CSS properties unprefixed, and many prefixed properties are aliases kept only for compatibility. Autoprefixer in a build step still handles the handful that matter, driven by a browserslist target rather than guesswork.
+
+## Testing support with @supports and caniuse
+
+`@supports` asks the browser a yes-or-no question about a declaration and applies the block only if the answer is yes. This is far more reliable than sniffing the user agent string.
+
+```css
+.glass {
+  background: #ffffff;
+}
+
+@supports (backdrop-filter: blur(12px)) {
+  .glass {
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(12px);
+  }
+}
+```
+
+Two details worth remembering. Write the fallback outside the query and let the supported branch override it, never the reverse, because a browser that fails the query never sees the block. And you can combine conditions with `and`, `or`, and `not`, plus `selector()` when you need to test whether a selector parses.
+
+Feature queries handle detection in the browser, but you still need to know what to expect before you ship. Browser data answers the other half of the question.
+
+1. Look the feature up, then read the **global support percentage first**, not the colored bars.
+2. Check whether the gap is a *graceful* one. A missing `backdrop-filter` means a flat panel; a missing `gap` in flexbox once meant broken spacing. Only the second kind needs a fallback.
+3. Check the **notes** row, since partial support is the usual trap — a property may exist but ignore a keyword you rely on.
+4. Decide the target, then let tooling enforce it. A `browserslist` entry such as `defaults` feeds both Autoprefixer and your test matrix.
+
+## A complete example
+
+This panel renders a glass card over a gradient. Where `backdrop-filter` is unavailable, the `@supports` block never applies and the card stays opaque — same layout, different finish.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Feature query panel</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        background:
+          radial-gradient(circle at 18% 22%, #ff9c6e 0, transparent 46%),
+          radial-gradient(circle at 78% 74%, #5f7cf7 0, transparent 48%),
+          linear-gradient(140deg, #221a3a, #0f1424);
+        color: #f4f6ff;
+      }
+
+      .glass {
+        width: min(360px, 100%);
+        padding: 26px;
+        border-radius: 22px;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        background: #262c44;
+        box-shadow: 0 28px 60px -30px rgba(0, 0, 0, 0.7);
+      }
+
+      @supports (backdrop-filter: blur(12px)) {
+        .glass {
+          background: rgba(255, 255, 255, 0.12);
+          backdrop-filter: blur(14px) saturate(140%);
+        }
+      }
+
+      .glass h1 {
+        margin: 0 0 6px;
+        font-size: 1.15rem;
+      }
+
+      .glass p {
+        margin: 0 0 18px;
+        font-size: 0.82rem;
+        line-height: 1.55;
+        color: rgba(244, 246, 255, 0.78);
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 0;
+        margin: 0;
+        list-style: none;
+      }
+
+      .chips li {
+        padding: 5px 11px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        font-size: 0.68rem;
+        letter-spacing: 0.04em;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="glass">
+      <h1>Capability, not guesswork</h1>
+      <p>
+        This surface upgrades itself only when the engine reports support for
+        backdrop blur. Older engines keep the solid panel.
+      </p>
+      <ul class="chips">
+        <li>@supports</li>
+        <li>backdrop-filter</li>
+        <li>no UA sniffing</li>
+      </ul>
+    </section>
+  </body>
+</html>
+```
+
+When a prefix is genuinely still useful, it belongs in a build pipeline with a documented target, not scattered by hand through a stylesheet. Hand-written prefixes rot; a configured Autoprefixer run does not.

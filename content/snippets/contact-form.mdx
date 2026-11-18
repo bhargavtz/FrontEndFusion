@@ -1,0 +1,35 @@
+---
+title: Contact Form
+description: Name, email, subject dropdown, message textarea with character counter, success toast on submit.
+tags: [Tailwind, Validation, JS]
+icon: ✉️
+component: ContactForm
+order: 2
+---
+
+## Preview
+
+<Preview>
+  <ContactForm />
+</Preview>
+
+## Notes
+
+- Native validation is combined with inline error messaging.
+- The message textarea shows a live character counter.
+- A success toast confirms submission without a page reload.
+- All fields have visible labels and autocomplete hints.
+
+## Usage
+
+```tsx
+import { ContactForm } from "@/components/snippets/contact-form";
+
+export function Page() {
+  return <ContactForm />;
+}
+```
+
+## Source
+
+<SourceCode file="src/components/snippets/contact-form.tsx" />

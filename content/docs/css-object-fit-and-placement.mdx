@@ -1,0 +1,147 @@
+---
+title: Object Fit and Placement
+description: Control how replaced elements fill their box with object-fit, aim them with object-position, and reserve stable space using aspect-ratio.
+chapter: 51
+category: "CSS"
+order: 151
+---
+
+# Object Fit and Placement
+
+An image dropped into a fixed box has to make a decision: stretch, shrink, or crop. By default the browser stretches it, which is why a wide landscape photo inside a square avatar slot comes out looking like a funhouse mirror. `object-fit` and `object-position` give you control over that decision, and `aspect-ratio` stops the box from jumping around while the file loads.
+
+## The five values of object-fit
+
+- `fill` — the default. The image stretches to the box in both directions and ignores its own proportions.
+- `cover` — the image scales until it covers the box completely, cropping whatever overflows. Best for photo thumbnails and hero media.
+- `contain` — the image scales until it fits entirely inside the box, leaving empty space on the shorter axis. Best for logos, screenshots, and diagrams where every pixel matters.
+- `none` — no scaling at all. The image keeps its natural size and is cropped or letterboxed by the box.
+- `scale-down` — behaves like `none` when the image is already smaller than the box, otherwise like `contain`. It never enlarges an image.
+
+`object-fit` only applies to replaced elements: `img`, `video`, `canvas`, and `iframe`. Setting it on a `div` does nothing.
+
+## Aiming the crop, reserving the box
+
+`object-position` accepts the same syntax as `background-position`, and it defaults to `50% 50%` — dead center. When `cover` crops a portrait photo into a wide banner, the subject's head often falls outside the visible area. Nudging the position to `50% 20%` pushes the frame upward toward the face.
+
+```css
+.avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: 50% 15%;
+}
+```
+
+Once the crop is right, the box itself still needs a shape. `aspect-ratio` sets a preferred width-to-height relationship on the box. Pair it with a fluid width and the height follows automatically, so the layout no longer depends on the image's intrinsic size. This replaces the old `padding-top: 56.25%` trick and removes the layout shift that happens when media arrives late.
+
+## A complete example
+
+The gallery below uses one portrait-shaped vector illustration in three boxes. The first crops with `cover`, the second letterboxes with `contain`, and the third crops from a raised focal point.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Object fit gallery</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 44px 20px;
+        font-family: system-ui, sans-serif;
+        background: radial-gradient(circle at 80% 0%, #e8f0ff, #f6f8fb 60%);
+        color: #1b2434;
+      }
+
+      .gallery {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+        max-width: 720px;
+        margin: 0 auto;
+      }
+
+      .frame {
+        flex: 1 1 180px;
+        max-width: 220px;
+        background: #ffffff;
+        border: 1px solid #e3e9f4;
+        border-radius: 18px;
+        padding: 10px 10px 16px;
+        box-shadow: 0 20px 40px -28px rgba(20, 32, 60, 0.5);
+      }
+
+      .frame h2 {
+        margin: 12px 6px 2px;
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+
+      .frame p {
+        margin: 0 6px;
+        font-size: 0.72rem;
+        color: #6b7a93;
+      }
+
+      .shot {
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        border-radius: 12px;
+        background: #eef2f8;
+      }
+
+      .shot--cover {
+        object-fit: cover;
+      }
+
+      .shot--contain {
+        object-fit: contain;
+      }
+
+      .shot--top {
+        object-fit: cover;
+        object-position: 50% 12%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="gallery">
+      <figure class="frame">
+        <img
+          class="shot shot--cover"
+          alt="Abstract sunset illustration"
+          src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='320'%3E%3Crect width='240' height='320' fill='%23f2b880'/%3E%3Ccircle cx='120' cy='120' r='58' fill='%23fff3e2'/%3E%3Cpath d='M0 320 L120 180 L240 320 Z' fill='%23c96a3f'/%3E%3C/svg%3E"
+        />
+        <h2>cover</h2>
+        <p>Fills the frame, crops the overflow.</p>
+      </figure>
+
+      <figure class="frame">
+        <img
+          class="shot shot--contain"
+          alt="Abstract sunset illustration"
+          src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='320'%3E%3Crect width='240' height='320' fill='%23f2b880'/%3E%3Ccircle cx='120' cy='120' r='58' fill='%23fff3e2'/%3E%3Cpath d='M0 320 L120 180 L240 320 Z' fill='%23c96a3f'/%3E%3C/svg%3E"
+        />
+        <h2>contain</h2>
+        <p>Whole image visible, gaps allowed.</p>
+      </figure>
+
+      <figure class="frame">
+        <img
+          class="shot shot--top"
+          alt="Abstract sunset illustration"
+          src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='320'%3E%3Crect width='240' height='320' fill='%23f2b880'/%3E%3Ccircle cx='120' cy='120' r='58' fill='%23fff3e2'/%3E%3Cpath d='M0 320 L120 180 L240 320 Z' fill='%23c96a3f'/%3E%3C/svg%3E"
+        />
+        <h2>cover + top</h2>
+        <p>Focal point raised to 12%.</p>
+      </figure>
+    </div>
+  </body>
+</html>
+```
+
+The frames keep a 4:3 box regardless of the illustration's real ratio, so all three cards stay the same size while the contents differ. That predictability is the whole point of the pair: `aspect-ratio` fixes the box, and `object-fit` decides what happens inside it.

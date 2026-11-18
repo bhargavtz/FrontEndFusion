@@ -1,0 +1,99 @@
+---
+title: Selection Menu Controls
+description: Build dropdowns with select, option, and optgroup, and autocomplete fields with datalist.
+chapter: 27
+category: "HTML"
+order: 37
+---
+
+# Selection Menu Controls
+
+HTML provides two ways to pick from a list: a fixed `select` menu and a free-text `datalist` suggestion list.
+
+## Select menu
+
+```html
+<label for="size">T-shirt size</label>
+<select id="size" name="size">
+  <option value="">Choose a size</option>
+  <option value="s">Small</option>
+  <option value="m">Medium</option>
+  <option value="l">Large</option>
+</select>
+```
+
+Use an empty first option as a placeholder. Add `required` if the user must choose a real value.
+
+## Options
+
+Each `option` has a `value` that is submitted and optional text that is displayed.
+
+```html
+<select name="delivery">
+  <option value="standard">Standard — 5 days</option>
+  <option value="express" selected>Express — 2 days</option>
+  <option value="pickup" disabled>Pickup — unavailable</option>
+</select>
+```
+
+- `selected` sets the initial choice.
+- `disabled` prevents selection.
+- `label` can provide a shorter display label.
+
+## Option groups
+
+Use `optgroup` to group related options. The `label` attribute names the group.
+
+```html
+<label for="city">City</label>
+<select id="city" name="city">
+  <optgroup label="United Kingdom">
+    <option value="lon">London</option>
+    <option value="edi">Edinburgh</option>
+  </optgroup>
+  <optgroup label="Ireland">
+    <option value="dub">Dublin</option>
+    <option value="cor">Cork</option>
+  </optgroup>
+</select>
+```
+
+Groups cannot be selected themselves. They only organise the list.
+
+## Datalist
+
+A `datalist` provides suggestions while still allowing free text.
+
+```html
+<label for="fruit">Favourite fruit</label>
+<input id="fruit" name="fruit" list="fruit-options" />
+<datalist id="fruit-options">
+  <option value="Apple" />
+  <option value="Banana" />
+  <option value="Cherry" />
+  <option value="Dragon fruit" />
+</datalist>
+```
+
+The user can type a value that is not in the list. Validate it on the server if only listed values are allowed.
+
+## Multiple selections
+
+```html
+<label for="topics">Topics</label>
+<select id="topics" name="topics" multiple size="4">
+  <option value="html">HTML</option>
+  <option value="css">CSS</option>
+  <option value="js">JavaScript</option>
+  <option value="a11y">Accessibility</option>
+</select>
+```
+
+With `multiple`, users can select more than one option. Provide instructions because the interaction differs between platforms.
+
+## Accessibility notes
+
+- Always pair `select` with a label.
+- Keep option text descriptive.
+- Do not use `select` for navigation that should be links.
+- Do not rely on colour to show the selected option.

@@ -1,0 +1,149 @@
+---
+title: execCommand and contenteditable
+description: Edit rich text with contenteditable and the legacy execCommand API, with a safe clipboard fallback.
+chapter: 45
+category: "JavaScript"
+order: 345
+---
+
+# execCommand and contenteditable
+
+Putting the `contenteditable` attribute on an element turns it into a tiny editor: the user can click inside and type, and the browser updates its `innerHTML` for you. Pairing it with `document.execCommand()` lets you apply formatting such as bold, italic, and underline, or copy text to the clipboard. The API is old and formally deprecated, yet it remains the simplest way to add a few editing buttons without a full editor library.
+
+## Making an editable region
+
+Any element can become editable by adding `contenteditable="true"`. Listen for the `input` event to react as the user types — this is the moment to update a character counter or autosave. Read the plain text with `textContent` and the markup with `innerHTML`. Keep in mind that pasted content may carry its own HTML, so sanitise it before storing it anywhere permanent.
+
+```html
+<div contenteditable="true" id="editor">Type here...</div>
+```
+
+## Formatting and copying
+
+`document.execCommand(name)` applies a command to the current selection inside the focused editable region. Common commands include `bold`, `italic`, `underline`, and `createLink`. A toolbar button should not steal the selection, so cancel its default mouse-down behaviour before running the command. For copying, place text in a temporary `textarea`, select it, and call `execCommand("copy")`. Modern browsers also expose the asynchronous `navigator.clipboard` API, which is promise-based; try it first and fall back to the older command.
+
+The demo is a mini editor with a formatting toolbar, a live character count, and a copy button that reports which method succeeded. If `execCommand` is unavailable, the buttons explain that instead of failing silently.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mini editor</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 40px 18px;
+        font-family: system-ui, sans-serif;
+        background: #fdf3ef;
+        color: #3d251d;
+      }
+      .card {
+        max-width: 580px;
+        margin: 0 auto;
+        padding: 28px 30px 30px;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 26px 54px -40px rgba(61, 37, 29, 0.6);
+      }
+      h1 { margin: 0 0 6px; font-size: 1.25rem; }
+      p { margin: 0 0 16px; color: #936f63; font-size: 0.9rem; }
+      .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+      button {
+        border: 1px solid #f0d4c8;
+        border-radius: 9px;
+        padding: 7px 13px;
+        font: inherit;
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+        background: #fff5f1;
+        color: #9c4a2f;
+      }
+      button:hover { background: #ffe9df; }
+      #editor {
+        min-height: 110px;
+        padding: 16px 18px;
+        border: 1px solid #f0d4c8;
+        border-radius: 12px;
+        font-size: 0.92rem;
+        line-height: 1.6;
+        outline: none;
+        background: #fffaf8;
+      }
+      #editor:focus { border-color: #d97a55; }
+      .out {
+        margin: 14px 0 0;
+        min-height: 40px;
+        padding: 12px 14px;
+        background: #fff4ef;
+        border-radius: 10px;
+        font-size: 0.8rem;
+        color: #9c4a2f;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Mini editor</h1>
+      <p>Select text, then format it. The copy button uses the modern clipboard API when available.</p>
+      <div class="toolbar">
+        <button data-cmd="bold">Bold</button>
+        <button data-cmd="italic">Italic</button>
+        <button data-cmd="underline">Underline</button>
+        <button id="copy">Copy text</button>
+      </div>
+      <div id="editor" contenteditable="true">Select some of this text and click a button.</div>
+      <pre id="out" class="out">Characters: 0</pre>
+    </div>
+    <script>
+      var editor = document.getElementById("editor");
+      var out = document.getElementById("out");
+      var supported = typeof document.execCommand === "function";
+
+      function count() {
+        out.textContent = "Characters: " + editor.textContent.length +
+          (supported ? "" : "  (execCommand unavailable in this browser)");
+      }
+      editor.addEventListener("input", count);
+      count();
+
+      Array.prototype.forEach.call(document.querySelectorAll("button[data-cmd]"), function (btn) {
+        btn.addEventListener("mousedown", function (e) { e.preventDefault(); });
+        btn.onclick = function () {
+          if (!supported) { out.textContent = "Formatting is not supported here."; return; }
+          editor.focus();
+          document.execCommand(btn.getAttribute("data-cmd"), false, null);
+          out.textContent = "Applied " + btn.getAttribute("data-cmd") + ".";
+        };
+      });
+
+      document.getElementById("copy").onclick = function () {
+        var text = editor.textContent;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function () {
+            out.textContent = "Copied using navigator.clipboard (" + text.length + " chars).";
+          }).catch(function () { legacyCopy(text); });
+        } else {
+          legacyCopy(text);
+        }
+      };
+      function legacyCopy(text) {
+        if (!supported) { out.textContent = "Clipboard access is blocked here."; return; }
+        var tmp = document.createElement("textarea");
+        tmp.value = text;
+        tmp.style.position = "fixed";
+        tmp.style.opacity = "0";
+        document.body.appendChild(tmp);
+        tmp.select();
+        var ok = document.execCommand("copy");
+        document.body.removeChild(tmp);
+        out.textContent = ok ? "Copied using execCommand." : "Copy was not permitted.";
+      }
+    </script>
+  </body>
+</html>
+```
+
+Because formatting commands act on the live selection, call `editor.focus()` before each one and prevent the toolbar button from taking focus with `preventDefault()` on mouse-down.

@@ -1,0 +1,77 @@
+---
+title: WeakMap
+description: Attach metadata to objects with a WeakMap whose keys are held only weakly.
+chapter: 76
+category: "JavaScript"
+order: 376
+---
+
+# WeakMap
+
+A `WeakMap` is a collection of key-value pairs where the keys must be objects and are held weakly. "Weakly" means that if nothing else in your program references a key object, the garbage collector may reclaim it and its entry disappears automatically. That makes a weak map ideal for associating extra data with objects you do not own, such as DOM nodes or third-party instances, without leaking memory.
+
+## Creating, reading, and writing
+
+You create one with `new WeakMap()`. The `set` method stores a value under an object key and returns the map, so calls can be chained. `get` retrieves the value for a key, returning `undefined` when the key is not present. `has` reports whether a key exists, and `delete` removes one. Unlike a regular `Map`, a weak map is not iterable: there is no `size`, no `keys`, and no way to loop over entries, because entries may vanish at any time.
+
+## Why weak keys matter
+
+The weak reference demo below stores per-card metadata in a `WeakMap` keyed by the card objects themselves. Clicking a card reads its record, and you can raise or lower a priority. Because the keys are weak, removing all other references to a card lets the engine reclaim both the card and its stored data, which is the property that keeps long-lived caches from growing without bound. The garbage collector is not directly observable from JavaScript, so the panel explains the idea rather than pretending to display live memory counts.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WeakMap demo</title>
+    <style>
+      body { margin: 0; padding: 24px 18px; font-family: system-ui, sans-serif; color: #26343d; background: linear-gradient(135deg, #fff7ed, #eef2ff 75%); }
+      .card { max-width: 470px; margin: 0 auto; padding: 22px; background: #fff; border-radius: 20px; box-shadow: 0 18px 40px -28px rgba(80,60,30,.45); }
+      h1 { margin: 0 0 4px; font-size: 1.1rem; }
+      p.sub { margin: 0 0 14px; font-size: .8rem; color: #6b7280; }
+      .items { display: flex; flex-wrap: wrap; gap: 8px; }
+      .chip { padding: 9px 13px; border: 1px solid #f0d9b5; border-radius: 999px; background: #fffaf0; font: inherit; font-size: .82rem; cursor: pointer; }
+      .chip.active { background: #f59e0b; color: #fff; border-color: #f59e0b; }
+      pre { margin: 16px 0 0; padding: 12px; border-radius: 10px; background: #1f2937; color: #fde68a; font-size: .76rem; line-height: 1.55; white-space: pre-wrap; min-height: 92px; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Task metadata store</h1>
+      <p class="sub">Each task object is a weak key in a WeakMap.</p>
+      <div id="items" class="items"></div>
+      <pre id="out">Select a task to read its metadata.</pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      var meta = new WeakMap();
+      var tasks = [
+        { name: "Write outline" },
+        { name: "Review draft" },
+        { name: "Publish post" }
+      ];
+      tasks.forEach(function (task, i) {
+        meta.set(task, { priority: ["low", "medium", "high"][i], views: 0 });
+        var btn = document.createElement("button");
+        btn.className = "chip";
+        btn.textContent = task.name;
+        btn.addEventListener("click", function () {
+          document.querySelectorAll(".chip").forEach(function (c) { c.classList.remove("active"); });
+          btn.classList.add("active");
+          var data = meta.get(task);
+          data.views += 1;
+          meta.set(task, data);
+          out.textContent =
+            "key       -> " + task.name + "\n" +
+            "has(task) -> " + meta.has(task) + "\n" +
+            "priority  -> " + data.priority + "\n" +
+            "views     -> " + data.views + "\n\n" +
+            "Drop every reference to this task and the\nentry is collected automatically (no size).";
+        });
+        document.getElementById("items").appendChild(btn);
+      });
+    </script>
+  </body>
+</html>
+```

@@ -1,0 +1,142 @@
+---
+title: Method Chaining
+description: Design fluent APIs by returning the current object so several method calls read as one continuous sentence.
+chapter: 28
+category: "JavaScript"
+order: 328
+---
+
+# Method Chaining
+
+Method chaining is the practice of calling several methods in a row on the same object, with each call feeding into the next. The trick behind it is simple: every mutating method returns the instance it was called on, so the result becomes the receiver of the following call.
+
+## Return the instance
+
+A normal setter might return nothing, leaving you to repeat the variable name on every line. If instead the method ends with `return this;`, the expression evaluates to the object again. Calls can then be strung together without storing intermediate results.
+
+The same reasoning applies to constructors and factory functions. As long as each step hands back an object with the remaining methods, the chain keeps working. A terminal method such as `describe()` or `build()` returns a final value instead and ends the sequence.
+
+## Designing a readable chain
+
+Fluent interfaces read best when each method name describes one small action and the order mirrors real steps. Short verbs work well: `add`, `mix`, `pour`, `serve`. Keep side effects predictable, and avoid returning a different type halfway through unless a new stage is genuinely intended.
+
+One caution: because every step operates on shared state, a half-built object is still a valid object. If a chain can fail, decide whether to reset, throw, or leave the partial state visible, and document that choice.
+
+Chains are also easy to extend. Adding a new step means writing one more method that returns `this`, with no change to the existing methods or to callers that ignore it. That openness is a real advantage for builder objects that grow alongside the application using them.
+
+## Demo: smoothie station
+
+```html
+<div class="smoothie">
+  <h2>Smoothie station</h2>
+  <p>Each step returns the same builder, so the calls link together.</p>
+  <div class="smoothie__buttons">
+    <button id="berry" type="button">Build berry blast</button>
+    <button id="tropical" type="button">Build tropical</button>
+    <button id="identity" type="button">Check return value</button>
+  </div>
+  <div id="cup" class="smoothie__cup">Your cup is waiting.</div>
+  <pre id="out" class="smoothie__out">No smoothie yet.</pre>
+</div>
+
+<style>
+  body {
+    margin: 0;
+    padding: 2rem 1.25rem;
+    background: #fdeef0;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    color: #4d3038;
+  }
+  .smoothie {
+    max-width: 36rem;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 18px;
+    padding: 1.5rem;
+    box-shadow: 0 18px 40px -28px rgba(120, 40, 60, 0.55);
+  }
+  .smoothie h2 { margin: 0 0 0.4rem; font-size: 1.25rem; }
+  .smoothie p { margin: 0 0 1rem; color: #996a76; font-size: 0.88rem; }
+  .smoothie__buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  button {
+    font: inherit;
+    font-size: 0.8rem;
+    padding: 0.5rem 0.8rem;
+    border: 0;
+    border-radius: 9px;
+    background: #c94f6d;
+    color: #fff;
+    cursor: pointer;
+  }
+  #identity { background: #8a6172; }
+  button:hover { filter: brightness(1.08); }
+  .smoothie__cup {
+    background: linear-gradient(180deg, #fff6f8, #ffe3ea);
+    border: 1px solid #f5c9d4;
+    border-radius: 12px;
+    padding: 1rem;
+    min-height: 2.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+  .smoothie__out {
+    margin: 0;
+    min-height: 4rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: #3a1f29;
+    color: #ffd4e0;
+    border-radius: 10px;
+    padding: 0.85rem;
+    font-size: 0.78rem;
+    line-height: 1.6;
+  }
+</style>
+
+<script>
+  class Smoothie {
+    constructor() {
+      this.fruits = [];
+      this.seconds = 0;
+      this.size = "medium";
+    }
+    add(fruit) { this.fruits.push(fruit); return this; }
+    blast(seconds) { this.seconds += seconds; return this; }
+    pour(size) { this.size = size; return this; }
+    describe() {
+      return this.size + " cup of " + this.fruits.join(" + ") + ", blended " + this.seconds + " seconds";
+    }
+  }
+
+  var cup = document.getElementById("cup");
+  var out = document.getElementById("out");
+
+  function serve(builder, code) {
+    cup.textContent = builder.describe();
+    out.textContent = code + "\n\nResult: " + builder.describe();
+  }
+
+  document.getElementById("berry").addEventListener("click", function () {
+    serve(
+      new Smoothie().add("strawberry").add("blueberry").blast(20).pour("small"),
+      "new Smoothie().add('strawberry').add('blueberry').blast(20).pour('small')"
+    );
+  });
+
+  document.getElementById("tropical").addEventListener("click", function () {
+    serve(
+      new Smoothie().add("mango").add("pineapple").add("lime").blast(35).pour("large"),
+      "new Smoothie().add('mango').add('pineapple').add('lime').blast(35).pour('large')"
+    );
+  });
+
+  document.getElementById("identity").addEventListener("click", function () {
+    var builder = new Smoothie();
+    var returned = builder.add("pear");
+    out.textContent = "builder.add('pear') === builder  ->  " + (returned === builder)
+      + "\nThat identity is what makes the chain possible.";
+    cup.textContent = "Same object, ready for more steps.";
+  });
+</script>
+```

@@ -1,0 +1,113 @@
+---
+title: Server-sent events
+description: Receive a stream of updates from a server with EventSource and message listeners.
+chapter: 80
+category: "JavaScript"
+order: 380
+---
+
+# Server-sent events
+
+Server-sent events, often shortened to SSE, give the browser a one-way stream of text updates from a server. You create an `EventSource` pointed at a URL and the connection stays open, delivering each new message as an event. It is a good fit for feeds, progress indicators, and live scores where data flows only from the server to the client.
+
+## Opening and binding listeners
+
+Creating the source with `new EventSource(url)` starts the connection. A `message` handler registered with `addEventListener` runs for every unnamed event, while `addEventListener` with a custom name catches events the server tagged with that name. The event object carries the payload in its `data` property. The `onmessage` property is a shorthand for the common case, and the `readyState` property reports whether the connection is connecting, open, or closed.
+
+## Closing the stream
+
+Calling `close` on the source ends the connection permanently; to reconnect you must build a new `EventSource`. The browser will normally reconnect on its own after a network drop unless you close it explicitly. Because this sandbox has no server to stream from, the demo uses a small local simulator that follows the same interface: `addEventListener`, custom events, `readyState`, and `close`. It lets you see listener binding and stream closing without any network request.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Server-sent events</title>
+    <style>
+      body { margin: 0; padding: 24px 18px; font-family: system-ui, sans-serif; color: #24313b; background: linear-gradient(135deg, #ecfdf5, #eff6ff 75%); }
+      .card { max-width: 480px; margin: 0 auto; padding: 22px; background: #fff; border-radius: 20px; box-shadow: 0 18px 40px -28px rgba(20,80,60,.45); }
+      h1 { margin: 0 0 4px; font-size: 1.1rem; }
+      p.sub { margin: 0 0 14px; font-size: .8rem; color: #64748b; }
+      .row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+      button { padding: 9px 14px; border: 0; border-radius: 10px; background: #059669; color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+      button.stop { background: #dc2626; }
+      button:disabled { opacity: .45; cursor: not-allowed; }
+      .state { font-size: .78rem; padding: 5px 9px; border-radius: 999px; background: #f1f5f9; }
+      .state.open { background: #d1fae5; color: #065f46; }
+      pre { margin: 14px 0 0; padding: 12px; border-radius: 10px; background: #10231d; color: #a7f3d0; font-size: .76rem; line-height: 1.6; white-space: pre-wrap; min-height: 120px; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Live event stream</h1>
+      <p class="sub">A local stand-in for EventSource; no network involved.</p>
+      <div class="row">
+        <button id="start">Connect</button>
+        <button id="stop" class="stop" disabled>Close stream</button>
+        <span id="state" class="state">CLOSED</span>
+      </div>
+      <pre id="out">Press Connect to open the stream.</pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      var lines = [];
+      function log(text) {
+        lines.push(text);
+        if (lines.length > 8) lines.shift();
+        out.textContent = lines.join("\n");
+      }
+      function MockSource() {
+        this.listeners = {};
+        this.readyState = 0;
+        this.timer = null;
+        this.count = 0;
+      }
+      MockSource.prototype.addEventListener = function (type, fn) {
+        (this.listeners[type] = this.listeners[type] || []).push(fn);
+      };
+      MockSource.prototype.emit = function (type, data) {
+        (this.listeners[type] || []).forEach(function (fn) { fn({ data: data }); });
+      };
+      MockSource.prototype.open = function () {
+        var self = this;
+        this.readyState = 1;
+        this.timer = window.setInterval(function () {
+          self.count += 1;
+          if (self.count % 3 === 0) self.emit("status", "heartbeat #" + self.count);
+          else self.emit("message", "update #" + self.count + " at " + new Date().toLocaleTimeString());
+        }, 900);
+      };
+      MockSource.prototype.close = function () {
+        window.clearInterval(this.timer);
+        this.readyState = 2;
+      };
+      var source = null;
+      function setState() {
+        var el = document.getElementById("state");
+        el.textContent = source && source.readyState === 1 ? "OPEN" : "CLOSED";
+        el.classList.toggle("open", !!source && source.readyState === 1);
+      }
+      document.getElementById("start").addEventListener("click", function () {
+        if (source && source.readyState === 1) return;
+        log("new EventSource(...) -> connecting");
+        source = new MockSource();
+        source.addEventListener("message", function (e) { log("message -> " + e.data); });
+        source.addEventListener("status", function (e) { log("[status] -> " + e.data); });
+        source.open();
+        setState();
+        document.getElementById("stop").disabled = false;
+        log("readyState -> " + source.readyState);
+      });
+      document.getElementById("stop").addEventListener("click", function () {
+        if (!source) return;
+        source.close();
+        log("close() called, readyState -> " + source.readyState);
+        setState();
+        document.getElementById("stop").disabled = true;
+      });
+    </script>
+  </body>
+</html>
+```

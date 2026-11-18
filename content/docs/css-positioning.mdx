@@ -1,0 +1,137 @@
+---
+title: Positioning
+description: Understand static, relative, absolute, fixed, and sticky positioning, and how z-index settles overlaps.
+chapter: 22
+category: "CSS"
+order: 122
+---
+
+# Positioning
+
+The `position` property changes how an element is placed and what it is positioned against. Normal flow is the default; the other values let you pull an element out of that flow or pin it to the viewport.
+
+## The five values
+
+`static` is the default. Offsets do nothing, and the element simply follows the document order.
+
+`relative` keeps the element in flow but shifts its painted box by `top`, `right`, `bottom`, or `left`. The space it originally occupied stays reserved, so neighbours do not move. More importantly, a relatively positioned element becomes the containing block for absolutely positioned descendants.
+
+`absolute` removes the element from flow and places it against the nearest positioned ancestor — or the initial containing block if there is none. This is the standard tool for badges, close buttons, dropdown panels, and image captions. Forgetting the ancestor is the most common bug: the element escapes to the page corner.
+
+`fixed` also leaves flow, but it anchors to the viewport. It stays put while the page scrolls, which suits floating action buttons and modal backdrops. Note that a transformed ancestor can become the containing block, breaking the effect.
+
+`sticky` is a hybrid. The element behaves normally until a scroll threshold is crossed, then it sticks within its containing block. It needs an offset such as `top: 0`, and it stops sticking once its parent scrolls away.
+
+## z-index and stacking
+
+`z-index` only applies to positioned elements (and flex or grid items). Higher numbers paint on top, but only within the same stacking context. A parent with `transform`, `filter`, `opacity` below 1, or its own `z-index` creates a new context, so a child with `z-index: 9999` still cannot jump above a sibling context. Reach for small, local numbers rather than escalating a z-index war.
+
+## Demo: sticky header with an overlapping badge
+
+```html
+<article class="panel">
+  <header class="panel__bar">
+    <span class="panel__dot"></span>
+    <strong>Deploy log</strong>
+  </header>
+  <div class="panel__body">
+    <div class="tile">
+      <span class="tile__badge">new</span>
+      <h3>Build 148</h3>
+      <p>Static assets uploaded. Cache purged in 4 regions.</p>
+    </div>
+    <div class="tile tile--muted">
+      <h3>Build 147</h3>
+      <p>Rolled back after a failed health check.</p>
+    </div>
+    <div class="tile tile--muted">
+      <h3>Build 146</h3>
+      <p>Database migration applied without downtime.</p>
+    </div>
+  </div>
+</article>
+
+<style>
+  body {
+    margin: 0;
+    padding: 2rem 1.25rem;
+    background: #eef2f7;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+  .panel {
+    max-width: 30rem;
+    max-height: 17rem;
+    margin: 0 auto;
+    overflow-y: auto;
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 24px 50px -30px rgba(15, 23, 42, 0.55);
+  }
+  .panel__bar {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 1rem 1.25rem;
+    background: rgba(15, 23, 42, 0.95);
+    color: #f8fafc;
+    font-size: 0.9rem;
+    letter-spacing: 0.02em;
+  }
+  .panel__dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: #34d399;
+  }
+  .panel__body {
+    display: grid;
+    gap: 0.9rem;
+    padding: 1.25rem;
+  }
+  .tile {
+    position: relative;
+    padding: 1rem 1.1rem;
+    border-radius: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+  }
+  .tile h3 {
+    margin: 0 0 0.35rem;
+    font-size: 0.95rem;
+    color: #0f172a;
+  }
+  .tile p {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: #475569;
+  }
+  .tile--muted {
+    opacity: 0.75;
+  }
+  .tile__badge {
+    position: absolute;
+    top: -0.6rem;
+    right: 0.9rem;
+    z-index: 1;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .panel__body::after {
+    content: "scroll inside the panel — the bar stays";
+    padding: 0.5rem;
+    text-align: center;
+    font-size: 0.7rem;
+    color: #94a3b8;
+  }
+</style>
+```

@@ -1,0 +1,135 @@
+---
+title: Feature Queries
+description: Detect browser support at parse time with @supports, chain conditions, and layer enhancements without breaking the baseline.
+chapter: 47
+category: "CSS"
+order: 147
+---
+
+# Feature Queries
+
+`@supports` asks the browser a yes-or-no question about a declaration, and applies the block only if the answer is yes. It is the CSS equivalent of feature detection in JavaScript, except the browser answers before it paints, so there is no flash of a half-applied enhancement.
+
+```css
+@supports (backdrop-filter: blur(12px)) {
+  .glass { backdrop-filter: blur(12px); }
+}
+```
+
+The condition must be a declaration in parentheses, not a selector. `@supports (display: grid)` is valid; `@supports (display: grid) and (gap: 1rem)` combines two checks. A bare property name is not enough, because support can depend on the value.
+
+## Chaining conditions
+
+Three logical operators are available: `and`, `or`, and `not`. Parentheses group each test, and each test is one declaration.
+
+```css
+@supports ((display: grid) and (gap: 1rem)) or (display: flex) { … }
+@supports not (position: sticky) { … }
+```
+
+`and` binds tighter than `or`, but explicit parentheses are worth the keystrokes. Use `or` when two syntaxes achieve the same result — the classic case is prefixed and unprefixed `backdrop-filter`. Use `not` sparingly: a fallback that targets the absence of a feature ages badly once every browser supports it.
+
+There is also `selector()` for testing selector syntax:
+
+```css
+@supports selector(:has(> img)) { … }
+```
+
+JavaScript can ask the same question with `CSS.supports("backdrop-filter", "blur(12px)")`, which is handy when a feature changes behaviour rather than appearance.
+
+## Progressive enhancement
+
+The reliable pattern is baseline first, enhancement second. Write the plain, universally supported rule outside the query. Then add a second rule, inside `@supports`, that improves it. If the query fails, the baseline is untouched. If it passes, both apply and the later one wins.
+
+Never hide essential content inside a feature query unless you also give it a fallback. A card whose text is only visible with `backdrop-filter` is a card that vanishes in older engines.
+
+The demo below is a glass panel over a coloured background. The fallback is an opaque white card; the enhancement is translucent with a blur. Two probe chips report what the current engine chose.
+
+```html
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 30px;
+    background: radial-gradient(circle at 20% 20%, #6d5dfc, transparent 55%),
+                radial-gradient(circle at 80% 30%, #ff7ab6, transparent 50%),
+                radial-gradient(circle at 50% 90%, #35d0ba, transparent 55%),
+                #101a34;
+    font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  }
+  .glass {
+    width: min(560px, 94vw);
+    padding: 28px 30px;
+    border-radius: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    /* baseline: readable everywhere */
+    background: rgba(255, 255, 255, 0.94);
+    color: #17233c;
+    box-shadow: 0 30px 60px -30px rgba(6, 12, 28, 0.85);
+  }
+  .glass h2 { margin: 0 0 8px; font-size: 1.2rem; letter-spacing: -0.01em; }
+  .glass p { margin: 0 0 20px; font-size: 0.88rem; line-height: 1.65; color: #4a5a76; }
+  .probes { display: grid; gap: 8px; }
+  .probe {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 13px;
+    border-radius: 10px;
+    background: rgba(23, 35, 60, 0.06);
+    font-size: 0.76rem;
+    letter-spacing: 0.04em;
+    color: #33445f;
+  }
+  .probe code { font-family: ui-monospace, Menlo, monospace; font-size: 0.72rem; }
+  .probe::after { content: "fallback"; color: #9a3412; font-weight: 600; }
+  .probe.grid::after { content: "legacy"; }
+  .probe.grid { display: block; }
+
+  /* one condition, two syntaxes */
+  @supports (backdrop-filter: blur(14px)) or (-webkit-backdrop-filter: blur(14px)) {
+    .glass {
+      background: rgba(255, 255, 255, 0.42);
+      color: #ffffff;
+      -webkit-backdrop-filter: blur(14px) saturate(140%);
+      backdrop-filter: blur(14px) saturate(140%);
+    }
+    .glass p { color: #e7ecff; }
+    .probe {
+      background: rgba(255, 255, 255, 0.16);
+      color: #f2f5ff;
+    }
+    .probe::after { content: "native glass ✓"; color: #b6ffd9; }
+  }
+
+  /* chained condition */
+  @supports (display: grid) and (gap: 1rem) {
+    .probe.grid { display: grid; grid-template-columns: 1fr auto; }
+    .probe.grid::after { content: "grid + gap ✓"; color: #b6ffd9; }
+  }
+
+  /* negative test */
+  @supports not (position: sticky) {
+    .probe.sticky::after { content: "no sticky"; color: #ffb4a8; }
+  }
+</style>
+
+<section class="glass">
+  <h2>Progressive enhancement in layers</h2>
+  <p>
+    The card is readable with a solid background. Where the engine can blur what sits behind
+    it, the same card becomes frosted glass — no duplicate markup, no loading state.
+  </p>
+  <div class="probes">
+    <div class="probe"><code>backdrop-filter</code></div>
+    <div class="probe grid"><code>grid + gap</code></div>
+    <div class="probe sticky"><code>position: sticky</code></div>
+  </div>
+</section>
+```
+
+Feature queries are not a substitute for `@media`. Responsive layout still belongs in media queries; `@supports` answers "can this engine do it", not "is this the right context".

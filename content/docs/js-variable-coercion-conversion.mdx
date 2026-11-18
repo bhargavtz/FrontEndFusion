@@ -1,0 +1,68 @@
+---
+title: Variable coercion/conversion
+description: Learn how JavaScript converts values between strings, numbers, and booleans.
+chapter: 59
+category: "JavaScript"
+order: 359
+---
+
+# Variable coercion/conversion
+
+JavaScript is a loosely typed language, so values are often converted automatically when operators expect a different type. Understanding these rules, known as coercion, explains many surprising results and helps you write clearer comparisons.
+
+## Implicit conversion and truthiness
+
+When an operator mixes types, the engine converts one operand to match the other. Adding a string and a number concatenates them, while subtracting coerces both to numbers. In a boolean context, values become either truthy or falsy. The falsy values are `false`, `0`, an empty string, `null`, `undefined`, and `NaN`. Everything else, including empty arrays and objects, is truthy. Applying the logical NOT twice, written as two exclamation marks before a value, is a compact way to force any value into a true boolean.
+
+## Explicit conversions
+
+You can control conversion instead of relying on it. `Number()` and `parseFloat()` turn strings into numbers, though the parser is stricter than the constructor about trailing characters. `String()` produces a textual form, and `Boolean()` forces truthiness. Unary plus is a short alternative to `Number()`. Converting a number to an integer can be done with `Math.trunc()`, `Math.floor()`, or `parseInt()` depending on how negatives should behave.
+
+## Equality quirks and arrays
+
+The loose equality operator converts types before comparing, so a string of digits can equal the matching number. The strict operator compares both value and type and avoids that surprise; prefer it in new code. Arrays coerce to strings by joining their elements with commas, which is why an empty array becomes an empty string and a single-element array becomes that element. Calling `map()` or `join()` explicitly is usually clearer than depending on this behaviour.
+
+The conversion lab below applies these rules to a value you type and prints each result, along with a few classic loose-versus-strict comparisons.
+
+```html
+<div class="cv-wrap">
+  <div class="cv-card">
+    <h2>Conversion Lab</h2>
+    <p class="cv-sub">Type a value and see how JavaScript interprets it.</p>
+    <input id="val" type="text" value="42" style="width:140px">
+    <button id="run" type="button">Convert</button>
+    <pre id="out" class="cv-out"></pre>
+  </div>
+</div>
+<style>
+  .cv-wrap{font-family:system-ui,sans-serif;background:#fffbeb;padding:18px;border-radius:14px;}
+  .cv-card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 6px 18px rgba(110,80,10,.08);}
+  .cv-card h2{margin:0 0 4px;font-size:18px;color:#92400e;}
+  .cv-sub{margin:0 0 14px;color:#b45309;font-size:13px;}
+  .cv-card input{border:1px solid #fcd34d;border-radius:8px;padding:8px 10px;font-size:13px;}
+  .cv-card button{border:0;background:#d97706;color:#fff;padding:8px 14px;border-radius:8px;cursor:pointer;font-weight:600;margin-left:8px;}
+  .cv-out{background:#0f172a;color:#fcd34d;padding:12px;border-radius:8px;font-size:12px;line-height:1.7;white-space:pre-wrap;margin:14px 0 0;}
+</style>
+<script>
+  const out = document.getElementById('out');
+  function render(){
+    const v = document.getElementById('val').value;
+    const n = Number(v);
+    out.textContent =
+      'Input:                 "' + v + '"\n' +
+      'Number(input):         ' + n + '\n' +
+      'String(input):         "' + String(v) + '"\n' +
+      'Boolean(input):        ' + Boolean(v) + '\n' +
+      'Double negation (!!):  ' + !!v + '\n' +
+      'Unary plus:            ' + (+v) + '\n' +
+      'input == 42:           ' + (v == 42) + '\n' +
+      'input === 42:          ' + (v === 42) + '\n' +
+      '[].toString():         "' + [].toString() + '"';
+  }
+  document.getElementById('run').addEventListener('click', render);
+  document.getElementById('val').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') render();
+  });
+  render();
+</script>
+```

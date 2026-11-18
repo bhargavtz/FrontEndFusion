@@ -1,0 +1,121 @@
+---
+title: Arrays
+description: Store ordered collections and reshape them with iteration, map, filter, reduce, sorting, spread, and destructuring.
+chapter: 12
+category: "JavaScript"
+order: 312
+---
+
+# Arrays
+
+An array is an ordered list of values held under numeric indexes starting at zero. It is the workhorse of JavaScript data handling, and modern array methods let you describe transformations without writing manual loops.
+
+## Creating and reading arrays
+
+Create an array with square brackets, such as `var items = ["tea", "coffee"]`. Read an element by index with `items[0]`, and find how many elements it holds with `items.length`. The `push` and `pop` methods add or remove from the end, while `unshift` and `shift` work at the front. Indexes that do not exist return `undefined`, so guard your access when reading user-provided positions.
+
+## Transforming with map, filter, and reduce
+
+These three methods form the core of array processing, and each returns a new result rather than changing the original. `map` applies a function to every element and builds an equally long array of results. `filter` keeps only the elements whose callback returns a truthy value. `reduce` walks the list while carrying an accumulator, collapsing it to a single value such as a total or an object. Their callbacks receive the current element, its index, and the whole array, which is handy when position matters.
+
+## Other handy moves
+
+`sort` orders elements in place; pass a comparison function for numbers, since the default sorts by string value. `find` returns the first matching element and `includes` tests membership. The spread syntax `...` copies an array or concatenates several, and destructuring unpacks positions into named variables, such as `var [first, second] = items`. To remove duplicates, pass the array to a `Set` and spread it back. `slice` gives a shallow copy of part of an array, while `splice` changes the original by inserting or deleting.
+
+## Demo: expense tracker
+
+The demo filters a small expense list by category. `filter` selects the visible rows, `map` rounds the amounts, and `reduce` computes the total.
+
+```html
+<div class="wrap">
+  <div class="card">
+    <h2>Expense tracker</h2>
+    <p class="hint">Pick a category to see filter, map, and reduce at work.</p>
+    <div class="filters">
+      <button data-cat="all" class="active">All</button>
+      <button data-cat="food">Food</button>
+      <button data-cat="travel">Travel</button>
+      <button data-cat="tools">Tools</button>
+    </div>
+    <ul id="list"></ul>
+    <div class="summary" id="summary"></div>
+  </div>
+</div>
+
+<style>
+  .wrap {
+    min-height: 70vh; display: grid; place-items: center;
+    padding: 2rem 1rem; background: #eaf4ef;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+  .card {
+    width: min(100%, 27rem); background: #fff; border-radius: 18px;
+    padding: 1.75rem; box-shadow: 0 18px 40px -24px rgba(30, 80, 60, 0.5);
+  }
+  h2 { margin: 0 0 0.35rem; font-size: 1.2rem; color: #204536; }
+  .hint { margin: 0 0 1.1rem; font-size: 0.85rem; color: #6b8579; }
+  .filters { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .filters button {
+    padding: 0.4rem 0.75rem; border: 1px solid #cfe0d7; border-radius: 999px;
+    background: #fff; color: #3c6b57; font-size: 0.82rem; cursor: pointer;
+  }
+  .filters button.active { background: #2f8a63; border-color: #2f8a63; color: #fff; }
+  ul { list-style: none; padding: 0; margin: 1.1rem 0 0; }
+  li {
+    display: flex; justify-content: space-between; padding: 0.55rem 0.2rem;
+    border-bottom: 1px solid #eef2ef; font-size: 0.9rem; color: #2c4037;
+  }
+  li span:last-child { font-weight: 700; color: #2f8a63; }
+  .summary {
+    margin-top: 1rem; padding: 0.85rem 1rem; border-radius: 12px;
+    background: #eaf4ef; color: #204536; font-size: 0.9rem; font-weight: 600;
+  }
+</style>
+
+<script>
+  var expenses = [
+    { name: "Lunch", cat: "food", amount: 12.5 },
+    { name: "Train ticket", cat: "travel", amount: 24 },
+    { name: "Notebook", cat: "tools", amount: 8.75 },
+    { name: "Coffee", cat: "food", amount: 4.25 },
+    { name: "USB cable", cat: "tools", amount: 11 }
+  ];
+  var current = "all";
+
+  function render() {
+    var shown = expenses.filter(function (e) {
+      return current === "all" || e.cat === current;
+    });
+    var list = document.getElementById("list");
+    list.innerHTML = "";
+    shown.forEach(function (e) {
+      var li = document.createElement("li");
+      var label = document.createElement("span");
+      var amount = document.createElement("span");
+      label.textContent = e.name;
+      amount.textContent = "$" + e.amount.toFixed(2);
+      li.appendChild(label);
+      li.appendChild(amount);
+      list.appendChild(li);
+    });
+    var total = shown.reduce(function (sum, e) { return sum + e.amount; }, 0);
+    var rounded = shown.map(function (e) { return Math.round(e.amount); });
+    var roundedSum = rounded.reduce(function (a, b) { return a + b; }, 0);
+    document.getElementById("summary").textContent =
+      shown.length + " items · total $" + total.toFixed(2) +
+      " · rounded sum $" + roundedSum;
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll(".filters button"), function (btn) {
+    btn.addEventListener("click", function () {
+      current = btn.dataset.cat;
+      Array.prototype.forEach.call(document.querySelectorAll(".filters button"), function (b) {
+        b.classList.remove("active");
+      });
+      btn.classList.add("active");
+      render();
+    });
+  });
+  render();
+</script>
+```

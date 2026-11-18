@@ -1,0 +1,94 @@
+---
+title: "Media Queries"
+description: "Write media queries that respond to viewport width, screen type, and pixel density without breaking layout."
+chapter: 13
+category: "CSS"
+order: 113
+---
+
+# Media Queries
+
+A media query is a conditional wrapper around a block of CSS. If the condition matches the current device and viewport, the rules apply; otherwise they are ignored. Width is the condition people use most, but it is only one of several features.
+
+## Anatomy and media types
+
+The syntax has four moving parts: the `@media` keyword, an optional media type, an optional condition, and the rule block. Media types are `all`, `screen`, and `print`. `screen` is the safe default for on-screen styles; `print` is genuinely useful for stripping navigation and flattening backgrounds before a page is printed.
+
+Conditions can be chained with `and`, grouped with commas (a comma means "or"), and negated with `not`. Range syntax is the newer, more readable form: `@media (width >= 800px)` replaces `min-width: 800px`, and `@media (400px <= width <= 900px)` expresses an interval directly.
+
+`width` refers to the viewport width, not the screen's physical width, which is why it tracks a resized browser window. The `<link>` element accepts the same conditions through its `media` attribute, letting the browser skip downloading a stylesheet that cannot apply.
+
+## Breakpoints and pixel density
+
+Pick breakpoints where the design actually breaks, not at device names. A practical set is a single-column default, a two-column step around 600px, and a three-column step around 900px. Write the small-screen styles first and add complexity with `min-width`, so the cascade does the work of overriding.
+
+High-DPI screens are a separate concern. `min-resolution: 2dppx` targets retina-class displays, where a 1px border may look heavy and a raster image can appear soft. Use it for hairline borders and sharper assets rather than for layout changes. Avoid locking zoom by omitting `width=device-width` from the viewport meta tag.
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Responsive card grid</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 26px;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      background: #f2f5f8;
+      color: #1d2833;
+    }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    h2 { margin: 0; font-size: 1.05rem; }
+    .badge {
+      padding: .3rem .7rem;
+      border-radius: 999px;
+      background: #e2ebf4;
+      color: #33587a;
+      font-size: .72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    .badge::after { content: "single column"; }
+    .lede { margin: 8px 0 18px; font-size: .85rem; color: #5c6c7a; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+    .card {
+      padding: 18px;
+      border-radius: 14px;
+      background: #fff;
+      border: 1px solid #e0e7ee;
+      box-shadow: 0 6px 18px rgba(29, 40, 51, .06);
+    }
+    .card h3 { margin: 0 0 6px; font-size: .95rem; }
+    .card p { margin: 0; font-size: .82rem; line-height: 1.55; color: #5c6c7a; }
+    .card span { display: block; margin-top: 12px; font-size: 1.4rem; font-weight: 700; color: #2f6b8f; }
+    @media (min-width: 560px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
+      .badge::after { content: "two columns"; }
+    }
+    @media (min-width: 860px) {
+      .grid { grid-template-columns: repeat(3, 1fr); }
+      .badge::after { content: "three columns"; }
+    }
+    @media (min-resolution: 2dppx) {
+      .card { border-width: .5px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h2>Plans that reflow</h2>
+    <span class="badge"></span>
+  </header>
+  <p class="lede">Resize the preview: columns are added at 560px and 860px, and the label follows along.</p>
+  <div class="grid">
+    <article class="card"><h3>Starter</h3><p>One project and community support.</p><span>$0</span></article>
+    <article class="card"><h3>Studio</h3><p>Unlimited projects, shared review links.</p><span>$19</span></article>
+    <article class="card"><h3>Team</h3><p>Roles, audit history, and priority help.</p><span>$49</span></article>
+  </div>
+</body>
+</html>
+```

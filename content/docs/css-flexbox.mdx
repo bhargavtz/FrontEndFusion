@@ -1,0 +1,119 @@
+---
+title: "Flexible Box Layout (Flexbox)"
+description: "Centre content, stretch cards to equal heights, pin footers, and assemble the classic holy-grail page with flex containers."
+chapter: 16
+category: "CSS"
+order: 116
+---
+
+# Flexible Box Layout (Flexbox)
+
+Flexbox distributes space along a single axis. You declare a flex container, and its direct children become flex items that can grow, shrink, and align relative to that axis. Most layout problems that used to need hacks are now one or two properties.
+
+## Centring and distributing space
+
+`display: flex` turns on the formatting context. `justify-content` positions items along the main axis; `align-items` positions them across it. To centre one child completely, set both to `center` — and give the container a height, otherwise there is no vertical space to centre within. `gap` replaces margin arithmetic for spacing between siblings.
+
+The axis flips with `flex-direction: column`, and `justify-content` then controls vertical distribution while `align-items` handles horizontal. `flex-wrap: wrap` allows items onto multiple lines; `align-content` then controls spacing between those lines, which is a frequent source of confusion with `align-items`.
+
+## Fitting, growing, and equal heights
+
+The `flex` shorthand controls how items share free space: `flex: 1` means grow and shrink from a zero basis, `flex: 0 0 200px` means a fixed 200px item that neither grows nor shrinks. `flex: 1 1 220px` is the friendly middle ground for card grids.
+
+Because flex items stretch to the tallest item in the row by default, equal-height cards come for free. Inside each card, `display: flex; flex-direction: column` plus `margin-top: auto` on the action button pins every button to the same baseline, regardless of copy length. The same technique makes a variable-height footer stick to the bottom of a column, and combining three vertical regions — header, expanding body, footer — is the classic sticky-footer pattern. For a holy-grail layout, make the page a column flex container, then make the middle row a flex row with fixed-width rails and a fluid centre.
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Flexbox pricing cards</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 26px;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      background: linear-gradient(160deg, #eef4f7, #e3ecf1);
+      color: #1c2b35;
+    }
+    h2 { margin: 0 0 4px; font-size: 1.05rem; }
+    .lede { margin: 0 0 18px; font-size: .84rem; color: #5d7180; }
+    .plans {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: stretch;
+      gap: 16px;
+    }
+    .plan {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 190px;
+      padding: 20px;
+      border-radius: 16px;
+      background: #fff;
+      border: 1px solid #dbe6ec;
+      box-shadow: 0 8px 22px rgba(28, 43, 53, .07);
+    }
+    .plan.featured {
+      border-color: #2f6f8f;
+      box-shadow: 0 12px 28px rgba(47, 111, 143, .18);
+    }
+    .tag {
+      align-self: flex-start;
+      margin-bottom: 10px;
+      padding: .22rem .6rem;
+      border-radius: 999px;
+      background: #e5eff5;
+      color: #2f6f8f;
+      font-size: .66rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    .plan h3 { margin: 0 0 6px; font-size: 1rem; }
+    .price { font-size: 1.9rem; font-weight: 700; letter-spacing: -.02em; }
+    .price small { font-size: .7rem; font-weight: 500; color: #7c8f9c; }
+    .plan ul { margin: 12px 0 18px; padding-left: 1.1rem; font-size: .8rem; line-height: 1.8; color: #4f6473; }
+    .cta {
+      margin-top: auto;
+      padding: .6rem 1rem;
+      border: 1px solid #cfdde5;
+      border-radius: 10px;
+      background: #f7fafc;
+      color: #1c2b35;
+      font: inherit;
+      font-size: .82rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .featured .cta { background: #2f6f8f; border-color: #2f6f8f; color: #fff; }
+  </style>
+</head>
+<body>
+  <h2>Equal heights, aligned actions</h2>
+  <p class="lede">Each card is a column flex container; the button uses <code>margin-top: auto</code> so all three sit on one line.</p>
+  <div class="plans">
+    <article class="plan">
+      <h3>Sketch</h3>
+      <div class="price">$0 <small>/ forever</small></div>
+      <ul><li>One board</li><li>Community help</li></ul>
+      <button class="cta">Start free</button>
+    </article>
+    <article class="plan featured">
+      <span class="tag">Most chosen</span>
+      <h3>Studio</h3>
+      <div class="price">$19 <small>/ month</small></div>
+      <ul><li>Unlimited boards</li><li>Review links</li><li>Version history</li></ul>
+      <button class="cta">Choose Studio</button>
+    </article>
+    <article class="plan">
+      <h3>Team</h3>
+      <div class="price">$49 <small>/ month</small></div>
+      <ul><li>Roles and permissions</li><li>Audit log</li><li>Priority support</li></ul>
+      <button class="cta">Talk to us</button>
+    </article>
+  </div>
+</body>
+</html>
+```

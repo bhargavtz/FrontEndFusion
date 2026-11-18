@@ -1,0 +1,111 @@
+---
+title: Meta Information
+description: Describe pages, set encoding, control robots, add social cards, and configure mobile behaviour.
+chapter: 33
+category: "HTML"
+order: 43
+---
+
+# Meta Information
+
+The `meta` element provides metadata about the document. It belongs in the head and is not visible on the page.
+
+## Page information
+
+```html
+<meta name="description" content="A practical guide to HTML forms, media, and semantic structure." />
+<meta name="author" content="FrontEndFusion contributors" />
+<meta name="keywords" content="HTML, forms, accessibility, semantics" />
+```
+
+The description often appears in search results. The `keywords` meta tag is ignored by major search engines, but it can still document a page's topic.
+
+## Character encoding
+
+```html
+<meta charset="utf-8" />
+```
+
+Place this as early as possible in the head. UTF-8 covers most of the world's writing systems and avoids mojibake.
+
+## Robots
+
+```html
+<meta name="robots" content="index, follow" />
+<meta name="robots" content="noindex, nofollow" />
+```
+
+- `index` allows the page to appear in search results.
+- `noindex` asks search engines not to index it.
+- `follow` allows links to be followed.
+- `nofollow` asks search engines not to follow links.
+
+Use `noindex` for private or duplicate pages. It is a hint, not a security control.
+
+## Social media
+
+```html
+<meta property="og:title" content="The Complete HTML5 Reference" />
+<meta property="og:description" content="41 chapters with live examples." />
+<meta property="og:image" content="https://frontendfusion.vercel.app/og/html5.png" />
+<meta property="og:url" content="https://frontendfusion.vercel.app/html5" />
+<meta property="og:type" content="website" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="The Complete HTML5 Reference" />
+<meta name="twitter:description" content="41 chapters with live examples." />
+<meta name="twitter:image" content="https://frontendfusion.vercel.app/og/html5.png" />
+```
+
+Open Graph tags control the preview on many social platforms. Twitter cards control the preview on X.
+
+## Mobile layout control
+
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+```
+
+This makes the layout width match the device width and sets the initial zoom. Do not disable zoom; it harms accessibility.
+
+## Automatic refresh
+
+```html
+<meta http-equiv="refresh" content="30" />
+```
+
+This reloads the page every 30 seconds. It is almost always a bad idea for content pages. If you need a redirect, use a server-side redirect or a link.
+
+## Phone number recognition
+
+```html
+<meta name="format-detection" content="telephone=no" />
+```
+
+Some mobile browsers turn number-like text into phone links. This meta tag disables that behaviour when it is unwanted.
+
+## Automatic redirect
+
+```html
+<meta http-equiv="refresh" content="0; url=https://example.com/new-page" />
+```
+
+This is a client-side redirect. It is slow and can confuse assistive technology. Prefer an HTTP 301 or 302 redirect.
+
+## Web app
+
+```html
+<meta name="theme-color" content="#0f172a" />
+<meta name="application-name" content="FrontEndFusion" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+```
+
+Theme colour tints the browser UI on some platforms. The Apple tags control standalone web-app behaviour on iOS.
+
+## Checklist
+
+1. Set `charset` early.
+2. Write a unique description for each page.
+3. Add Open Graph and Twitter tags.
+4. Use a viewport tag that allows zooming.
+5. Avoid meta refresh for redirects.

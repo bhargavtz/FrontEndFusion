@@ -1,0 +1,204 @@
+---
+title: Functions
+description: Compute lengths with calc, pull text from attributes, reuse values through var, and paint depth with gradient functions.
+chapter: 36
+category: "CSS"
+order: 136
+---
+
+# Functions
+
+CSS values are not just literals any more. A function call produces a value at render time: arithmetic, a lookup, or a generated image. Five of them cover most real work, and they compose freely inside one another.
+
+## calc(), attr(), and var()
+
+`calc()` mixes units that cannot otherwise be compared. A percentage of the container plus a fixed gutter, a viewport width minus a sidebar, a full height minus a sticky header — all of these were impossible before it existed.
+
+```css
+.panel {
+  width: calc(100% - 260px);
+  padding: calc(1rem + 0.5vw);
+  margin-top: calc(-1 * 12px);
+}
+```
+
+Whitespace around `+` and `-` is mandatory. `calc(100%-260px)` is invalid because the parser reads it as a single token. Multiplication and division need no spaces but must have a unitless number on one side.
+
+A different kind of lookup, `attr()` reads an attribute from the element and turns it into a value. In practice it works for `content` across all browsers, which makes it perfect for CSS-driven labels, badges, and tooltips that keep their text in the markup.
+
+```css
+.badge::after {
+  content: attr(data-count);
+}
+```
+
+A newer typed form lets `attr()` declare what kind of value it returns, so attributes could eventually feed widths and colours. Support for that is still partial, so treat the `content` case as the dependable one.
+
+`var()` substitutes a custom property. Because the property can be redefined at any level, one declaration can change the whole component.
+
+```css
+:root { --accent: #4b6cf5; }
+.button {
+  background: var(--accent);
+  border-radius: var(--radius, 10px);
+}
+```
+
+The second argument is the fallback, used when the property is missing or invalid. Fallbacks can nest, which is how theme systems degrade gracefully.
+
+## Gradient functions
+
+`linear-gradient()` and `radial-gradient()` produce an image, so they plug into `background` rather than `background-color`. A linear gradient runs along an angle; a radial one expands from a centre point.
+
+```css
+.hero {
+  background:
+    radial-gradient(circle at 20% 0%, rgba(75, 108, 245, 0.25), transparent 60%),
+    linear-gradient(135deg, #1d2742, #33415c);
+}
+```
+
+Layering a radial glow over a linear base is the cheapest way to make a flat panel feel lit. Gradients are also perfect for generating patterns without image files — a repeating linear gradient at 45 degrees makes diagonal stripes in one line.
+
+## A complete example
+
+A pricing card combines all five: `calc` for a lifted badge, `attr` for the plan label, `var` for theme colours, and two gradients for the background and the button.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Function-driven card</title>
+    <style>
+      :root {
+        --ink: #131c31;
+        --muted: #6b7a94;
+        --accent: #4b6cf5;
+        --radius: 20px;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 40px 20px;
+        font-family: system-ui, sans-serif;
+        background:
+          radial-gradient(circle at 15% 10%, rgba(75, 108, 245, 0.22), transparent 55%),
+          radial-gradient(circle at 85% 90%, rgba(125, 92, 240, 0.22), transparent 55%),
+          #f6f8fd;
+        color: var(--ink);
+      }
+
+      .plan {
+        position: relative;
+        width: min(340px, 100%);
+        padding: calc(1.9rem + 0.4vw) 1.75rem 1.9rem;
+        background: #fff;
+        border-radius: var(--radius);
+        box-shadow: 0 30px 60px -40px rgba(19, 28, 49, 0.55);
+      }
+
+      .plan::before {
+        content: attr(data-label);
+        position: absolute;
+        top: calc(-1 * 13px);
+        left: calc(1.75rem + 4px);
+        padding: 5px 12px;
+        border-radius: 999px;
+        font-size: 0.64rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #fff;
+        background: linear-gradient(120deg, var(--accent), #7d5cf0);
+      }
+
+      .eyebrow {
+        margin: 0 0 10px;
+        font-size: 0.68rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .price {
+        margin: 0;
+        font-size: 2.6rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+
+      .price span {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--muted);
+      }
+
+      ul {
+        margin: 22px 0 26px;
+        padding: 18px 0 0;
+        border-top: 1px solid #edf1f8;
+        list-style: none;
+        font-size: 0.88rem;
+        color: #3c4a63;
+      }
+
+      li {
+        padding: 6px 0 6px 22px;
+        position: relative;
+      }
+
+      li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: calc(0.85em - 3px);
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: linear-gradient(120deg, var(--accent), #7d5cf0);
+      }
+
+      .cta {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        border: 0;
+        border-radius: 12px;
+        font: inherit;
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: #fff;
+        background: linear-gradient(120deg, var(--accent), #7d5cf0);
+        cursor: pointer;
+      }
+
+      .note {
+        margin: 14px 0 0;
+        text-align: center;
+        font-size: 0.72rem;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <section class="plan" data-label="Best value">
+      <p class="eyebrow">Team plan</p>
+      <p class="price">$18 <span>/ seat / month</span></p>
+      <ul>
+        <li>Unlimited environments</li>
+        <li>Shared component library</li>
+        <li>Usage analytics, live</li>
+      </ul>
+      <button class="cta">Choose this plan</button>
+      <p class="note">Cancel whenever, no call needed.</p>
+    </section>
+  </body>
+</html>
+```
+
+Change one line — `--accent: #12876f` on `:root` — and the badge, bullets, and button all shift colour together. That is `var()` doing the work a preprocessor used to.

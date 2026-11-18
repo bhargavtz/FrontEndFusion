@@ -3,3 +3,4 @@
 /learn/:slug /docs/:slug 301
 /resources/:slug.md /docs/:slug 301
 /web-dev-learning-path/docs/:slug.md /docs/:slug 301
+/learning /roadmaps 301

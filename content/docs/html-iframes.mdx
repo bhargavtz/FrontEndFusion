@@ -1,0 +1,102 @@
+---
+title: IFrames
+description: Embed another document with iframe, sandbox it, size it, and target links into it.
+chapter: 29
+category: "HTML"
+order: 39
+---
+
+# IFrames
+
+An `iframe` embeds another HTML document inside the current page. The embedded page has its own window and its own styles.
+
+## Basics of an inline frame
+
+```html
+<iframe
+  src="https://example.com"
+  title="Example website"
+  width="600"
+  height="320"
+  loading="lazy"
+></iframe>
+```
+
+Always add a `title`. It is the accessible name of the frame. Without it, screen reader users hear only “frame”.
+
+## Sandboxing
+
+The `sandbox` attribute restricts what the embedded page can do. An empty sandbox blocks scripts, forms, popups, and navigation.
+
+```html
+<iframe
+  src="https://example.com"
+  title="Sandboxed example"
+  sandbox
+  width="600"
+  height="320"
+></iframe>
+```
+
+Add capabilities one at a time:
+
+```html
+<iframe
+  srcdoc="<button onclick='document.body.dataset.clicked = true'>Click</button>"
+  title="Sandboxed script demo"
+  sandbox="allow-scripts"
+  width="400"
+  height="160"
+></iframe>
+```
+
+Never combine `allow-scripts` and `allow-same-origin` for untrusted content. That combination can let the frame remove its own sandbox.
+
+## Setting the frame size
+
+Use CSS for responsive sizing:
+
+```html
+<iframe
+  src="https://example.com"
+  title="Responsive example"
+  style="width: 100%; aspect-ratio: 16 / 9; border: 0;"
+  loading="lazy"
+></iframe>
+```
+
+`aspect-ratio` keeps the frame from collapsing or jumping as it loads.
+
+## Using srcdoc
+
+`srcdoc` provides the frame's HTML inline, so no network request is needed:
+
+```html
+<iframe
+  title="Inline document"
+  srcdoc="<h2>Inside the frame</h2><p>This content is part of the attribute.</p>"
+  width="400"
+  height="160"
+></iframe>
+```
+
+Escape double quotes inside the attribute or use single quotes for the outer value. The content is still a separate document.
+
+## Using anchors with iframes
+
+An `a` element can target a named frame with the `target` attribute:
+
+```html
+<a href="https://example.com" target="preview-frame">Open in the frame</a>
+<iframe name="preview-frame" title="Preview" width="400" height="160"></iframe>
+```
+
+The frame needs a `name` that matches the link's `target`.
+
+## Security checklist
+
+1. Use `sandbox` for untrusted content.
+2. Add a descriptive `title`.
+3. Avoid `allow-same-origin` with `allow-scripts` for third-party content.
+4. Use `loading="lazy"` for frames below the fold.
+5. Do not embed pages that set `X-Frame-Options: DENY`; the frame will be empty.

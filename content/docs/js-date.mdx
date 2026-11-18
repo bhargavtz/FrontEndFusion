@@ -1,0 +1,133 @@
+---
+title: Date
+description: Create Date objects, read and format their parts, move them forward in time and convert them to strings or JSON.
+chapter: 8
+category: "JavaScript"
+order: 308
+---
+
+# Date
+
+The `Date` object represents a single moment in time. Internally it stores the number of milliseconds since the Unix epoch, the first of January 1970 in UTC, and offers methods for reading or changing the calendar parts of that moment.
+
+## Creating Date objects
+
+Calling `new Date()` with no arguments creates an object for the current moment. You can also pass a date string, or several numbers such as year, month, and day. Months start at zero, so January is `0` and December is `11` — a detail that causes many off-by-one bugs. To build a date in UTC without local time-zone shifts, use `Date.UTC()` and pass the resulting number to the constructor.
+
+## Reading and formatting parts
+
+Getter methods extract pieces of the date: `getFullYear()`, `getMonth()`, `getDate()`, `getHours()`, `getMinutes()`, and `getDay()` for the weekday. Each has a UTC counterpart such as `getUTCHours()`.
+
+For display, `toString()` produces a readable local string, while `toISOString()` returns a standard UTC string ending in `Z`. Because built-in formatting is limited, custom formatting usually means combining getters into your own layout, for example padding the month and day with a leading zero.
+
+## Moving dates and converting
+
+`getTime()` returns the millisecond timestamp, which makes arithmetic easy. To increment a date, call `setDate(getDate() + 1)`; the setters automatically roll over into the next month or year. `toJSON()` returns the same value as `toISOString()`, so dates serialise cleanly into JSON payloads.
+
+The date lab below builds several dates and shows each of these operations live.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Date</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px 18px;
+        font-family: system-ui, sans-serif;
+        color: #2a2c38;
+        background: linear-gradient(140deg, #fff6e9, #eef3ff 72%);
+      }
+      .card {
+        max-width: 540px;
+        margin: 0 auto;
+        padding: 22px;
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 20px 42px -30px rgba(50, 50, 90, 0.5);
+      }
+      h1 { margin: 0 0 14px; font-size: 1.15rem; }
+      .row { display: flex; flex-wrap: wrap; gap: 7px; }
+      button {
+        padding: 8px 11px;
+        border: 0;
+        border-radius: 9px;
+        background: #b5651d;
+        color: #ffffff;
+        font: inherit;
+        font-size: 0.76rem;
+        cursor: pointer;
+      }
+      button:hover { background: #95500f; }
+      pre {
+        margin: 14px 0 0;
+        min-height: 130px;
+        padding: 12px;
+        border-radius: 10px;
+        background: #2a211a;
+        color: #ffe6c4;
+        font-size: 0.77rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Date lab</h1>
+      <div class="row">
+        <button data-op="now">new Date()</button>
+        <button data-op="parts">Read the parts</button>
+        <button data-op="utc">Build from UTC</button>
+        <button data-op="strings">String formats</button>
+        <button data-op="add">Add ten days</button>
+        <button data-op="json">JSON output</button>
+      </div>
+      <pre id="out">Choose an operation to inspect a date.</pre>
+    </div>
+    <script>
+      const out = document.getElementById("out");
+      const pad = function (n) { return String(n).padStart(2, "0"); };
+      const ops = {
+        now: function () { return "new Date() -> " + new Date().toString(); },
+        parts: function () {
+          const d = new Date();
+          return "Full year -> " + d.getFullYear() + "\nMonth (0-based) -> " + d.getMonth() +
+            "\nDay of month -> " + d.getDate() + "\nWeekday (0-6) -> " + d.getDay() +
+            "\nHours -> " + d.getHours();
+        },
+        utc: function () {
+          const d = new Date(Date.UTC(2026, 0, 15, 12, 0, 0));
+          return "Date.UTC(2026, 0, 15, 12, 0, 0)\n" +
+            "toISOString -> " + d.toISOString() + "\n(month 0 means January)";
+        },
+        strings: function () {
+          const d = new Date();
+          return "toString()   -> " + d.toString() + "\n" +
+            "toISOString()-> " + d.toISOString() + "\n" +
+            "custom       -> " + d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+        },
+        add: function () {
+          const d = new Date(2026, 0, 28);
+          const before = d.toISOString().slice(0, 10);
+          d.setDate(d.getDate() + 10);
+          return "Start        -> " + before + "\nAfter +10 days -> " + d.toISOString().slice(0, 10) +
+            "\nsetDate rolls over months automatically";
+        },
+        json: function () {
+          const d = new Date();
+          return "getTime() -> " + d.getTime() + "\ntoJSON()  -> " + d.toJSON() +
+            "\nJSON.stringify({ when: d }) -> " + JSON.stringify({ when: d });
+        }
+      };
+      document.querySelectorAll("button[data-op]").forEach(function (btn) {
+        btn.addEventListener("click", function () { out.textContent = ops[btn.dataset.op](); });
+      });
+      out.textContent = ops.now();
+    </script>
+  </body>
+</html>
+```

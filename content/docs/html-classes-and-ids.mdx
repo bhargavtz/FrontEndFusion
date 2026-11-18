@@ -1,0 +1,97 @@
+---
+title: Classes and IDs
+description: Use classes for reusable styling and IDs for unique anchors and labels.
+chapter: 10
+category: "HTML"
+order: 20
+---
+
+# Classes and IDs
+
+The `class` and `id` attributes are the main hooks between HTML and CSS or JavaScript. They have different rules and different jobs.
+
+## Giving an element a class
+
+A class can be reused on as many elements as you like. An element can also have several classes separated by spaces.
+
+```html
+<p class="note">This paragraph uses the note style.</p>
+<p class="note note--warning">This one adds a warning modifier.</p>
+<button class="button button--primary">Save</button>
+```
+
+In CSS, classes begin with a dot:
+
+```css
+.note {
+  border-left: 4px solid #2563eb;
+  padding-left: 12px;
+}
+
+.note--warning {
+  border-color: #d97706;
+}
+```
+
+## Giving an element an ID
+
+An ID must be unique in the document. It is used for fragment links, form labels, and JavaScript lookups.
+
+```html
+<h2 id="shipping">Shipping details</h2>
+<p><a href="#shipping">Jump to shipping</a></p>
+
+<label for="email">Email address</label>
+<input id="email" name="email" type="email" />
+```
+
+The `for` attribute of a label must match the `id` of its control.
+
+## Acceptable values
+
+- IDs and classes can contain letters, digits, hyphens, underscores, and periods.
+- They must not contain spaces. Use a hyphen or underscore to separate words.
+- Values are case-sensitive in CSS selectors.
+- An ID should not start with a digit in CSS selectors, although HTML allows it.
+- Prefer descriptive names over presentational ones: `site-nav` is better than `blue-box`.
+
+```html
+<div id="site-nav" class="nav nav--compact">…</div>
+```
+
+## Duplicate IDs
+
+Duplicate IDs are invalid. They can break:
+
+- Fragment navigation, because the browser picks the first match.
+- `label for` associations.
+- `aria-labelledby` and `aria-describedby`.
+- JavaScript that uses `document.getElementById`.
+
+```html
+<!-- Wrong: the second id is ignored by getElementById -->
+<p id="intro">First introduction</p>
+<p id="intro">Second introduction</p>
+```
+
+If you need to group several elements, use a class. If you need a unique target, use an ID.
+
+## CSS specificity
+
+An ID selector is more specific than a class selector. That can make styles hard to override. Most component styles should use classes.
+
+```css
+/* Hard to override */
+#main-nav { background: black; }
+
+/* Easier to reuse and override */
+.site-nav { background: black; }
+```
+
+## Quick rules
+
+1. Use classes for styling.
+2. Use IDs for unique anchors and form associations.
+3. Never duplicate an ID.
+4. Keep names semantic and consistent.
+5. Avoid IDs as the primary styling hook.

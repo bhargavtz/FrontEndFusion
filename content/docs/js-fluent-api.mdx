@@ -1,0 +1,93 @@
+---
+title: Fluent API
+description: Build readable object configurations with a fluent interface where every configuration method returns the object.
+chapter: 93
+category: "JavaScript"
+order: 393
+---
+
+# Fluent API
+
+A fluent API (or fluent interface) is a style of designing objects so that method calls read like a sentence. The trick is simple: each configuration method mutates internal state and returns the same object, usually with `return this`. That lets callers chain steps together instead of writing a long series of separate assignments.
+
+## A chainable article builder
+
+Imagine building an HTML article. Rather than passing a dozen arguments to a constructor, you can create an `Article` object and call `article.title("...").paragraph("...").tag("...")` in sequence. Each method stores a value and hands the object back, so the next method can be called immediately. A final `render()` method returns the assembled string. Because the chain is ordinary JavaScript, you can break it across lines, store intermediate objects, or loop over data to add paragraphs.
+
+## Trade-offs
+
+Fluent code is compact and pleasant when the number of options is large and the operations are related. It does make errors harder to pinpoint — a long chain produces one expression — and returning `this` means the methods are not pure. Keep chains short, give methods descriptive names, and avoid hiding side effects such as network calls inside them.
+
+The demo constructs an article from form fields using a small chainable builder, then shows both the rendered result and the generated markup.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fluent builder demo</title>
+    <style>
+      body { margin: 0; padding: 24px 16px; font-family: system-ui, sans-serif; color: #28313f; background: linear-gradient(135deg, #f0f4fa, #faf0ec 80%); }
+      .card { max-width: 560px; margin: 0 auto; padding: 22px; background: #fff; border-radius: 20px; box-shadow: 0 20px 42px -30px rgba(40, 50, 80, .5); }
+      h1 { margin: 0 0 6px; font-size: 1.15rem; }
+      .lead { margin: 0 0 14px; font-size: .84rem; color: #646e80; }
+      label { display: block; margin-bottom: 9px; font-size: .78rem; color: #4e5a6e; }
+      input, textarea { width: 100%; box-sizing: border-box; margin-top: 4px; padding: 9px 10px; border: 1px solid #d3dae7; border-radius: 9px; font: inherit; font-size: .82rem; }
+      textarea { min-height: 84px; resize: vertical; }
+      button { margin-top: 6px; padding: 9px 14px; border: 0; border-radius: 9px; background: #3f5f8f; color: #fff; font: inherit; font-size: .8rem; cursor: pointer; }
+      button:hover { background: #314c74; }
+      .preview { margin-top: 16px; padding: 14px 16px; border-radius: 12px; background: #f7f9fd; border-left: 4px solid #3f5f8f; }
+      .preview h2 { margin: 0 0 6px; font-size: 1rem; }
+      .preview p { margin: 0 0 8px; font-size: .8rem; line-height: 1.5; }
+      .preview .tag { display: inline-block; padding: 3px 8px; border-radius: 999px; background: #e2eaf6; color: #3f5f8f; font-size: .7rem; }
+      pre { margin: 14px 0 0; min-height: 120px; padding: 12px; border-radius: 11px; background: #1e2635; color: #d8e6f5; font-size: .73rem; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Fluent builder demo</h1>
+      <p class="lead">Each setter returns the builder, so calls chain together.</p>
+      <label>Title <input id="title" value="A small note on chains" /></label>
+      <label>Category <input id="tag" value="JavaScript" /></label>
+      <label>Body (one paragraph per line) <textarea id="body">Fluent methods return this after storing a value.
+That makes configuration read like a sentence.</textarea></label>
+      <button id="build">Build article</button>
+      <div class="preview" id="preview"></div>
+      <pre id="out">Generated markup will appear here.</pre>
+    </div>
+    <script>
+      function esc(s) {
+        return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      }
+
+      // A tiny fluent interface: every configuration method returns `this`.
+      function Article() { this.titleText = ""; this.tagText = ""; this.paragraphs = []; }
+      Article.prototype.title = function (t) { this.titleText = t; return this; };
+      Article.prototype.tag = function (t) { this.tagText = t; return this; };
+      Article.prototype.paragraph = function (p) { this.paragraphs.push(p); return this; };
+      Article.prototype.render = function () {
+        var parts = ["<article>"];
+        parts.push("<h2>" + esc(this.titleText) + "</h2>");
+        this.paragraphs.forEach(function (p) { parts.push("<p>" + esc(p) + "</p>"); });
+        if (this.tagText) parts.push("<span class='tag'>" + esc(this.tagText) + "</span>");
+        parts.push("</article>");
+        return parts.join("\n");
+      };
+
+      document.getElementById("build").addEventListener("click", function () {
+        var lines = document.getElementById("body").value.split("\n").filter(function (s) { return s.trim(); });
+
+        var article = new Article()
+          .title(document.getElementById("title").value)
+          .tag(document.getElementById("tag").value);
+        lines.forEach(function (text) { article.paragraph(text); });
+
+        var markup = article.render();
+        document.getElementById("preview").innerHTML = markup;
+        document.getElementById("out").textContent = markup;
+      });
+    </script>
+  </body>
+</html>
+```

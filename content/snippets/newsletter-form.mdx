@@ -1,0 +1,35 @@
+---
+title: Newsletter Signup
+description: Card + inline banner variants, topic tags, frequency picker, social proof avatars, success state.
+tags: [Tailwind, Two Variants, JS]
+icon: 📬
+component: NewsletterForm
+order: 3
+---
+
+## Preview
+
+<Preview>
+  <NewsletterForm />
+</Preview>
+
+## Notes
+
+- Includes a card layout and an inline banner variant.
+- Topic tags and a frequency picker make preferences explicit.
+- Social proof avatars build trust near the CTA.
+- A friendly success state replaces the form after submission.
+
+## Usage
+
+```tsx
+import { NewsletterForm } from "@/components/snippets/newsletter-form";
+
+export function Page() {
+  return <NewsletterForm />;
+}
+```
+
+## Source
+
+<SourceCode file="src/components/snippets/newsletter-form.tsx" />

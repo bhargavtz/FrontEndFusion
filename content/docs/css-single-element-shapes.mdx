@@ -1,0 +1,230 @@
+---
+title: Single Element Shapes
+description: Carve triangles, circles, trapezoids, bursts, cubes, and pyramids out of one box using borders, clip-path, and transforms.
+chapter: 38
+category: "CSS"
+order: 138
+---
+
+# Single Element Shapes
+
+Every shape on this page starts as an empty `div` with no children and no images. The box model, `clip-path`, and transforms are enough to produce a whole vocabulary of geometry — useful for icons, decoration, and diagrams that should not cost a network request.
+
+## Triangles, circles, and capsules
+
+A border on a zero-sized box is drawn as a wedge. Each side meets its neighbours at a diagonal, so putting a colour on one side and `transparent` on the other three leaves a triangle.
+
+```css
+.tri {
+  width: 0;
+  height: 0;
+  border-left: 34px solid transparent;
+  border-right: 34px solid transparent;
+  border-bottom: 58px solid #4b6cf5;
+}
+```
+
+The two vertical borders set the base width, the bottom border sets the height, and the colour sits on the side you want the shape to point away from. Rotate the whole thing with `transform` for the other three directions.
+
+`border-radius` accepts two values separated by a slash: the horizontal radius, then the vertical. Equal values that exceed half the box produce a circle; unequal ones produce an ellipse.
+
+```css
+.circle  { border-radius: 50%; }
+.ellipse { border-radius: 50% / 35%; }
+.capsule { border-radius: 999px; }
+```
+
+`999px` is the idiom for a pill, because the browser clamps the radius to half the shorter side no matter how tall the element gets.
+
+## Clip-path shapes and solid forms
+
+For a trapezoid, take a rectangle and clip two slanted corners:
+
+```css
+.trap { clip-path: polygon(18% 0, 82% 0, 100% 100%, 0 100%); }
+```
+
+`clip-path` is the modern workhorse. `polygon()` takes percentage points and throws away everything outside them, so a starburst is a single long list of alternating outer and inner coordinates, and a hexagon is six points. `circle()` and `ellipse()` are the other two clip functions you will use often, and `inset()` cuts a rectangle with rounded corners — handy for framing an image.
+
+One caveat: clipping does not change layout. The element still occupies its original box, so add padding to the parent if the cut-away corners need room.
+
+A cube pushes the 3D illusion further: one square plus two pseudo-elements. Skew each of them and attach it to a different edge, then dim one face so the light reads consistently.
+
+```css
+.cube { transform-style: preserve-3d; transform: rotateX(-18deg) rotateY(-28deg); }
+.cube::before, .cube::after { content: ""; position: absolute; }
+```
+
+A pyramid is the border triangle from earlier, assembled with two skewed halves mirrored around a centre line, or simply approximated with three `clip-path` triangles positioned around a shared apex. Both techniques are illusions — a flat screen has no depth, so you are only ever drawing the silhouette and shading it convincingly.
+
+## A complete example
+
+A gallery of nine shapes, each built from a single box, arranged in a soft grid.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shape gallery</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 44px 20px;
+        font-family: system-ui, sans-serif;
+        background: linear-gradient(160deg, #eef2fb, #f9fafd 60%);
+        color: #16203a;
+      }
+
+      .board {
+        max-width: 620px;
+        margin: 0 auto;
+        padding: 30px;
+        background: #fff;
+        border-radius: 22px;
+        box-shadow: 0 30px 60px -45px rgba(22, 32, 58, 0.6);
+      }
+
+      h1 {
+        margin: 0 0 24px;
+        font-size: 0.95rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: #7b8aa5;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+        gap: 18px;
+      }
+
+      .cell {
+        display: grid;
+        place-items: center;
+        height: 120px;
+        background: #f5f8fd;
+        border-radius: 14px;
+      }
+
+      .label {
+        display: block;
+        margin-top: 8px;
+        text-align: center;
+        font-size: 0.68rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #8b99b1;
+      }
+
+      /* triangle */
+      .tri {
+        width: 0;
+        height: 0;
+        border-left: 30px solid transparent;
+        border-right: 30px solid transparent;
+        border-bottom: 52px solid #4b6cf5;
+      }
+
+      /* circle */
+      .circle {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: linear-gradient(140deg, #7d5cf0, #4b6cf5);
+      }
+
+      /* ellipse */
+      .ellipse {
+        width: 76px;
+        height: 44px;
+        border-radius: 50%;
+        background: linear-gradient(140deg, #3fb98a, #1e8f72);
+      }
+
+      /* trapezoid */
+      .trap {
+        width: 84px;
+        height: 50px;
+        background: #e2894b;
+        clip-path: polygon(20% 0, 80% 0, 100% 100%, 0 100%);
+      }
+
+      /* burst */
+      .burst {
+        width: 62px;
+        height: 62px;
+        background: #d9534f;
+        clip-path: polygon(
+          50% 0%, 61% 19%, 82% 12%, 79% 34%, 100% 45%,
+          81% 56%, 92% 76%, 69% 74%, 60% 96%, 48% 78%,
+          28% 92%, 30% 68%, 8% 62%, 24% 46%, 6% 30%,
+          31% 30%, 34% 8%
+        );
+      }
+
+      /* cube */
+      .cube {
+        position: relative;
+        width: 52px;
+        height: 52px;
+        background: #4b6cf5;
+        transform: rotate(30deg) skewY(-8deg);
+      }
+
+      .cube::before {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto auto;
+        width: 16px;
+        height: 100%;
+        background: #3150d8;
+        transform: skewY(38deg) translateY(-8px);
+        transform-origin: top left;
+      }
+
+      .cube::after {
+        content: "";
+        position: absolute;
+        inset: auto auto 0 0;
+        width: 100%;
+        height: 16px;
+        background: #8ea5ff;
+        transform: skewX(38deg) translateX(8px);
+        transform-origin: bottom left;
+      }
+
+      /* pyramid */
+      .pyramid {
+        width: 0;
+        height: 0;
+        border-left: 32px solid transparent;
+        border-right: 32px solid transparent;
+        border-bottom: 54px solid #b07a2f;
+        filter: drop-shadow(8px 0 0 #d9a55a);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="board">
+      <h1>Shapes from single boxes</h1>
+      <div class="grid">
+        <div class="cell"><div class="tri"></div></div>
+        <div class="cell"><div class="circle"></div></div>
+        <div class="cell"><div class="ellipse"></div></div>
+        <div class="cell"><div class="trap"></div></div>
+        <div class="cell"><div class="burst"></div></div>
+        <div class="cell"><div class="cube"></div></div>
+      </div>
+      <div class="grid" style="margin-top: 18px; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));">
+        <div><div class="cell"><div class="pyramid"></div></div><span class="label">Pyramid</span></div>
+        <div><div class="cell"><div class="trap" style="background:#1e8f72; clip-path: polygon(30% 0, 70% 0, 100% 100%, 0 100%);"></div></div><span class="label">Narrow trapezoid</span></div>
+        <div><div class="cell"><div class="circle" style="border-radius: 999px; width: 74px; height: 44px; background: #7d5cf0;"></div></div><span class="label">Capsule</span></div>
+      </div>
+    </div>
+  </body>
+</html>
+```
+
+Change a single coordinate in the burst polygon and the whole star shifts — that is the real advantage of shapes made of numbers. They scale, recolour from one property, and weigh nothing.

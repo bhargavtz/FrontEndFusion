@@ -1,0 +1,84 @@
+---
+title: Binary Data
+description: Work with raw bytes using ArrayBuffer, TypedArrays, DataView, and Blobs in the browser.
+chapter: 53
+category: "JavaScript"
+order: 353
+---
+
+# Binary Data
+
+JavaScript is not limited to text and objects. It can also handle raw bytes, which is what images, audio, file uploads, and network protocols are made of. The `ArrayBuffer` type is a fixed-length block of memory, and views layered on top of it let you interpret those bytes in structured ways.
+
+## ArrayBuffer and TypedArrays
+
+An `ArrayBuffer` is an opaque container; you cannot read it directly. You wrap it in a typed array such as `Uint8Array` for bytes or `Float64Array` for numbers. Every view points at the same memory, so changing one is visible through the others.
+
+```js
+const buffer = new ArrayBuffer(4);
+const bytes = new Uint8Array(buffer); // four values, each 0-255
+bytes[0] = 255;
+```
+
+Because the same bytes can mean different things, you must pay attention to byte order, known as endianness, when reading multi-byte numbers.
+
+## DataView and byte manipulation
+
+`DataView` gives explicit control that typed arrays hide. Methods like `setUint32()` and `getUint32()` take a byte offset plus a boolean flag choosing little-endian or big-endian layout. This makes it possible to parse binary file headers correctly on any device, instead of trusting the host machine's default order.
+
+## Blob, Base64, and iteration
+
+A `Blob` bundles raw data with a MIME type and is what a file input hands you. Convert a `Blob` to bytes with `blob.arrayBuffer()`, or build one from bytes with `new Blob([buffer])`. To carry bytes inside text you can decode a Base64 string into a `Uint8Array`. Any typed array supports a plain `for...of` loop, and `Array.from()` turns it into a regular array for methods like `map()`.
+
+The inspector below writes RGBA bytes into one shared buffer while a `DataView` reads the very same bytes as 32-bit integers in both byte orders.
+
+```html
+<div class="bd-wrap">
+  <div class="bd-card">
+    <h2>Byte Inspector</h2>
+    <p class="bd-sub">Move a slider. One block of memory is viewed three different ways.</p>
+    <div class="bd-controls">
+      <label>R <input id="r" type="range" min="0" max="255" value="220"></label>
+      <label>G <input id="g" type="range" min="0" max="255" value="60"></label>
+      <label>B <input id="b" type="range" min="0" max="255" value="120"></label>
+    </div>
+    <div id="swatch" class="bd-swatch"></div>
+    <pre id="out" class="bd-out"></pre>
+  </div>
+</div>
+<style>
+  .bd-wrap{font-family:system-ui,sans-serif;background:#eef2f7;padding:18px;border-radius:14px;}
+  .bd-card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 6px 18px rgba(30,50,80,.08);}
+  .bd-card h2{margin:0 0 4px;font-size:18px;color:#1e293b;}
+  .bd-sub{margin:0 0 14px;color:#64748b;font-size:13px;}
+  .bd-controls{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px;}
+  .bd-controls label{font-size:13px;font-weight:600;color:#334155;display:flex;align-items:center;gap:6px;}
+  .bd-swatch{height:54px;border-radius:10px;margin-bottom:12px;border:1px solid #e2e8f0;transition:background .15s;}
+  .bd-out{background:#0f172a;color:#7dd3fc;padding:12px;border-radius:8px;font-size:12px;line-height:1.7;white-space:pre-wrap;margin:0;}
+</style>
+<script>
+  const out = document.getElementById('out');
+  const swatch = document.getElementById('swatch');
+  function render(){
+    const buffer = new ArrayBuffer(8);
+    const bytes = new Uint8Array(buffer);
+    const view = new DataView(buffer);
+    const r = Number(document.getElementById('r').value);
+    const g = Number(document.getElementById('g').value);
+    const b = Number(document.getElementById('b').value);
+    bytes[0] = r; bytes[1] = g; bytes[2] = b; bytes[3] = 255;
+    view.setUint32(4, 0xAABBCCDD, false);
+    const hex = Array.from(bytes, n => n.toString(16).padStart(2, '0').toUpperCase()).join(' ');
+    swatch.style.background = 'rgb(' + r + ',' + g + ',' + b + ')';
+    out.textContent =
+      'Bytes (hex):        ' + hex + '\n' +
+      'First 4 as LE int:  ' + view.getUint32(0, true) + '\n' +
+      'First 4 as BE int:  ' + view.getUint32(0, false) + '\n' +
+      'Last 4 fixed BE:    0x' + view.getUint32(4, false).toString(16).toUpperCase();
+  }
+  ['r', 'g', 'b'].forEach(function(id){
+    document.getElementById(id).addEventListener('input', render);
+  });
+  render();
+</script>
+```

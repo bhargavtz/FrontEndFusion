@@ -1,0 +1,80 @@
+---
+title: Security issues
+description: Recognize the most common client-side security flaws, including cross-site scripting and unsafe evaluation, and learn how to neutralize them.
+chapter: 95
+category: "JavaScript"
+order: 395
+---
+
+# Security issues
+
+JavaScript runs with whatever privileges the page has, so a bug can quickly become a vulnerability. The golden rule is to treat every value that comes from a user, a URL, or another site as untrusted until you have validated or escaped it.
+
+## Cross-site scripting (XSS)
+
+Cross-site scripting happens when untrusted text is injected into the page as markup or code. In a **reflected** attack, the malicious payload arrives in the request itself, such as a query string that a search page echoes back. In a **persistent** attack, the payload is stored on the server, for example in a comment, and later shown to every visitor. A third variant hides the payload inside a JavaScript string literal, so building source code by concatenation can break out of the quotes and execute arbitrary statements.
+
+The fix is to choose the right sink. Writing text with `textContent` is safe because the browser treats it as plain characters. Passing it to `innerHTML`, `document.write`, or `eval` interprets it as code. When you truly need markup, escape special characters first and prefer a vetted sanitizer over a homemade regular expression.
+
+## Unsafe evaluation and JSON injection
+
+`eval()` executes a string in the current scope, which means data can turn into code. A classic mistake is evaluating a JSON response with `eval("(" + text + ")")`; a hostile response can contain a function call instead of an object. Use `JSON.parse()` instead, which only accepts data syntax and never runs expressions. The same caution applies to the `Function` constructor and to template strings that are later evaluated.
+
+The demo below renders the same input twice: once safely with `textContent`, and once with `innerHTML` to show what an unsafe sink would do. The sample payload is harmless markup, but the difference makes the risk visible.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>XSS sink demo</title>
+    <style>
+      body { margin: 0; padding: 24px 16px; font-family: system-ui, sans-serif;
+        color: #2c2b38; background: linear-gradient(135deg, #fdf1f2, #eef1fb 80%); }
+      .card { max-width: 620px; margin: 0 auto; padding: 22px; background: #fff;
+        border-radius: 18px; box-shadow: 0 20px 40px -28px rgba(50,40,70,.45); }
+      h1 { margin: 0 0 6px; font-size: 1.15rem; }
+      p.hint { margin: 0 0 14px; font-size: .82rem; color: #6b6878; }
+      input { width: 100%; box-sizing: border-box; padding: 9px 11px; border: 1px solid #d7d3e2;
+        border-radius: 9px; font: inherit; font-size: .85rem; }
+      .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+      .panel { padding: 12px; border-radius: 11px; min-height: 92px; background: #f5f6fb; }
+      .panel.safe { border-left: 4px solid #2f9e6b; }
+      .panel.risky { border-left: 4px solid #d05050; }
+      .label { font-size: .7rem; text-transform: uppercase; letter-spacing: .05em;
+        color: #77738a; margin-bottom: 8px; }
+      .value { font-size: .85rem; word-break: break-word; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Trusted sink vs. unsafe sink</h1>
+      <p class="hint">Edit the text and watch how the two panels interpret it.</p>
+      <input id="text" value="&lt;b style=&quot;color:#d05050&quot;&gt;looks like markup&lt;/b&gt;" />
+      <div class="panels">
+        <div class="panel safe">
+          <div class="label">Safe: textContent</div>
+          <div class="value" id="safe"></div>
+        </div>
+        <div class="panel risky">
+          <div class="label">Unsafe: innerHTML</div>
+          <div class="value" id="risky"></div>
+        </div>
+      </div>
+    </div>
+    <script>
+      var input = document.getElementById("text");
+      var safe = document.getElementById("safe");
+      var risky = document.getElementById("risky");
+      function render() {
+        var text = input.value;
+        safe.textContent = text;
+        risky.innerHTML = text;
+      }
+      input.addEventListener("input", render);
+      render();
+    </script>
+  </body>
+</html>
+```

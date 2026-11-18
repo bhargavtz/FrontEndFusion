@@ -1,0 +1,103 @@
+---
+title: "Opacity"
+description: "Fade whole elements, blend layers, and understand how opacity differs from alpha colours and affects stacking."
+chapter: 19
+category: "CSS"
+order: 119
+---
+
+# Opacity
+
+`opacity` takes a number from `0` to `1`, where `0` is fully transparent and `1` is fully opaque. It applies to the element as a whole — background, border, text, and every descendant — which is both its strength and its main limitation.
+
+## What the property actually does
+
+The browser renders the element and its subtree into an offscreen layer, then composites that layer onto the page with the requested transparency. As a consequence, a child cannot be more opaque than its parent. If a card has `opacity: .5`, a `color: #000` heading inside it will visually read as grey, no matter what colour you declare.
+
+That behaviour is useful for disabled states, hover fades, and modal backdrops, where fading the group is the intent. It is wrong for a translucent panel that needs crisp text on top. In that case, use an alpha colour on the background — `rgba(255, 255, 255, .6)` or `hsl(0 0% 100% / .6)` — so the text keeps full contrast while the panel lets the backdrop through.
+
+Opacity is also animatable and cheap to composite in modern browsers, which makes it a good choice for transitions. Animating `opacity` is far less expensive than animating `background-color`, because it can be handled by the compositor.
+
+## Stacking and side effects
+
+Any value below `1` creates a stacking context. That means `z-index` on descendants is contained within the faded element, and a child can never paint above a sibling of its faded ancestor, no matter how large its `z-index`. This is a common cause of "my tooltip is behind the header" when a parent has a fade applied.
+
+Opacity also affects hit testing and rendering of shadows: a box shadow belongs to the element, so it fades with it. For partially transparent text alone, prefer `color` with alpha, which leaves children unaffected.
+
+Legacy Internet Explorer lacked `opacity` and needed the proprietary `filter: alpha(opacity=50)` alongside it. That syntax is dead; do not include it in new code.
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Opacity and alpha compared</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 26px;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      background: radial-gradient(circle at 20% 10%, #3d5a80, #1b263b 65%);
+      color: #f2f6fb;
+      min-height: 100vh;
+    }
+    h2 { margin: 0 0 4px; font-size: 1.05rem; }
+    .lede { margin: 0 0 18px; font-size: .84rem; color: #a9bcd0; }
+    .row { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+    .circle {
+      width: 84px;
+      height: 84px;
+      border-radius: 50%;
+      background: linear-gradient(140deg, #7fd1c1, #4a8fb5);
+      display: grid;
+      place-items: center;
+      font-size: .72rem;
+      font-weight: 700;
+      color: #10202b;
+    }
+    .o25 { opacity: .25; }
+    .o50 { opacity: .5; }
+    .o75 { opacity: .75; }
+    .glass {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, .14);
+      border: 1px solid rgba(255, 255, 255, .28);
+      backdrop-filter: blur(8px);
+      font-size: .85rem;
+      line-height: 1.6;
+    }
+    .glass strong { color: #9be3cf; }
+    .ghost {
+      margin-top: 16px;
+      padding: .6rem 1rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, .3);
+      background: rgba(255, 255, 255, .12);
+      color: #f2f6fb;
+      font: inherit;
+      font-size: .82rem;
+      opacity: .45;
+      cursor: not-allowed;
+    }
+    .note { margin-top: 12px; font-size: .72rem; color: #8ea6bc; }
+  </style>
+</head>
+<body>
+  <h2>Fade the layer, not the words</h2>
+  <p class="lede">A single property, three strengths. The glass panel below uses alpha colours instead, so its text stays sharp.</p>
+  <div class="row">
+    <div class="circle o25">.25</div>
+    <div class="circle o50">.50</div>
+    <div class="circle o75">.75</div>
+  </div>
+  <div class="glass">
+    <strong>Translucent panel.</strong> The background is <code>rgba(255,255,255,.14)</code> while the text keeps full opacity — the opposite trade-off from fading the whole card.
+  </div>
+  <button class="ghost" disabled>Unavailable action</button>
+  <p class="note">Opacity creates a stacking context, so descendants cannot escape the faded layer.</p>
+</body>
+</html>
+```

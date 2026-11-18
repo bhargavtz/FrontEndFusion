@@ -1,0 +1,140 @@
+---
+title: Custom Elements
+description: Define reusable custom HTML elements with the Custom Elements API and react to attribute changes.
+chapter: 51
+category: "JavaScript"
+order: 351
+---
+
+# Custom Elements
+
+Custom Elements let you teach the browser new HTML tags. You define a JavaScript class, register it under a name, and from then on the parser upgrades matching tags into working components with their own markup, styles, and behaviour. It is the foundation of framework-free web components and works alongside the shadow DOM and HTML templates.
+
+## Registering an element
+
+Call `customElements.define(name, class)` with a class that extends `HTMLElement`. The name must contain a hyphen — something like `score-badge` — so it can never collide with a future standard tag. Once registered, you can use the tag in markup or create instances with `document.createElement()`.
+
+```js
+class ScoreBadge extends HTMLElement {
+  connectedCallback() {
+    this.textContent = this.getAttribute("score") || "?";
+  }
+}
+customElements.define("score-badge", ScoreBadge);
+```
+
+The `connectedCallback()` runs each time the element is inserted into the document, making it the right place for initial rendering and for attaching event listeners.
+
+## Reacting to attributes
+
+To respond to later attribute changes, declare which names you care about in a static `observedAttributes` array. The `attributeChangedCallback(name, oldValue, newValue)` method fires whenever one of those attributes is added, changed, or removed. Use it to update the element in place without recreating it. Remember to clean up listeners in `disconnectedCallback()` when the element leaves the page.
+
+The demo registers a `score-badge` element. Its `score` attribute controls both the number and the colour of the badge, and its `label` attribute sets the caption. A small form lets you append new badges at different scores. If the browser lacks the API, a visible fallback message explains that the custom tags would remain inert.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Custom elements</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 40px 18px;
+        font-family: system-ui, sans-serif;
+        background: #eef0fa;
+        color: #232952;
+      }
+      .card {
+        max-width: 580px;
+        margin: 0 auto;
+        padding: 28px 30px 30px;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 26px 54px -40px rgba(35, 41, 82, 0.6);
+      }
+      h1 { margin: 0 0 6px; font-size: 1.25rem; }
+      p { margin: 0 0 18px; color: #6c72a0; font-size: 0.9rem; }
+      .row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+      input {
+        border: 1px solid #d5d9f0; border-radius: 10px;
+        padding: 9px 11px; font: inherit; font-size: 0.86rem; width: 110px;
+      }
+      button {
+        border: 0; border-radius: 10px; padding: 9px 14px; cursor: pointer;
+        font: inherit; font-size: 0.83rem; font-weight: 600;
+        background: #4b52bb; color: #fff;
+      }
+      .gallery { display: flex; flex-wrap: wrap; gap: 12px; min-height: 80px; }
+      score-badge {
+        display: inline-flex; flex-direction: column; align-items: center;
+        padding: 10px 16px; border-radius: 12px; min-width: 84px;
+        background: #eef6f1; color: #1d7a4e; font-family: system-ui, sans-serif;
+      }
+      score-badge .value { font-size: 1.4rem; font-weight: 700; }
+      score-badge .cap { font-size: 0.72rem; opacity: 0.8; }
+      .out {
+        margin: 16px 0 0; min-height: 40px; padding: 12px 14px;
+        background: #f1f3fc; border-radius: 10px;
+        font-size: 0.8rem; color: #4b52bb;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Score badges</h1>
+      <p>Each badge is a custom element that redraws when its attributes change.</p>
+      <div class="row">
+        <input id="label" value="Quiz" />
+        <input id="score" type="number" min="0" max="100" value="80" />
+        <button id="add">Add badge</button>
+      </div>
+      <div class="gallery" id="gallery"></div>
+      <pre id="out" class="out">Registering element...</pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      var gallery = document.getElementById("gallery");
+
+      if (window.customElements && !customElements.get("score-badge")) {
+        class ScoreBadge extends HTMLElement {
+          static get observedAttributes() { return ["score", "label"]; }
+          connectedCallback() { this.render(); }
+          attributeChangedCallback() { this.render(); }
+          render() {
+            var value = Number(this.getAttribute("score") || 0);
+            var label = this.getAttribute("label") || "Score";
+            this.innerHTML = "";
+            var big = document.createElement("div");
+            big.className = "value";
+            big.textContent = value;
+            var cap = document.createElement("div");
+            cap.className = "cap";
+            cap.textContent = label;
+            this.appendChild(big);
+            this.appendChild(cap);
+            var low = value < 50;
+            this.style.background = low ? "#fdeaea" : "#eef6f1";
+            this.style.color = low ? "#a33232" : "#1d7a4e";
+          }
+        }
+        customElements.define("score-badge", ScoreBadge);
+        out.textContent = "Custom element 'score-badge' is registered.";
+      } else {
+        out.textContent = "Custom Elements API unavailable - tags cannot be upgraded here.";
+      }
+
+      document.getElementById("add").onclick = function () {
+        var badge = document.createElement("score-badge");
+        badge.setAttribute("label", document.getElementById("label").value || "Score");
+        badge.setAttribute("score", document.getElementById("score").value);
+        gallery.appendChild(badge);
+        out.textContent = "Added a badge; later attribute changes redraw it automatically.";
+      };
+    </script>
+  </body>
+</html>
+```
+
+Changing a badge's `score` attribute after insertion triggers `attributeChangedCallback()`, so the colour and number update without any manual refresh call.

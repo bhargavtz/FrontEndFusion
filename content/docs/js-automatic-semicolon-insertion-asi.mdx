@@ -1,0 +1,117 @@
+---
+title: Automatic Semicolon Insertion - ASI
+description: Understand when JavaScript inserts missing semicolons and why a newline after return can silently change what a function returns.
+chapter: 69
+category: "JavaScript"
+order: 369
+---
+
+# Automatic Semicolon Insertion - ASI
+
+JavaScript does not strictly require semicolons. When a statement is missing one, the parser inserts it automatically in certain situations. This feature, called automatic semicolon insertion, is convenient but can produce surprising results if you rely on it without understanding the rules.
+
+## Rules of insertion
+
+The engine inserts a semicolon when it meets a token it cannot parse, provided that token is separated from the previous one by at least one line break. It also inserts one at the end of a line that is clearly complete, and at the end of the input. A crucial detail is that the line break matters: without one, the tokens usually combine into a single expression instead of two statements.
+
+Statements most affected include `return`, `throw`, `break`, `continue`, variable declarations, and expression statements. The classic trap is starting a new line with `(` or `[` after a statement, because the parser treats it as a continuation such as a function call or property access.
+
+## Never break after return
+
+When a `return` statement is followed by a line break, a semicolon is inserted immediately after `return`. Any expression on the next line is unreachable. Returning an object literal on the following line therefore returns `undefined`, because the braces are parsed as a block rather than an object. Keeping the value on the same line as `return`, or wrapping it in parentheses, avoids the bug.
+
+Many teams adopt a style guide that either always writes explicit semicolons or deliberately omits them but guards the risky cases. Either choice is fine as long as it is consistent and a linter enforces it.
+
+The demo defines two nearly identical functions and reveals their different return values, then shows how a leading bracket changes parsing.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Automatic semicolon insertion</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px 18px;
+        font-family: system-ui, sans-serif;
+        color: #2c2b35;
+        background: radial-gradient(circle at 85% 0%, #eaeefb, #f6f6fa 60%);
+      }
+      .card {
+        max-width: 540px;
+        margin: 0 auto;
+        padding: 22px;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 20px 42px -30px rgba(40, 45, 90, 0.5);
+      }
+      h1 { margin: 0 0 14px; font-size: 1.15rem; }
+      .row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+      button {
+        padding: 8px 12px;
+        border: 1px solid #d8def4;
+        border-radius: 9px;
+        background: #f8faff;
+        color: #3d4c9a;
+        font: inherit;
+        font-size: 0.8rem;
+        cursor: pointer;
+      }
+      pre {
+        margin: 0;
+        padding: 14px;
+        border-radius: 12px;
+        background: #1e2233;
+        color: #cdd6ff;
+        font-size: 0.78rem;
+        line-height: 1.65;
+        white-space: pre-wrap;
+      }
+      .warn { color: #ffb4a8; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Where did my return value go?</h1>
+      <div class="row">
+        <button id="broken">Line break after return</button>
+        <button id="fixed">Value on same line</button>
+        <button id="bracket">Leading bracket case</button>
+      </div>
+      <pre id="out"></pre>
+    </div>
+    <script>
+      function broken() {
+        return
+        { value: 42 };
+      }
+      function fixed() {
+        return { value: 42 };
+      }
+      function bracketCase() {
+        var a = 1;
+        var b = a
+        [0];
+        return b;
+      }
+      var out = document.getElementById("out");
+      document.getElementById("broken").addEventListener("click", function () {
+        out.innerHTML = "return\n{ value: 42 };\n\nResult: " +
+          "<span class='warn'>" + String(broken()) + "</span>\n" +
+          "A semicolon was inserted right after return.";
+      });
+      document.getElementById("fixed").addEventListener("click", function () {
+        out.textContent = "return { value: 42 };\n\nResult: " + JSON.stringify(fixed()) +
+          "\nThe object literal stays on the return line.";
+      });
+      document.getElementById("bracket").addEventListener("click", function () {
+        out.textContent = "var b = a\n[0];\n\nParsed as: a[0]\nResult: " + String(bracketCase()) +
+          "\nThe bracket continues the previous expression.";
+      });
+      document.getElementById("broken").click();
+    </script>
+  </body>
+</html>
+```

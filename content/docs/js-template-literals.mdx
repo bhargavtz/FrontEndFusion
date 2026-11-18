@@ -1,0 +1,82 @@
+---
+title: Template Literals
+description: Build strings with interpolation, multiline text, tagged templates, and raw values.
+chapter: 54
+category: "JavaScript"
+order: 354
+---
+
+# Template Literals
+
+Template literals are strings delimited by backticks instead of quotes. They make interpolation, multiline text, and HTML construction far cleaner than repeated concatenation with the plus operator.
+
+## Interpolation and multiline strings
+
+Inside a backtick string, place a JavaScript expression between a dollar sign and curly braces. The expression is evaluated and its result is converted to text and inserted in place. Unlike ordinary quoted strings, a template literal can span lines, and the line breaks are preserved exactly as written.
+
+```js
+const name = 'Ada';
+const greeting = `Hello, ${name}!
+Today is ${new Date().toDateString()}.`;
+```
+
+Any expression works inside the placeholder: arithmetic, a function call, or a property access. Just keep side effects out of it so the string stays easy to reason about.
+
+## Tagged templates and raw strings
+
+A tag is a function placed before a template literal. It receives an array of the literal text chunks plus each interpolated value as separate arguments. That lets you escape HTML, translate text, or format numbers before they join. The tag also exposes a `raw` property, which holds the text exactly as typed, with escape sequences unprocessed. This is handy when building regular expressions or code snippets.
+
+## Building HTML with templates
+
+Because multiline text and interpolation combine naturally, template literals are a popular way to render markup. You can map an array of items to a chunk of HTML and join the results. Remember that injecting user data this way can create a cross-site scripting risk, so escape untrusted values first.
+
+The receipt builder below uses a multiline literal for plain text and a small tag that wraps each computed value in a strong element.
+
+```html
+<div class="tl-wrap">
+  <div class="tl-card">
+    <h2>Receipt Builder</h2>
+    <p class="tl-sub">Quantity:
+      <button id="minus" type="button">&minus;</button>
+      <span id="qty">2</span>
+      <button id="plus" type="button">&plus;</button>
+    </p>
+    <div id="receipt" class="tl-receipt"></div>
+    <pre id="out" class="tl-out"></pre>
+  </div>
+</div>
+<style>
+  .tl-wrap{font-family:system-ui,sans-serif;background:#fdf2f8;padding:18px;border-radius:14px;}
+  .tl-card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 6px 18px rgba(80,30,60,.08);}
+  .tl-card h2{margin:0 0 4px;font-size:18px;color:#831843;}
+  .tl-sub{margin:0 0 14px;color:#9d174d;font-size:13px;}
+  .tl-sub button{width:28px;height:26px;border:1px solid #f9a8d4;background:#fff;border-radius:6px;cursor:pointer;color:#9d174d;font-weight:700;}
+  .tl-receipt{background:#fce7f3;border:1px dashed #f472b6;border-radius:10px;padding:12px;margin-bottom:12px;font-size:14px;color:#831843;}
+  .tl-receipt strong{color:#be185d;}
+  .tl-out{background:#0f172a;color:#f9a8d4;padding:12px;border-radius:8px;font-size:12px;line-height:1.6;white-space:pre-wrap;margin:0;}
+</style>
+<script>
+  let qty = 2;
+  const price = 12.5;
+  function money(n){ return '$' + n.toFixed(2); }
+  function highlight(strings, ...values){
+    return strings.reduce(function(acc, s, i){
+      return acc + s + (i < values.length ? '<strong>' + values[i] + '</strong>' : '');
+    }, '');
+  }
+  function render(){
+    const total = qty * price;
+    const lines = `ORDER SUMMARY
+Item:  Notebook
+Qty:   ${qty}
+Price: ${money(price)}
+Total: ${money(total)}`;
+    document.getElementById('qty').textContent = qty;
+    document.getElementById('receipt').innerHTML = highlight`Total due: ${money(total)} for ${qty} item(s)`;
+    document.getElementById('out').textContent = lines;
+  }
+  document.getElementById('plus').addEventListener('click', function(){ qty++; render(); });
+  document.getElementById('minus').addEventListener('click', function(){ if(qty > 1){ qty--; render(); } });
+  render();
+</script>
+```

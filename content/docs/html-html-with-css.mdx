@@ -1,0 +1,95 @@
+---
+title: Using HTML with CSS
+description: Attach stylesheets externally, internally, or inline — and understand which one wins.
+chapter: 14
+category: "HTML"
+order: 24
+---
+
+# Using HTML with CSS
+
+HTML provides structure; CSS provides presentation. There are three ways to connect them.
+
+## External stylesheet
+
+```html
+<link rel="stylesheet" href="/css/site.css" />
+```
+
+This is the preferred approach for real projects:
+
+- One file can style every page.
+- The browser caches it.
+- Styles are easy to review and version.
+- HTML stays focused on content.
+
+## Internal stylesheet
+
+```html
+<style>
+  .callout {
+    border-left: 4px solid #0f766e;
+    background: #f0fdfa;
+    padding: 12px 16px;
+  }
+</style>
+
+<p class="callout">Internal styles are scoped to this document.</p>
+```
+
+Use internal styles for a single self-contained page, an email template, or a critical style that must load with the document.
+
+## Inline style
+
+```html
+<p style="color: #9a3412; font-weight: 600;">
+  This paragraph carries its own style.
+</p>
+```
+
+Inline styles are hard to reuse and override. They are acceptable for dynamic values set by JavaScript, such as a progress width, or for quick prototypes.
+
+## Multiple stylesheets
+
+```html
+<link rel="stylesheet" href="/css/base.css" />
+<link rel="stylesheet" href="/css/components.css" />
+<link rel="stylesheet" href="/css/print.css" media="print" />
+```
+
+When rules conflict, the cascade decides the winner. Consider:
+
+1. **Origin and importance** — author styles beat user-agent styles; `!important` changes the order.
+2. **Specificity** — an ID selector beats a class selector, which beats an element selector.
+3. **Source order** — when specificity is equal, the later rule wins.
+
+```html
+<style>
+  .card { color: #1d4ed8; }
+  .card { color: #b91c1c; }
+</style>
+
+<p class="card">This text is red because the later rule wins.</p>
+```
+
+## A maintainable order
+
+A common structure is:
+
+```html
+<link rel="stylesheet" href="/css/reset.css" />
+<link rel="stylesheet" href="/css/tokens.css" />
+<link rel="stylesheet" href="/css/layout.css" />
+<link rel="stylesheet" href="/css/components.css" />
+<link rel="stylesheet" href="/css/utilities.css" />
+```
+
+Load broad, low-specificity rules first and narrow utilities last.
+
+## Practical advice
+
+- Prefer external styles.
+- Use classes for reusable styles.
+- Avoid `!important` unless you are overriding third-party CSS.
+- Keep inline styles for values that genuinely change at runtime.
+- Test with the stylesheet disabled to confirm the HTML still makes sense.

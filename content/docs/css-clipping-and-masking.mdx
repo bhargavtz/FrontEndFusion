@@ -1,0 +1,170 @@
+---
+title: Clipping and Masking
+description: Cut elements into circles and polygons with clip-path, then fade, feather, and punch holes with mask-image.
+chapter: 44
+category: "CSS"
+order: 144
+---
+
+# Clipping and Masking
+
+Clipping and masking both hide part of an element, but they hide it in different ways. A clip is a hard-edged path: everything outside the path disappears. A mask is a transparency map: each pixel of the mask decides how much of the element shows through, so you can fade, feather, or punch holes.
+
+Both are paint-time operations. The element still occupies its original box in layout, so surrounding content does not reflow.
+
+## Hard edges with clip-path
+
+`clip-path` accepts basic shapes and arbitrary polygons:
+
+- `circle(50% at 50% 40%)` — a circle centred slightly high, the standard avatar crop.
+- `ellipse(60% 40% at 50% 50%)` — oval framing for portraits.
+- `inset(12px 24px round 18px)` — a rounded rectangular crop, useful for photo cards.
+- `polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%)` — a hexagon badge.
+- `path("...")` — an SVG path for anything hand-drawn.
+
+Shapes in the same functional family animate between each other, so a hover that grows a circle from `0%` to `50%` is smooth. Percentages resolve against the element's reference box, which makes shapes responsive without media queries.
+
+## Soft edges with mask-image
+
+`mask-image` takes an image, usually a gradient. Black is opaque, transparent is invisible, and grey is partial. That gives you effects a clip cannot produce:
+
+- `linear-gradient(to bottom, #000 50%, transparent)` — text fading out at the bottom of a card.
+- `radial-gradient(circle, #000 40%, transparent 70%)` — a spotlight vignette.
+- `radial-gradient(circle 32px at 82% 20%, transparent 98%, #000 100%)` — a ticket with a punched hole, drawn as one gradient.
+
+Add `mask-repeat: no-repeat` and `mask-size: 100% 100%` so the gradient covers the element exactly once. Safari still wants the `-webkit-mask-image` alias in production, and masking is more expensive to repaint than clipping, so avoid animating it on large surfaces.
+
+```html
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    gap: 20px;
+    padding: 28px;
+    background: radial-gradient(circle at 20% 0%, #f6f1ff, #e9e4fb 55%, #ddd6f5);
+    font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  }
+  .stage {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    width: min(700px, 94vw);
+  }
+  .tile {
+    padding: 18px;
+    text-align: center;
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 20px 38px -28px rgba(46, 30, 90, 0.75);
+  }
+  .tile h2 {
+    margin: 14px 0 2px;
+    font-size: 0.9rem;
+    color: #3a2b63;
+  }
+  .tile span {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8b7fb3;
+  }
+  .avatar {
+    width: 108px;
+    height: 108px;
+    margin: 0 auto;
+    background: conic-gradient(from 210deg, #7c5cff, #ff8fb1, #ffd166, #7c5cff);
+    clip-path: circle(50% at 50% 45%);
+  }
+  .hex {
+    width: 108px;
+    height: 108px;
+    margin: 0 auto;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(150deg, #2f8f83, #6fd3b6);
+    clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  }
+  .fade {
+    width: 108px;
+    height: 108px;
+    margin: 0 auto;
+    padding: 10px 8px;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    text-align: left;
+    color: #3a2b63;
+    background: linear-gradient(180deg, #eef2ff, #dfe6ff);
+    border-radius: 12px;
+    -webkit-mask-image: linear-gradient(to bottom, #000 42%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 42%, transparent 100%);
+  }
+  .voucher {
+    position: relative;
+    width: min(700px, 94vw);
+    padding: 26px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    color: #ffffff;
+    background: linear-gradient(120deg, #3b2c72, #6a4bd0 55%, #9d7bf0);
+    border-radius: 20px;
+    -webkit-mask-image: radial-gradient(circle 26px at 84% 22%, transparent 98%, #000 100%);
+    mask-image: radial-gradient(circle 26px at 84% 22%, transparent 98%, #000 100%);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+  }
+  .voucher strong {
+    display: block;
+    font-size: 1.15rem;
+    letter-spacing: 0.02em;
+  }
+  .voucher small {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #d9cdfb;
+  }
+  .voucher b {
+    font-size: 1.6rem;
+    letter-spacing: 0.04em;
+  }
+</style>
+
+<div class="stage">
+  <div class="tile">
+    <div class="avatar"></div>
+    <h2>Circle</h2>
+    <span>clip-path: circle()</span>
+  </div>
+  <div class="tile">
+    <div class="hex">44</div>
+    <h2>Polygon</h2>
+    <span>clip-path: polygon()</span>
+  </div>
+  <div class="tile">
+    <div class="fade">Soft edges let content dissolve instead of stopping at a hard line.</div>
+    <h2>Fade</h2>
+    <span>mask-image: linear-gradient()</span>
+  </div>
+</div>
+
+<div class="voucher">
+  <div>
+    <strong>Clipping &amp; masking workshop</strong>
+    <small>one gradient, one hole</small>
+  </div>
+  <b>44</b>
+</div>
+```
+
+Accessibility note: content hidden by a clip or mask is still in the accessibility tree and still focusable. If a control is visually cut away, hide it for real with `display: none` or `visibility: hidden` rather than relying on paint alone.

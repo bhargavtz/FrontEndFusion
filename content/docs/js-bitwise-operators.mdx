@@ -1,0 +1,87 @@
+---
+title: Bitwise operators
+description: Work directly with the binary bits of numbers using logical, shift, and unsigned operators.
+chapter: 15
+category: "JavaScript"
+order: 315
+---
+
+# Bitwise operators
+
+Most JavaScript arithmetic treats numbers as decimal values. Bitwise operators instead convert their operands to 32-bit integers, work on the individual bits, and return a number. They are compact and fast, though best reserved for cases where bit-level control genuinely helps.
+
+## The operators
+
+`&` sets a bit only when it is set in both operands, `|` sets it when it is set in either, and `^` sets it when the bits differ. `~` flips every bit. The shift operators move bits left or right: `<<` shifts left, `>>` shifts right while preserving the sign, and `>>>` shifts right and fills with zeros. Each of the first three also has an assignment form, such as `&=`. Remember that JavaScript views these values as signed 32-bit integers, so results can look surprising when the highest bit is set.
+
+## Bit flags in practice
+
+A common use is packing several yes-or-no options into one number. Assign each option a single bit: one, two, four, eight, and so on, doubling each time. Combine flags with `|`, test whether one is present with `value & flag`, clear one with `value & ~flag`, and toggle one with `value ^ flag`. This pattern is compact for permission masks and feature toggles. Because each flag is a power of two, you can compute it with a left shift like `1 << 3`. To display the mask in binary, call `value.toString(2)`.
+
+## Demo: permission toggler
+
+The demo represents permissions as bits. Toggling a checkbox flips the matching bit, and the panel shows the numeric mask, the binary form, and which permissions are active.
+
+```html
+<div class="wrap">
+  <div class="card">
+    <h2>Permission toggler</h2>
+    <p class="hint">Each checkbox maps to one bit in a single numeric mask.</p>
+    <label><input type="checkbox" data-bit="0" /> Read</label>
+    <label><input type="checkbox" data-bit="1" /> Write</label>
+    <label><input type="checkbox" data-bit="2" /> Delete</label>
+    <label><input type="checkbox" data-bit="3" /> Share</label>
+    <pre class="out" id="out"></pre>
+  </div>
+</div>
+
+<style>
+  .wrap {
+    min-height: 70vh; display: grid; place-items: center;
+    padding: 2rem 1rem; background: #f0eee8;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+  .card {
+    width: min(100%, 25rem); background: #fff; border-radius: 18px;
+    padding: 1.75rem; box-shadow: 0 18px 40px -24px rgba(80, 70, 55, 0.5);
+  }
+  h2 { margin: 0 0 0.35rem; font-size: 1.2rem; color: #433c30; }
+  .hint { margin: 0 0 1.1rem; font-size: 0.85rem; color: #8a8172; }
+  label {
+    display: flex; align-items: center; gap: 0.6rem; padding: 0.45rem 0;
+    font-size: 0.92rem; color: #3f382d; cursor: pointer;
+  }
+  input { width: 1.05rem; height: 1.05rem; accent-color: #a8793f; }
+  .out {
+    margin: 1.1rem 0 0; padding: 0.9rem; border-radius: 12px;
+    background: #f5f1e9; color: #4c4334; font-size: 0.85rem; white-space: pre-wrap;
+  }
+</style>
+
+<script>
+  var names = ["Read", "Write", "Delete", "Share"];
+  var mask = 0;
+
+  function render() {
+    var active = names.filter(function (name, i) {
+      return (mask & (1 << i)) !== 0;
+    });
+    document.getElementById("out").textContent =
+      "Mask: " + mask + "\n" +
+      "Binary: " + mask.toString(2).padStart(4, "0") + "\n" +
+      "Active: " + (active.length ? active.join(", ") : "none");
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll("input[data-bit]"), function (box) {
+    box.addEventListener("change", function () {
+      var bit = 1 << Number(box.dataset.bit);
+      mask = box.checked ? (mask | bit) : (mask & ~bit);
+      render();
+    });
+  });
+
+  document.querySelector('input[data-bit="0"]').checked = true;
+  mask = 1;
+  render();
+</script>
+```

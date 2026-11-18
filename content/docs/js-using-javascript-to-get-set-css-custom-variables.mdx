@@ -1,0 +1,104 @@
+---
+title: Using JavaScript to get/set CSS custom variables
+description: Read and write CSS custom properties from JavaScript to drive live theme changes on any element.
+chapter: 87
+category: "JavaScript"
+order: 387
+---
+
+# Using JavaScript to get/set CSS custom variables
+
+CSS custom properties (also called CSS variables) are names that begin with two dashes, such as `--accent`. They are declared in a stylesheet and inherited like other properties, which makes them a natural bridge between CSS and JavaScript: one script can retint an entire interface by changing a single value on a shared ancestor.
+
+## Getting and setting values
+
+To read a custom property you must ask for the *computed* value, because `element.style` only contains inline declarations. Use `getComputedStyle(element).getPropertyValue("--accent")` and trim the result; it often contains a leading space. To write one, call `element.style.setProperty("--accent", "#4a63c8")`. Setting the variable on `document.documentElement` (the `html` element) makes it available everywhere through inheritance. Remove an override with `element.style.removeProperty("--accent")` so the stylesheet value takes over again.
+
+Custom properties hold strings, so numbers used for lengths or angles need a unit appended, for example `setProperty("--radius", "18px")`. You can store any valid CSS value — colors, gradients, durations, even whole shadow definitions — and reference it in a rule with `var(--accent)`. Because the browser recomputes styles when the variable changes, transitions declared in CSS still animate smoothly.
+
+## A live theme control
+
+The demo edits three variables on the root element: an accent color, a corner radius and a glow intensity. The preview card reacts instantly, and the "Read computed values" button shows exactly what `getComputedStyle()` returns.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CSS variables bridge</title>
+    <style>
+      :root { --accent: #4a63c8; --radius: 14px; --glow: 0.25; }
+      body { margin: 0; padding: 24px 16px; font-family: system-ui, sans-serif; color: #263043; background: linear-gradient(135deg, #eef1f8, #fdf4ee 80%); }
+      .card { max-width: 540px; margin: 0 auto; padding: 22px; background: #fff; border-radius: 20px; box-shadow: 0 20px 42px -30px rgba(30, 40, 80, .5); }
+      h1 { margin: 0 0 6px; font-size: 1.15rem; }
+      .lead { margin: 0 0 16px; font-size: .84rem; color: #606b80; }
+      .controls { display: grid; gap: 10px; }
+      label { display: flex; align-items: center; gap: 10px; font-size: .8rem; }
+      label span { width: 92px; color: #4c576b; }
+      input[type=color] { width: 44px; height: 30px; border: 1px solid #ccd3e2; border-radius: 8px; background: #fff; padding: 2px; }
+      input[type=range] { flex: 1; accent-color: var(--accent); }
+      .row { display: flex; gap: 8px; margin-top: 12px; }
+      button { padding: 8px 12px; border: 0; border-radius: 9px; background: #3f5bb7; color: #fff; font: inherit; font-size: .78rem; cursor: pointer; }
+      button.ghost { background: #e8ecf7; color: #3f5bb7; }
+      .preview { margin-top: 16px; padding: 18px; border-radius: var(--radius); background: var(--accent); color: #fff; box-shadow: 0 12px 30px rgba(40, 60, 130, var(--glow)); transition: border-radius .25s, background-color .25s; }
+      .preview b { font-size: 1rem; }
+      .preview p { margin: 6px 0 0; font-size: .8rem; opacity: .9; }
+      pre { margin: 14px 0 0; min-height: 96px; padding: 12px; border-radius: 11px; background: #1e2433; color: #d7e6ff; font-size: .75rem; line-height: 1.6; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>CSS variables bridge</h1>
+      <p class="lead">Change custom properties on the root element and read them back.</p>
+      <div class="controls">
+        <label><span>--accent</span><input id="accent" type="color" value="#4a63c8" /></label>
+        <label><span>--radius</span><input id="radius" type="range" min="0" max="32" value="14" /></label>
+        <label><span>--glow</span><input id="glow" type="range" min="0" max="60" value="25" /></label>
+      </div>
+      <div class="row">
+        <button id="read">Read computed values</button>
+        <button id="reset" class="ghost">Reset</button>
+      </div>
+      <div class="preview">
+        <b>Live preview</b>
+        <p>These colors and corners come from inherited custom properties.</p>
+      </div>
+      <pre id="out">Values will appear here.</pre>
+    </div>
+    <script>
+      var root = document.documentElement;
+      var out = document.getElementById("out");
+      var accent = document.getElementById("accent");
+      var radius = document.getElementById("radius");
+      var glow = document.getElementById("glow");
+
+      function apply() {
+        root.style.setProperty("--accent", accent.value);
+        root.style.setProperty("--radius", radius.value + "px");
+        root.style.setProperty("--glow", (glow.value / 100).toFixed(2));
+      }
+
+      function read() {
+        var s = getComputedStyle(root);
+        var names = ["--accent", "--radius", "--glow"];
+        out.textContent = names.map(function (name) {
+          return name.padEnd(11) + " = " + JSON.stringify(s.getPropertyValue(name).trim());
+        }).join("\n");
+      }
+
+      [accent, radius, glow].forEach(function (el) {
+        el.addEventListener("input", apply);
+      });
+      document.getElementById("read").addEventListener("click", read);
+      document.getElementById("reset").addEventListener("click", function () {
+        ["--accent", "--radius", "--glow"].forEach(function (name) { root.style.removeProperty(name); });
+        accent.value = "#4a63c8"; radius.value = 14; glow.value = 25;
+        read();
+      });
+      apply();
+      read();
+    </script>
+  </body>
+</html>
+```

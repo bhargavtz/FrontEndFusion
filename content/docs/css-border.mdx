@@ -1,0 +1,214 @@
+---
+title: Border
+description: Draw edges with style, width, and colour, round the corners, stack multiple rings, and paint gradient borders.
+chapter: 10
+category: "CSS"
+order: 110
+---
+
+# Border
+
+A border is the line drawn between an element's padding and its margin. It is part of the box, so it changes the element's size, and it accepts more visual variety than most people expect.
+
+## The three required pieces
+
+A visible border needs a style. `border: 2px solid #d9d2e8` is shorthand for width, style, and colour, in that order. If you set only `border-width`, nothing appears, because the initial style is `none`.
+
+```css
+.panel {
+  border: 1px solid #e6e1f0;
+  border-radius: 18px;
+}
+
+.quote {
+  border-left: 4px solid #7c5cf0;
+  border-radius: 0 12px 12px 0;
+}
+```
+
+Per-side longhands — `border-top`, `border-right`, `border-bottom`, `border-left` — are ideal for dividers and accent bars. `border-radius` can use a slash to describe elliptical corners: `border-radius: 40px / 12px` gives soft, petal-like ends.
+
+## Beyond a single line
+
+- **Multiple borders** can be faked with `box-shadow` rings: `box-shadow: 0 0 0 4px #fff, 0 0 0 8px #d9c9ff`. Shadows stack outward and accept a spread value, which makes them perfect for concentric frames.
+- **`border-image`** slices an image or gradient into nine regions and draws it around the box. It ignores `border-radius`, so it is a deliberate, sharper look.
+- **Multi-colour borders** come from per-side colours, for example giving each edge of a div a different hue, or from a gradient border built with two background layers.
+- **`border-collapse`** removes the doubled lines between table cells. Use `collapse` for data tables and `separate` with `border-spacing` when you want gaps.
+
+Borders never overlap margin, and a border blocks margin collapsing between a parent and its first child — a detail that explains many "why is there a gap here" moments.
+
+## A complete example
+
+The ticket below uses a dashed divider, a gradient strip, and a set of badges showing three border treatments: stacked rings, a gradient border, and `border-image`.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cinema ticket</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 44px 20px;
+        font-family: system-ui, sans-serif;
+        background: #f4f2f8;
+        color: #241f2e;
+      }
+
+      .ticket {
+        max-width: 340px;
+        margin: 0 auto 28px;
+        background: #ffffff;
+        border: 1px solid #e7e1f0;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 24px 46px -32px rgba(36, 31, 46, 0.55);
+      }
+
+      .ticket__top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 24px 24px 20px;
+        border-bottom: 2px dashed #e2dbee;
+      }
+
+      .ticket__top h1 {
+        margin: 6px 0 4px;
+        font-size: 1.3rem;
+      }
+
+      .kicker {
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #a79dbb;
+      }
+
+      .muted {
+        margin: 0;
+        font-size: 0.8rem;
+        color: #7b738c;
+      }
+
+      .seat {
+        flex-shrink: 0;
+        padding: 10px 14px;
+        border: 2px solid #7c5cf0;
+        border-radius: 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        color: #5a3fd0;
+        text-align: center;
+      }
+
+      .strip {
+        height: 8px;
+        background: linear-gradient(90deg, #ffb26b, #e4572e, #7c5cf0);
+      }
+
+      .ticket__bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 24px;
+        background: #faf8ff;
+      }
+
+      .barcode {
+        flex: 1;
+        height: 34px;
+        background: repeating-linear-gradient(
+          90deg,
+          #241f2e 0 2px,
+          transparent 2px 5px,
+          #241f2e 5px 6px,
+          transparent 6px 11px
+        );
+      }
+
+      .valid {
+        font-size: 0.62rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #9a91ab;
+        white-space: nowrap;
+      }
+
+      .badges {
+        display: flex;
+        justify-content: center;
+        gap: 26px;
+      }
+
+      .item {
+        text-align: center;
+        font-size: 0.58rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #8c839d;
+      }
+
+      .badge {
+        width: 54px;
+        height: 54px;
+        margin: 0 auto 8px;
+        display: grid;
+        place-items: center;
+        background: #ffffff;
+        font-size: 1.15rem;
+      }
+
+      .badge--ring {
+        border: 4px solid #7c5cf0;
+        border-radius: 50%;
+        box-shadow: 0 0 0 4px #ffffff, 0 0 0 8px #ddd3ff;
+      }
+
+      .badge--gradient {
+        border: 5px solid transparent;
+        border-radius: 50%;
+        background:
+          linear-gradient(#ffffff, #ffffff) padding-box,
+          linear-gradient(135deg, #ffb26b, #e4572e) border-box;
+      }
+
+      .badge--image {
+        border: 7px solid #2a9d8f;
+        border-image: linear-gradient(120deg, #2a9d8f, #6d5cf0) 1;
+      }
+    </style>
+  </head>
+  <body>
+    <article class="ticket">
+      <div class="ticket__top">
+        <div>
+          <span class="kicker">Riverside Cinema</span>
+          <h1>Late show</h1>
+          <p class="muted">Fri · 21:30 · Screen 2</p>
+        </div>
+        <div class="seat">F7</div>
+      </div>
+      <div class="strip"></div>
+      <div class="ticket__bottom">
+        <div class="barcode"></div>
+        <span class="valid">Valid once</span>
+      </div>
+    </article>
+
+    <div class="badges">
+      <div class="item"><div class="badge badge--ring">◎</div>Rings</div>
+      <div class="item"><div class="badge badge--gradient">✦</div>Gradient</div>
+      <div class="item"><div class="badge badge--image">▤</div>Image</div>
+    </div>
+  </body>
+</html>
+```
+
+One last rule of thumb: the moment borders start overlapping content or collapsing margins in unexpected ways, check the box model before adding more rules. Most border problems are really sizing problems wearing a costume.

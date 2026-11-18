@@ -1,0 +1,136 @@
+---
+title: Pseudo-Elements
+description: Use ::before and ::after with generated content to add decorative detail and custom list markers without extra markup.
+chapter: 21
+category: "CSS"
+order: 121
+---
+
+# Pseudo-Elements
+
+A pseudo-element styles a piece of an element that is not in the HTML. You can address the first line of a paragraph, the marker of a list item, or create two extra boxes per element with `::before` and `::after`. Nothing is added to the DOM, so screen readers and copy-paste stay unaffected.
+
+## Generated content
+
+`::before` and `::after` only render when `content` is set. An empty string still counts, which is the usual trick for decorative bars, dots, and overlays. Both boxes are inline by default and sit inside the element, before or after its children.
+
+```css
+.badge::after {
+  content: "";
+  display: inline-block;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: #16a34a;
+}
+```
+
+Because these boxes are children for layout purposes, absolute positioning works well: give the parent `position: relative` and place the pseudo-element exactly where you want it. Avoid putting meaningful text in `content` — keep it decorative, since it is poorly exposed to assistive technology and may not be translated.
+
+## Pseudo-elements in lists
+
+List markers have their own pseudo-element, `::marker`. It accepts color, font properties, and `content` for simple symbols, which is enough to replace default bullets without touching the markup structure.
+
+```css
+li::marker {
+  content: "✓ ";
+  color: #0f766e;
+  font-weight: 700;
+}
+```
+
+For richer markers — a colored circle, a custom icon — hide the native bullet with `list-style: none` and draw the marker with `li::before`. Remember to keep spacing consistent so wrapped lines of text align under the text, not under the marker.
+
+Other useful parts are `::first-letter` for drop caps, `::first-line`, `::selection`, and `::placeholder`. `content` can also read attributes with `attr(data-label)`, which is handy for responsive tables that print a column name before each value, or combine a counter with `counter-increment` for numbered sections.
+
+Keep pseudo-elements out of the accessibility tree's critical path: a decorative bar is fine, a required label is not. When the generated box carries meaning, put that meaning in real text and let CSS only style it.
+
+## Demo: quote card
+
+```html
+<figure class="quote">
+  <blockquote>
+    Good interfaces disappear. What remains is the decision the reader came to make.
+  </blockquote>
+  <ul class="quote__points">
+    <li>Generous line height</li>
+    <li>One clear accent color</li>
+    <li>Nothing that competes with the words</li>
+  </ul>
+  <figcaption>Ada Fielding, <cite>Notes on Craft</cite></figcaption>
+</figure>
+
+<style>
+  body {
+    margin: 0;
+    padding: 2rem 1.25rem;
+    background: #f4f1ea;
+    font-family: ui-serif, Georgia, serif;
+  }
+  .quote {
+    position: relative;
+    max-width: 34rem;
+    margin: 0 auto;
+    padding: 2.75rem 2rem 1.75rem 3.75rem;
+    background: #fffdf8;
+    border-radius: 18px;
+    box-shadow: 0 18px 40px -26px rgba(53, 42, 24, 0.5);
+  }
+  .quote::before {
+    content: "\201C";
+    position: absolute;
+    top: 0.25rem;
+    left: 1rem;
+    font-size: 5.5rem;
+    line-height: 1;
+    color: #c9a227;
+  }
+  .quote blockquote {
+    margin: 0;
+    font-size: 1.15rem;
+    line-height: 1.7;
+    color: #2c2418;
+  }
+  .quote__points {
+    margin: 1.25rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.9rem;
+    color: #6b5d45;
+  }
+  .quote__points li {
+    position: relative;
+    padding-left: 1.4rem;
+    margin-bottom: 0.4rem;
+  }
+  .quote__points li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.45em;
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: #c9a227;
+  }
+  .quote figcaption {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e8dfcb;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8a7a5c;
+  }
+  .quote figcaption::before {
+    content: "";
+    display: inline-block;
+    width: 1.5rem;
+    height: 2px;
+    margin-right: 0.6rem;
+    vertical-align: middle;
+    background: #c9a227;
+  }
+</style>
+```

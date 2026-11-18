@@ -1,0 +1,93 @@
+---
+title: Proxy
+description: Intercept and customize fundamental operations on objects with a Proxy and its traps.
+chapter: 74
+category: "JavaScript"
+order: 374
+---
+
+# Proxy
+
+A `Proxy` wraps a target object and lets you redefine how fundamental operations on it behave. Reading a property, assigning one, checking whether a key exists, or deleting a key can each be intercepted by a handler object whose methods are called traps. Code that uses the proxy cannot tell it apart from a plain object, which makes this a powerful way to add behavior transparently.
+
+## Property lookup with the get trap
+
+The `get` trap runs whenever code reads a property through the proxy. It receives the target, the requested key, and the receiver. A common use is returning a computed value or a friendly default when a key is absent. You can delegate the normal behavior to `Reflect.get` when you only want to decorate the result. Other traps mirror the rest of the object protocol, including `has` for the `in` operator and `deleteProperty` for the `delete` operator.
+
+## Validation with the set trap
+
+The `set` trap runs on assignment and can validate or transform the value before storing it, typically finishing by calling `Reflect.set`. Because every write funnels through your code, a proxy is a natural home for invariants such as clamping a number to a range, recording an audit log, or rejecting unknown keys. The demo below builds a settings store where volume is clamped and every change is recorded.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Proxy store</title>
+    <style>
+      body { margin: 0; padding: 24px 18px; font-family: system-ui, sans-serif; color: #24313b; background: linear-gradient(140deg, #eef2ff, #fdf2f8 75%); }
+      .card { max-width: 460px; margin: 0 auto; padding: 22px; background: #fff; border-radius: 20px; box-shadow: 0 18px 40px -28px rgba(60,40,90,.55); }
+      h1 { margin: 0 0 4px; font-size: 1.1rem; }
+      p.sub { margin: 0 0 16px; font-size: .8rem; color: #6b7280; }
+      .row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+      label { flex: 0 0 66px; font-size: .8rem; }
+      input[type="range"] { flex: 1; }
+      input[type="text"] { flex: 1; min-width: 0; padding: 8px 10px; border: 1px solid #d8d3ea; border-radius: 10px; font: inherit; font-size: .82rem; }
+      .val { flex: 0 0 32px; text-align: right; font-variant-numeric: tabular-nums; font-size: .82rem; }
+      pre { margin: 14px 0 0; padding: 12px; border-radius: 10px; background: #1b1530; color: #d7c8ff; font-size: .76rem; line-height: 1.55; white-space: pre-wrap; min-height: 96px; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Reactive settings store</h1>
+      <p class="sub">Every read and write passes through the proxy handler.</p>
+      <div class="row">
+        <label for="vol">Volume</label>
+        <input id="vol" type="range" min="-20" max="120" value="60" />
+        <span id="volval" class="val">60</span>
+      </div>
+      <div class="row">
+        <label for="theme">Theme</label>
+        <input id="theme" type="text" value="light" />
+      </div>
+      <pre id="out">Waiting for changes…</pre>
+    </div>
+    <script>
+      var log = document.getElementById("out");
+      var lines = [];
+      function record(text) {
+        lines.push(text);
+        if (lines.length > 6) lines.shift();
+        log.textContent = lines.join("\n");
+      }
+      var target = { volume: 60, theme: "light" };
+      var settings = new Proxy(target, {
+        get: function (obj, key) {
+          if (key in obj) return obj[key];
+          return "(default: " + String(key) + ")";
+        },
+        set: function (obj, key, value) {
+          if (key === "volume") {
+            var n = Number(value);
+            var clamped = Math.max(0, Math.min(100, n));
+            if (n !== clamped) record("clamped " + n + " -> " + clamped);
+            value = clamped;
+          }
+          record("set " + String(key) + " = " + JSON.stringify(value));
+          obj[key] = value;
+          return true;
+        }
+      });
+      document.getElementById("vol").addEventListener("input", function (e) {
+        settings.volume = Number(e.target.value);
+        document.getElementById("volval").textContent = settings.volume;
+      });
+      document.getElementById("theme").addEventListener("input", function (e) {
+        settings.theme = e.target.value;
+      });
+      record("unknown key -> " + settings.missingKey);
+    </script>
+  </body>
+</html>
+```

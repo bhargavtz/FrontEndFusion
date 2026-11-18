@@ -1,0 +1,115 @@
+---
+title: CSS Image Sprites
+description: Pack several graphics into one image, reveal each frame with background-position, and swap artwork on hover.
+chapter: 43
+category: "CSS"
+order: 143
+---
+
+# CSS Image Sprites
+
+A sprite sheet is a single image that holds many small graphics arranged in a grid. Instead of requesting eight icons, you request one file and use `background-position` to crop the region you want. The classic use case is an icon set where the same element shows a muted icon at rest and a highlighted icon on hover.
+
+The savings that made sprites famous — fewer HTTP requests — matter less over HTTP/2, but sprites still help when a set of states must paint instantly, and the technique is a good way to understand background geometry.
+
+## How the crop works
+
+The element is the window; the sprite is the film. Give the element the size of one cell, then shift the sheet by whole cells:
+
+- `background-repeat: no-repeat` — otherwise the sheet tiles and you see neighbouring icons.
+- `background-position: 0 0` — first cell, top-left.
+- `background-position: -120px 0` — second column of a 120px grid.
+- `background-position: -120px -120px` — second column, second row.
+
+Negative offsets move the image up and left, so the cell you want slides into view. Keep the arithmetic aligned with `background-size`: if you scale the sheet down to 50%, every offset halves too. Percentage positions are the other option, but they are relative to the difference between element and image size, so a three-column sheet steps by `50%` and `100%`, not by a third.
+
+## Hover states and a CSS-only sheet
+
+The demo uses an inline SVG data URI as the sprite: three icons across, two rows deep. The top row is the resting style, the bottom row is the active style on a navy tile. Hovering a card moves `background-position` down by one row and the transition makes the swap feel intentional.
+
+```html
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    background: radial-gradient(circle at 70% 10%, #f2f6ff, #e2eaf8 60%, #d3dff3);
+    font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    width: min(620px, 92vw);
+  }
+  .card {
+    padding: 22px 18px 20px;
+    text-align: center;
+    background: #ffffff;
+    border: 1px solid #dde6f4;
+    border-radius: 18px;
+    box-shadow: 0 18px 34px -26px rgba(25, 48, 84, 0.7);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .card:hover,
+  .card:focus-within {
+    transform: translateY(-4px);
+    box-shadow: 0 26px 44px -26px rgba(25, 48, 84, 0.75);
+  }
+  .card h2 {
+    margin: 12px 0 4px;
+    font-size: 0.98rem;
+    color: #1f3a63;
+  }
+  .card p {
+    margin: 0;
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #7b8aa3;
+  }
+  .sprite {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='240'%3E%3Cg fill='%23e9eefb'%3E%3Crect x='6' y='6' width='108' height='108' rx='26'/%3E%3Crect x='126' y='6' width='108' height='108' rx='26'/%3E%3Crect x='246' y='6' width='108' height='108' rx='26'/%3E%3C/g%3E%3Cg fill='%231f3a63'%3E%3Crect x='6' y='126' width='108' height='108' rx='26'/%3E%3Crect x='126' y='126' width='108' height='108' rx='26'/%3E%3Crect x='246' y='126' width='108' height='108' rx='26'/%3E%3C/g%3E%3Cg transform='translate(60 60)' fill='%234a6fa5'%3E%3Cpath d='M4-30-16 4h12L-4 30 16-4H4z'/%3E%3C/g%3E%3Cg transform='translate(180 60)' fill='%234a6fa5'%3E%3Cpath d='M0-26 22 0 0 26-22 0z'/%3E%3C/g%3E%3Cg transform='translate(300 60)' fill='none' stroke='%234a6fa5' stroke-width='9'%3E%3Ccircle r='20'/%3E%3C/g%3E%3Cg transform='translate(60 180)' fill='%23ffffff'%3E%3Cpath d='M4-30-16 4h12L-4 30 16-4H4z'/%3E%3C/g%3E%3Cg transform='translate(180 180)' fill='%23ffffff'%3E%3Cpath d='M0-26 22 0 0 26-22 0z'/%3E%3C/g%3E%3Cg transform='translate(300 180)' fill='none' stroke='%23ffffff' stroke-width='9'%3E%3Ccircle r='20'/%3E%3C/g%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: 360px 240px;
+    background-position: 0 0;
+    transition: background-position 0.35s ease;
+  }
+  /* each card starts on a different column of the sheet */
+  .card:nth-child(1) .sprite { background-position: 0 0; }
+  .card:nth-child(2) .sprite { background-position: -120px 0; }
+  .card:nth-child(3) .sprite { background-position: -240px 0; }
+  /* hover slides to the second row of the same column */
+  .card:nth-child(1):hover .sprite,
+  .card:nth-child(1):focus-within .sprite { background-position: 0 -120px; }
+  .card:nth-child(2):hover .sprite,
+  .card:nth-child(2):focus-within .sprite { background-position: -120px -120px; }
+  .card:nth-child(3):hover .sprite,
+  .card:nth-child(3):focus-within .sprite { background-position: -240px -120px; }
+</style>
+
+<div class="row">
+  <article class="card" tabindex="0">
+    <div class="sprite" aria-hidden="true"></div>
+    <h2>Speed</h2>
+    <p>frame 1 of 6</p>
+  </article>
+  <article class="card" tabindex="0">
+    <div class="sprite" aria-hidden="true"></div>
+    <h2>Focus</h2>
+    <p>frame 2 of 6</p>
+  </article>
+  <article class="card" tabindex="0">
+    <div class="sprite" aria-hidden="true"></div>
+    <h2>Polish</h2>
+    <p>frame 3 of 6</p>
+  </article>
+</div>
+```
+
+Sprites are pure presentation, so keep the artwork out of the accessibility tree with `aria-hidden` or `role="presentation"` and put the meaning in real text beside it. For an animated sprite, step the offset on a timer instead of relying on hover — the geometry is exactly the same.

@@ -1,0 +1,92 @@
+---
+title: Getting Started with HTML
+description: Build your first HTML document, understand the document skeleton, and learn how elements nest.
+chapter: 1
+category: "HTML"
+order: 11
+---
+
+# Getting Started with HTML
+
+HTML describes the structure of a web page. It is not a programming language; it is a markup language made of **elements** that wrap content and tell the browser what that content means.
+
+## A complete first document
+
+Every page starts with a document type, a root element, a head for metadata, and a body for visible content.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>My First Page</title>
+  </head>
+  <body>
+    <h1>Hello, world!</h1>
+    <p>This page was written by hand and rendered by the browser.</p>
+  </body>
+</html>
+```
+
+Click **Preview** on the code block to render it in a sandboxed frame.
+
+## What each part does
+
+- `<!doctype html>` puts the browser in standards mode.
+- `<html>` is the root element. The `lang` attribute helps screen readers and search engines.
+- `<head>` holds metadata that is not shown directly on the page.
+- `<meta charset="utf-8">` makes text encoding predictable.
+- `<title>` is the text shown in the browser tab and in search results.
+- `<body>` contains everything the visitor sees.
+
+## Elements, tags, and content
+
+An element usually has an opening tag, content, and a closing tag:
+
+```html
+<p>This is a paragraph element.</p>
+```
+
+Some elements are empty and never have a closing tag:
+
+```html
+<img src="photo.jpg" alt="A mountain at sunrise" />
+<br />
+<input type="email" name="email" />
+```
+
+## Nesting and indentation
+
+Elements can contain other elements. Keep the nesting valid: close the inner element before the outer one.
+
+```html
+<article>
+  <h2>Morning routine</h2>
+  <p>Start with <strong>water</strong>, then stretch.</p>
+</article>
+```
+
+Browsers are forgiving, but invalid nesting can produce surprising layouts and accessibility problems. Indentation is for humans; the browser does not care about it.
+
+## Attributes
+
+Attributes add information to an opening tag:
+
+```html
+<a href="https://example.com" target="_blank" rel="noopener">
+  Visit example.com
+</a>
+```
+
+- The attribute name comes first.
+- The value is wrapped in double quotes by convention.
+- Boolean attributes such as `disabled` do not need a value.
+
+## Practical starting rules
+
+1. Always declare the doctype.
+2. Use one `<h1>` for the page's main topic.
+3. Prefer semantic elements over generic containers.
+4. Write valid nesting before adding styles.
+5. Test the page with JavaScript disabled at least once.

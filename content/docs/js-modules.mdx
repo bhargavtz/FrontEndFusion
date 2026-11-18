@@ -1,0 +1,88 @@
+---
+title: Modules
+description: Organize code into reusable files with exports, imports, and module scope.
+chapter: 57
+category: "JavaScript"
+order: 357
+---
+
+# Modules
+
+A module is a file that exposes selected values to other files while keeping the rest private. ES modules are the standard format in modern browsers and build tools, and they replace older patterns that relied on global variables or library-specific loaders.
+
+## Exporting and importing
+
+Any declaration can be marked with `export`, and another file can bring it in with `import`. Named exports keep their original names, which the importer must match inside curly braces. Modules are always strict mode, and each one has its own scope, so top-level names never collide across files.
+
+```js
+// math.js
+export function add(a, b){ return a + b; }
+export const PI = 3.14159;
+
+// app.js
+import { add, PI } from './math.js';
+```
+
+## Default exports and aliases
+
+A module may have one default export, useful when a file has a single main value. It is imported without curly braces and can be given any local name. Named imports can be renamed with the `as` keyword to avoid clashes, and an entire module can be gathered into a namespace object with `import * as name`.
+
+```js
+import Circle, { area as circleArea } from './circle.js';
+import * as utils from './utils.js';
+```
+
+## Side effects and loading
+
+An import can be written with no bindings at all, purely to run a module's top-level code. This is called importing for side effects and is common for style or setup files. Modules are deferred by default, are fetched once, and are cached by the browser, so repeated imports reuse a single instance.
+
+Inline preview scripts cannot import separate files, so the demo below models two modules with the revealing module pattern: immediately invoked functions that return a small public API. The composition idea is exactly the same as real imports.
+
+```html
+<div class="mo-wrap">
+  <div class="mo-card">
+    <h2>Composed Calculator</h2>
+    <p class="mo-sub">Two private modules expose a tiny public API, then combine.</p>
+    <label>Value <input id="value" type="number" value="8" style="width:70px"></label>
+    <button id="add" type="button">+ 5</button>
+    <button id="mul" type="button">&times; 3</button>
+    <pre id="out" class="mo-out"></pre>
+  </div>
+</div>
+<style>
+  .mo-wrap{font-family:system-ui,sans-serif;background:#ecfdf5;padding:18px;border-radius:14px;}
+  .mo-card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 6px 18px rgba(20,90,60,.08);}
+  .mo-card h2{margin:0 0 4px;font-size:18px;color:#065f46;}
+  .mo-sub{margin:0 0 14px;color:#047857;font-size:13px;}
+  .mo-card label{font-size:13px;font-weight:600;color:#334155;margin-right:8px;}
+  .mo-card button{border:0;background:#059669;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;margin-right:6px;}
+  .mo-out{background:#0f172a;color:#6ee7b7;padding:12px;border-radius:8px;font-size:12px;line-height:1.7;white-space:pre-wrap;margin:14px 0 0;}
+</style>
+<script>
+  // A stand-in for a separate math.js module.
+  const mathModule = (function(){
+    function add(a, b){ return a + b; }
+    function multiply(a, b){ return a * b; }
+    return { add: add, multiply: multiply };
+  })();
+  // A stand-in for a separate format.js module.
+  const formatModule = (function(){
+    function money(n){ return '$' + n.toFixed(2); }
+    return { money: money };
+  })();
+  const out = document.getElementById('out');
+  const field = document.getElementById('value');
+  function report(label, value){
+    out.textContent = label + '\nRaw: ' + value + '\nFormatted: ' + formatModule.money(value)
+      + '\n\nPublic APIs: math = ' + Object.keys(mathModule).join(', ')
+      + ' | format = ' + Object.keys(formatModule).join(', ');
+  }
+  document.getElementById('add').addEventListener('click', function(){
+    report('add() called', mathModule.add(Number(field.value), 5));
+  });
+  document.getElementById('mul').addEventListener('click', function(){
+    report('multiply() called', mathModule.multiply(Number(field.value), 3));
+  });
+  report('Ready', Number(field.value));
+</script>
+```

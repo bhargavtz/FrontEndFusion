@@ -1,0 +1,113 @@
+---
+title: "Typography"
+description: "Compose font stacks, use the font shorthand, and shape rhythm with spacing, decoration, truncation, and shadow."
+chapter: 15
+category: "CSS"
+order: 115
+---
+
+# Typography
+
+Typography on the web is mostly a negotiation: you request a family, the operating system decides what is actually installed, and the browser fills the gaps. Good CSS makes that negotiation predictable and keeps the reading rhythm intact.
+
+## Font shorthand and stacks
+
+The `font` shorthand packs style, variant, weight, size, line-height, and family into one declaration. Size and family are mandatory, and the family must come last: `font: italic 600 1.05rem/1.5 "Inter", system-ui, sans-serif`. A missing size silently invalidates the whole line, which is a common source of "the font did nothing" bugs.
+
+Because you cannot rely on a single family, build a stack. Start with the preferred face, add broadly available fallbacks, then a generic family such as `sans-serif` or `serif` so the browser always has a final answer. Quoted names are required when a family contains spaces.
+
+## Spacing, decoration, and case
+
+`letter-spacing` loosens or tightens tracking; use small positive values for uppercase labels and slightly negative values for large headings. `word-spacing` adjusts gaps between words and is rarely needed. `text-indent` pushes the first line inward, handy for prose but not for UI copy. `text-transform` changes case for display without touching the underlying content, which keeps screen readers and copy-paste intact.
+
+`text-decoration` handles underlines, overlines, and line-through, with `text-decoration-thickness` and `text-underline-offset` for control. `font-variant` enables small caps and numeric styles; `font-variant-numeric: tabular-nums` is worth remembering for tables and prices.
+
+## Truncation, quotes, and shadow
+
+Single-line truncation needs three properties together: `white-space: nowrap`, `overflow: hidden`, and `text-overflow: ellipsis`. For multi-line clamping, use `line-clamp` with `display: -webkit-box`, accepting its prefixed history. The `quotes` property defines the glyph pairs inserted by generated content around `q` elements, and `text-shadow` adds a cheap depth or glow — keep offsets small and contrast high.
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Typography specimen</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 26px;
+      background: #f7f5f1;
+      color: #241f1a;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+    }
+    .card {
+      max-width: 560px;
+      padding: 26px 28px;
+      border-radius: 18px;
+      background: #fffdf9;
+      border: 1px solid #e9e2d6;
+      box-shadow: 0 10px 28px rgba(36, 31, 26, .08);
+    }
+    .eyebrow {
+      margin: 0 0 10px;
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: #9c6b3c;
+    }
+    h2 {
+      margin: 0 0 10px;
+      font: 700 1.75rem/1.2 Georgia, "Times New Roman", serif;
+      letter-spacing: -.015em;
+      text-shadow: 0 1px 0 rgba(255, 255, 255, .9), 0 2px 6px rgba(36, 31, 26, .12);
+    }
+    .body { margin: 0 0 12px; font-size: .9rem; line-height: 1.7; text-indent: 1.4em; }
+    .truncate {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      font-size: .78rem;
+      color: #7c7062;
+      padding: 6px 0;
+      border-top: 1px solid #f0e9dd;
+    }
+    blockquote {
+      margin: 14px 0 0;
+      padding: 12px 16px;
+      border-left: 3px solid #c99a63;
+      background: #faf4ea;
+      border-radius: 0 10px 10px 0;
+      font: italic 1rem/1.5 Georgia, serif;
+      quotes: "\201C" "\201D";
+    }
+    blockquote::before { content: open-quote; font-size: 1.4rem; color: #c99a63; }
+    blockquote::after { content: close-quote; }
+    .meta {
+      margin-top: 14px;
+      font-variant-numeric: tabular-nums;
+      font-size: .74rem;
+      letter-spacing: .04em;
+      color: #9c9284;
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+  </style>
+</head>
+<body>
+  <article class="card">
+    <p class="eyebrow">Field notes · Issue 12</p>
+    <h2>The quiet weight of a well-set page</h2>
+    <p class="body">
+      A first-line indent signals a new paragraph without extra space. Tracking opens the label above,
+      while the headline tightens slightly as it grows.
+    </p>
+    <p class="truncate">https://example.com/journal/2026/the-quiet-weight-of-a-well-set-page-and-other-notes</p>
+    <blockquote>Type is the voice; spacing is the breath between sentences.</blockquote>
+    <p class="meta">Set in Georgia · 26 November 2026</p>
+  </article>
+</body>
+</html>
+```

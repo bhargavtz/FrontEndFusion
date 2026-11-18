@@ -1,0 +1,117 @@
+---
+title: Strict mode
+description: Opt into stricter JavaScript parsing with use strict and understand the errors it surfaces.
+chapter: 50
+category: "JavaScript"
+order: 350
+---
+
+# Strict mode
+
+Strict mode is a opt-in dialect of JavaScript that removes silent mistakes and turns several of them into thrown errors. You enable it by placing the string `"use strict";` at the very top of a script or a function. It is a compile-time switch: the same code can behave differently depending on whether the directive is present.
+
+## Enabling it
+
+At the top of a file, `"use strict";` applies to the whole script. Placed as the first statement inside a function, it applies only to that function and its nested scopes. Modules are always strict, so you never need the directive in an `import`/`export` file.
+
+```js
+"use strict";
+function demo() {
+  // strict rules apply in here too
+}
+```
+
+## What changes
+
+The most visible change concerns undeclared variables. In normal code, assigning to a name you never declared quietly creates a global variable — a classic source of bugs. In strict mode that assignment throws a `ReferenceError`. Duplicate function parameters, allowed in sloppy mode, become a syntax error. Assigning to a read-only property or to a frozen object also throws instead of failing silently. Inside a strict function, `this` is `undefined` when the function is called plainly, rather than being coerced to the global object.
+
+These rules make code easier to reason about and help engines optimise it. The cost is that old code may rely on the permissive behaviour, so introducing strict mode to a legacy file can surface latent errors.
+
+The demo is a small lab. Each button runs a snippet, either sloppy or strict, and reports whether it succeeded or which error it raised. Errors are caught and shown as text, so nothing escapes to break the page.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Strict mode lab</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 40px 18px;
+        font-family: system-ui, sans-serif;
+        background: #f4f1ea;
+        color: #352f24;
+      }
+      .card {
+        max-width: 580px;
+        margin: 0 auto;
+        padding: 28px 30px 30px;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 26px 54px -40px rgba(53, 47, 36, 0.6);
+      }
+      h1 { margin: 0 0 6px; font-size: 1.25rem; }
+      p { margin: 0 0 18px; color: #857a67; font-size: 0.9rem; }
+      .row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+      button {
+        border: 0; border-radius: 10px; padding: 9px 14px; cursor: pointer;
+        font: inherit; font-size: 0.83rem; font-weight: 600;
+        background: #8a6b2f; color: #fff;
+      }
+      button.alt { background: #ece4d2; color: #6f5a2c; }
+      .out {
+        margin: 0; min-height: 150px; padding: 16px 18px;
+        background: #211d14; color: #e0d3ad;
+        border-radius: 12px; font-size: 0.82rem; line-height: 1.8;
+      }
+      .ok { color: #a6e3a0; }
+      .err { color: #ffab9a; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Strict mode lab</h1>
+      <p>The same mistake, run with and without the directive. Compare the outcomes.</p>
+      <div class="row">
+        <button id="sloppy">Undeclared - sloppy</button>
+        <button id="strict">Undeclared - strict</button>
+        <button id="dup" class="alt">Duplicate params - strict</button>
+        <button id="clear" class="alt">Clear</button>
+      </div>
+      <pre id="out" class="out">Results will appear here.</pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      function log(text, cls) {
+        var line = document.createElement("div");
+        line.textContent = text;
+        if (cls) line.className = cls;
+        out.appendChild(line);
+      }
+      function run(label, source) {
+        try {
+          var fn = new Function(source);
+          fn();
+          log(label + ": no error - assignment was allowed", "ok");
+        } catch (e) {
+          log(label + ": " + e.name + " - " + e.message, "err");
+        }
+      }
+      document.getElementById("sloppy").onclick = function () {
+        run("sloppy", "sloppyLeak = 42; return sloppyLeak;");
+      };
+      document.getElementById("strict").onclick = function () {
+        run("strict", "\"use strict\"; strictLeak = 42; return strictLeak;");
+      };
+      document.getElementById("dup").onclick = function () {
+        run("duplicate", "\"use strict\"; function f(a, a){ return a; } return f(1,2);");
+      };
+      document.getElementById("clear").onclick = function () { out.textContent = ""; };
+    </script>
+  </body>
+</html>
+```
+
+The sloppy snippet quietly creates a global; the strict snippet throws a `ReferenceError` instead. The duplicate-parameter case fails even earlier, while the function is being parsed.

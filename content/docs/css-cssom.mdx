@@ -1,0 +1,162 @@
+---
+title: CSS Object Model (CSSOM)
+description: Read and rewrite styles from JavaScript with element.style, getComputedStyle, and the rules inside document.styleSheets.
+chapter: 46
+category: "CSS"
+order: 146
+---
+
+# CSS Object Model (CSSOM)
+
+The CSSOM is the browser's live, scriptable representation of every style rule on the page. CSS text is parsed into objects: a stylesheet owns an ordered list of rules, each rule owns a declaration block, and each declaration is a property-value pair you can read or change without touching the markup.
+
+## Two ways to read a style
+
+`element.style` exposes only the inline declarations on that element. It is a `CSSStyleDeclaration` and it is writable:
+
+```css
+panel.style.background = "#4f7cff";
+panel.style.setProperty("--accent", "#4f7cff");
+```
+
+`getComputedStyle(element)` returns the resolved values after the cascade — inherited properties, relative units turned into pixels, and browser defaults all included. It is read-only, and the object updates live as styles change:
+
+```css
+const padding = getComputedStyle(panel).paddingTop; // "24px"
+```
+
+Use `element.style` when you are setting a value and `getComputedStyle` when you need to know what actually won. Reading `element.style.width` after a stylesheet sets the width returns an empty string, which is a common source of bugs.
+
+## Style sheets and cssRules
+
+`document.styleSheets` is an array-like list of every sheet applied to the document, including `link`ed files and inline `style` blocks. Each sheet exposes `cssRules`, an ordered collection where index matters: later rules with equal specificity win. A sheet loaded from another origin throws a security error when you touch `cssRules`, so you cannot inspect a third-party stylesheet.
+
+The mutating API is small:
+
+- `sheet.insertRule(".badge { opacity: .8 }", index)` — add a rule at a position.
+- `sheet.deleteRule(index)` — remove one.
+- `rule.style.setProperty("background", value)` — change a declaration inside an existing rule.
+- `new CSSStyleSheet()` with `replaceSync(text)` — build a sheet in memory and adopt it, the basis of constructable stylesheets for web components.
+
+Editing a rule beats writing inline styles when one change should affect many elements. One `cssRules` edit repaints every match and keeps the DOM clean.
+
+```html
+<style id="theme">
+  .badge { background: #4f7cff; }
+</style>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    background: radial-gradient(circle at 15% 10%, #f3f7ff, #e2e9f5 60%, #d5dfef);
+    font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  }
+  .panel {
+    width: min(520px, 92vw);
+    padding: 26px;
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 24px 46px -30px rgba(24, 45, 80, 0.75);
+  }
+  .panel h2 { margin: 0 0 6px; font-size: 1.05rem; color: #1d3557; }
+  .panel p { margin: 0 0 18px; font-size: 0.85rem; color: #64748b; line-height: 1.6; }
+  .preview {
+    display: grid;
+    place-items: center;
+    height: 128px;
+    margin-bottom: 18px;
+    border-radius: 14px;
+    background: #f6f8fc;
+    border: 1px solid #e3e9f3;
+  }
+  .badge {
+    display: inline-block;
+    padding: 10px 22px;
+    border-radius: 999px;
+    color: #ffffff;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    font-size: 0.85rem;
+    transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .row button {
+    font: inherit;
+    font-size: 0.78rem;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid #d7e0ee;
+    background: #ffffff;
+    color: #33506f;
+    cursor: pointer;
+  }
+  .row button:hover { border-color: #9fb4d3; background: #f4f8ff; }
+  .readout {
+    margin-top: 16px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #0f1c2e;
+    color: #9fe3b8;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.72rem;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+  }
+</style>
+
+<section class="panel">
+  <h2>Rule editor</h2>
+  <p>Each button rewrites the same declaration inside a style sheet, then asks <code>getComputedStyle</code> what the browser resolved.</p>
+  <div class="preview"><span class="badge" id="badge">Accent</span></div>
+  <div class="row">
+    <button data-color="#4f7cff">Indigo</button>
+    <button data-color="#199e83">Teal</button>
+    <button data-color="#c2410c">Rust</button>
+    <button id="glow">Toggle glow rule</button>
+  </div>
+  <div class="readout" id="readout">waiting for input…</div>
+</section>
+
+<script>
+  const sheet = document.getElementById("theme").sheet;
+  const rule = sheet.cssRules[0];
+  const badge = document.getElementById("badge");
+  const readout = document.getElementById("readout");
+  let glowIndex = -1;
+
+  function report() {
+    const computed = getComputedStyle(badge);
+    readout.textContent =
+      "cssRules: " + sheet.cssRules.length +
+      " | background: " + computed.backgroundColor +
+      " | box-shadow: " + (computed.boxShadow === "none" ? "none" : "set");
+  }
+
+  document.querySelectorAll("[data-color]").forEach((button) => {
+    button.addEventListener("click", () => {
+      rule.style.background = button.dataset.color;
+      report();
+    });
+  });
+
+  document.getElementById("glow").addEventListener("click", () => {
+    if (glowIndex === -1) {
+      glowIndex = sheet.insertRule(
+        ".badge { box-shadow: 0 0 0 8px rgba(79, 124, 255, 0.22); }",
+        sheet.cssRules.length
+      );
+    } else {
+      sheet.deleteRule(glowIndex);
+      glowIndex = -1;
+    }
+    report();
+  });
+
+  report();
+</script>
+```
+
+If that glow rule never appears in the computed style, check the index you passed to `insertRule` — inserting before an earlier rule with equal specificity can make the new one lose the cascade.

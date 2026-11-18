@@ -1,0 +1,103 @@
+---
+title: Functions
+description: Package reusable logic with named functions, arrow functions, rest and default parameters, recursion, and scope.
+chapter: 19
+category: "JavaScript"
+order: 319
+---
+
+# Functions
+
+A function bundles a set of statements under a name so you can run them repeatedly with different inputs. Functions are values in JavaScript, which means you can store them, pass them around, and return them.
+
+## Ways to declare a function
+
+A function declaration uses the `function` keyword followed by a name and a parameter list. A function expression assigns an anonymous or named function to a variable, and the arrow syntax `=>` is a compact form that also changes how `this` is bound. Immediately invoked function expressions, or IIFEs, are functions that run as soon as they are defined; they were a common way to create private scope before modules existed.
+
+## Parameters and arguments
+
+Parameters are the names in a declaration; arguments are the values passed at a call site. Default parameters such as `function greet(name = "Guest")` supply a fallback when an argument is missing. Rest parameters written as `...items` collect any number of extra arguments into an array. The older `arguments` object is array-like but not a true array. Objects and arrays are passed by reference, so a function can change their contents, while primitive values are passed as copies.
+
+## Return values, recursion, and scope
+
+The `return` statement ends a function and hands a value back; without it, the result is `undefined`. A recursive function calls itself, which suits problems that break into smaller versions of themselves, provided there is a base case to stop. Variables declared inside a function are local to it, while closures let an inner function keep access to an outer function's scope after it has returned.
+
+## Demo: function playground
+
+The demo exercises a recursive factorial, default and rest parameters, a curried multiplier, and an IIFE.
+
+```html
+<div class="wrap">
+  <div class="card">
+    <h2>Function playground</h2>
+    <p class="hint">Several function forms feed one output panel.</p>
+    <div class="row">
+      <input id="n" type="number" value="6" min="0" max="12" />
+      <button id="run">Run functions</button>
+    </div>
+    <pre class="out" id="out"></pre>
+  </div>
+</div>
+
+<style>
+  .wrap {
+    min-height: 70vh; display: grid; place-items: center;
+    padding: 2rem 1rem; background: #edf4f0;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+  .card {
+    width: min(100%, 27rem); background: #fff; border-radius: 18px;
+    padding: 1.75rem; box-shadow: 0 18px 40px -24px rgba(40, 90, 65, 0.5);
+  }
+  h2 { margin: 0 0 0.35rem; font-size: 1.2rem; color: #244334; }
+  .hint { margin: 0 0 1.1rem; font-size: 0.85rem; color: #6f8b7c; }
+  .row { display: flex; gap: 0.5rem; }
+  input {
+    flex: 1; min-width: 0; padding: 0.6rem 0.75rem;
+    border: 1px solid #d3e2d9; border-radius: 10px; font-size: 1rem;
+  }
+  button {
+    padding: 0.6rem 1rem; border: 0; border-radius: 10px;
+    background: #2f8a63; color: #fff; font-weight: 600; cursor: pointer;
+  }
+  .out {
+    margin: 1rem 0 0; padding: 0.9rem; border-radius: 12px;
+    background: #f0f7f3; color: #2d4d3c; font-size: 0.85rem; white-space: pre-wrap;
+  }
+</style>
+
+<script>
+  function factorial(n) {
+    if (n <= 1) { return 1; }
+    return n * factorial(n - 1);
+  }
+
+  function greet(name = "Guest") {
+    return "Hello, " + name + "!";
+  }
+
+  function sumAll(...numbers) {
+    return numbers.reduce(function (a, b) { return a + b; }, 0);
+  }
+
+  var times = function (a) {
+    return function (b) { return a * b; };
+  };
+
+  var started = (function () { return "IIFE ran once at load"; })();
+
+  document.getElementById("run").addEventListener("click", function () {
+    var raw = document.getElementById("n").value;
+    var n = Math.max(0, Math.min(12, Number(raw) || 0));
+    document.getElementById("out").textContent =
+      "factorial(" + n + ") = " + factorial(n) + "\n" +
+      "greet() = " + greet() + "\n" +
+      "greet('Ada') = " + greet("Ada") + "\n" +
+      "sumAll(2, 4, 6, 8) = " + sumAll(2, 4, 6, 8) + "\n" +
+      "times(3)(7) = " + times(3)(7) + "\n" +
+      started + "\n" +
+      "function name: " + factorial.name;
+  });
+  document.getElementById("run").click();
+</script>
+```

@@ -1,0 +1,126 @@
+---
+title: Geolocation
+description: Read a device position, watch for changes, and handle permission, availability, and timeout errors with clear feedback.
+chapter: 71
+category: "JavaScript"
+order: 371
+---
+
+# Geolocation
+
+The Geolocation API exposes the device's approximate location, subject to user permission. Because location is sensitive, browsers require an explicit opt-in and often restrict the API to secure contexts. Always request it only when the user asks for a location-based feature, and explain why.
+
+## Latitude and longitude
+
+`getCurrentPosition` takes a success callback and an optional error callback and options object. On success you receive a position object whose `coords` include `latitude` and `longitude` in decimal degrees, plus an `accuracy` value in metres. The call is asynchronous because the device may need time to fix a position from GPS, Wi-Fi, or cell towers.
+
+Options let you tune the request. `enableHighAccuracy` asks for the best fix at the cost of power, `timeout` caps how long you will wait, and `maximumAge` allows a cached position of a certain age to be reused.
+
+## Watching changes and handling errors
+
+`watchPosition` works like `getCurrentPosition` but calls your success handler repeatedly as the device moves. It returns a watch ID you can pass to `clearWatch` when you no longer need updates, which is important for battery life.
+
+Failures arrive through the error callback. `error.code` is `1` for permission denied, `2` when a position is unavailable, and `3` when the request times out. The `PERMISSION_DENIED` case is special: once a user refuses, asking again rarely helps, so show a helpful message instead.
+
+Since this API may be blocked in a sandboxed preview, the demo detects support and falls back to a simulated position feed. The buttons demonstrate success, movement updates, and each error code.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Geolocation</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px 18px;
+        font-family: system-ui, sans-serif;
+        color: #2a2f3b;
+        background: radial-gradient(circle at 80% 0%, #e6f1ff, #f5f7fb 60%);
+      }
+      .card {
+        max-width: 540px;
+        margin: 0 auto;
+        padding: 22px;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 20px 42px -30px rgba(30, 60, 110, 0.5);
+      }
+      h1 { margin: 0 0 8px; font-size: 1.15rem; }
+      .note { margin: 0 0 14px; font-size: 0.78rem; color: #7a4a2f; }
+      .row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+      button {
+        padding: 8px 11px;
+        border: 1px solid #d7e1f4;
+        border-radius: 9px;
+        background: #f8faff;
+        color: #34529c;
+        font: inherit;
+        font-size: 0.78rem;
+        cursor: pointer;
+      }
+      pre {
+        margin: 0;
+        padding: 14px;
+        border-radius: 12px;
+        background: #182133;
+        color: #c2d6ff;
+        font-size: 0.78rem;
+        line-height: 1.65;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Position tracker</h1>
+      <p class="note" id="note"></p>
+      <div class="row">
+        <button id="once">Get current position</button>
+        <button id="move">Simulate movement</button>
+        <button id="err1">Error 1</button>
+        <button id="err2">Error 2</button>
+        <button id="err3">Error 3</button>
+      </div>
+      <pre id="out"></pre>
+    </div>
+    <script>
+      var out = document.getElementById("out");
+      var supported = "geolocation" in navigator;
+      var lat = 40.7128, lon = -74.0060, fixes = 0;
+      document.getElementById("note").textContent = supported
+        ? "Geolocation API detected. For safety this demo uses simulated coordinates."
+        : "Geolocation is unavailable here (sandbox or insecure context). Using simulated data so the demo still works.";
+      function show(pos) {
+        fixes++;
+        out.textContent =
+          "Fix #" + fixes + "\n" +
+          "Latitude:  " + pos.latitude.toFixed(5) + "\n" +
+          "Longitude: " + pos.longitude.toFixed(5) + "\n" +
+          "Accuracy:  ±" + Math.round(pos.accuracy) + " m";
+      }
+      function fail(code) {
+        var names = { 1: "PERMISSION_DENIED", 2: "POSITION_UNAVAILABLE", 3: "TIMEOUT" };
+        var hints = {
+          1: "The user declined location access.",
+          2: "The device could not determine a position.",
+          3: "The request took too long."
+        };
+        out.textContent = "Error " + code + " (" + names[code] + ")\n" + hints[code];
+      }
+      document.getElementById("once").addEventListener("click", function () {
+        show({ latitude: lat, longitude: lon, accuracy: 25 });
+      });
+      document.getElementById("move").addEventListener("click", function () {
+        lat += 0.01; lon += 0.012;
+        show({ latitude: lat, longitude: lon, accuracy: 12 + fixes });
+      });
+      [1, 2, 3].forEach(function (code) {
+        document.getElementById("err" + code).addEventListener("click", function () { fail(code); });
+      });
+      show({ latitude: lat, longitude: lon, accuracy: 30 });
+    </script>
+  </body>
+</html>
+```

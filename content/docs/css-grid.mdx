@@ -1,0 +1,173 @@
+---
+title: Grid
+description: Build two-dimensional layouts with grid containers, tracks, gaps, explicit placement, and a responsive template.
+chapter: 24
+category: "CSS"
+order: 124
+---
+
+# Grid
+
+CSS Grid lays out children in columns and rows at the same time. One element becomes the grid container with `display: grid`, and its direct children become grid items. Everything else stays normal flow inside those items.
+
+## Tracks and gaps
+
+Columns and rows are called tracks. You define them with `grid-template-columns` and `grid-template-rows`. The `fr` unit divides the free space, so `1fr 2fr` gives the second column twice the width of the first. `repeat(3, 1fr)` is shorthand for three equal columns, and `minmax()` sets a floor and ceiling for a track.
+
+`gap` (or `row-gap` and `column-gap`) spaces tracks apart without margins on the items. This is one of Grid's biggest advantages over float layouts: no negative margins, no last-child exceptions.
+
+`auto-fit` with `minmax()` gives a responsive gallery without a single media query — tracks collapse and expand as the container changes width.
+
+## Placement
+
+By default items fill the grid in source order. To control them, use line numbers with `grid-column: 1 / 3` (start at line 1, end at line 3, spanning two tracks), or name areas:
+
+```css
+.layout {
+  display: grid;
+  grid-template-areas:
+    "head head"
+    "side main";
+  grid-template-columns: 14rem 1fr;
+}
+.layout > header { grid-area: head; }
+.layout > aside  { grid-area: side; }
+.layout > main   { grid-area: main; }
+```
+
+Named areas read like an ASCII sketch of the page, which makes a shell easy to review later. Items can also overlap by sharing cells, and `z-index` on a grid item works without `position`.
+
+Implicit rows appear when you place more items than the explicit grid allows; `grid-auto-rows` controls their height.
+
+Alignment lives on the container: `justify-items` and `align-items` position each item inside its cell, while `justify-content` and `align-content` distribute the whole track set when there is leftover space. On an individual item, `justify-self` and `align-self` override the container defaults. A common pattern is `place-items: center` for a single centered hero block.
+
+## Demo: responsive dashboard
+
+```html
+<div class="dash">
+  <header class="dash__head">
+    <h1>Studio overview</h1>
+    <span class="dash__pill">Live</span>
+  </header>
+  <aside class="dash__side">
+    <a class="is-active" href="#">Overview</a>
+    <a href="#">Projects</a>
+    <a href="#">Invoices</a>
+  </aside>
+  <main class="dash__main">
+    <div class="stat"><span>Active projects</span><strong>12</strong></div>
+    <div class="stat"><span>Hours this week</span><strong>31.5</strong></div>
+    <div class="stat stat--wide"><span>Next deadline</span><strong>Friday, 4 pm</strong></div>
+  </main>
+</div>
+
+<style>
+  body {
+    margin: 0;
+    padding: 1.5rem;
+    background: #eef1f6;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    color: #16202e;
+  }
+  .dash {
+    display: grid;
+    grid-template-areas:
+      "head head"
+      "side main";
+    grid-template-columns: 12rem 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 1rem;
+    max-width: 46rem;
+    margin: 0 auto;
+  }
+  .dash__head {
+    grid-area: head;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    background: #16202e;
+    border-radius: 14px;
+    color: #f7fafc;
+  }
+  .dash__head h1 {
+    margin: 0;
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+  }
+  .dash__pill {
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    background: #2dd4bf;
+    color: #06231f;
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+  .dash__side {
+    grid-area: side;
+    display: grid;
+    align-content: start;
+    gap: 0.25rem;
+    padding: 0.75rem;
+    background: #ffffff;
+    border-radius: 14px;
+  }
+  .dash__side a {
+    padding: 0.55rem 0.65rem;
+    border-radius: 8px;
+    color: #4a5a70;
+    font-size: 0.85rem;
+    text-decoration: none;
+  }
+  .dash__side a:hover {
+    background: #f1f5f9;
+  }
+  .dash__side .is-active {
+    background: #16202e;
+    color: #ffffff;
+  }
+  .dash__main {
+    grid-area: main;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+    gap: 0.9rem;
+  }
+  .stat {
+    display: grid;
+    gap: 0.4rem;
+    padding: 1.1rem;
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+  }
+  .stat span {
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #7b8a9e;
+  }
+  .stat strong {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  .stat--wide {
+    grid-column: span 2;
+    background: linear-gradient(135deg, #ffffff, #e8f7f4);
+  }
+  .stat--wide strong {
+    font-size: 1.1rem;
+  }
+  @media (max-width: 34rem) {
+    .dash {
+      grid-template-areas:
+        "head"
+        "main"
+        "side";
+      grid-template-columns: 1fr;
+    }
+    .stat--wide {
+      grid-column: span 1;
+    }
+  }
+</style>
+```

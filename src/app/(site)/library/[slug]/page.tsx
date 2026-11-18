@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { books, getBook } from "@/data/books";
 import { LevelBadge } from "@/components/level-badge";
+import { resolveBookCover } from "@/lib/book-cover";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -71,6 +72,7 @@ export default async function BookPage({ params }: PageProps) {
   }
 
   const metaLine = [book.author, book.year].filter(Boolean).join(" · ");
+  const cover = resolveBookCover(book);
 
   return (
     <main id="main-content" className="mx-auto max-w-4xl px-4 py-12">
@@ -108,11 +110,11 @@ export default async function BookPage({ params }: PageProps) {
           {book.level && <LevelBadge level={book.level} />}
         </div>
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-          {book.cover && (
-            // Cover thumbnails come from Google Drive, which is not in next.config remotePatterns.
+          {cover && (
+            // Cover thumbnails come from Google, which is not in next.config remotePatterns.
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={book.cover}
+              src={cover}
               alt={`Cover of ${book.title}`}
               width={200}
               height={150}
