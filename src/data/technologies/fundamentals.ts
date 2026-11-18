@@ -14,6 +14,7 @@ export const fundamentals: Technology[] = [
       "Every frontend decision — caching, bundle size, where code runs, why a layout shifts — traces back to this request/response cycle and the rendering pipeline. Knowing it turns performance and debugging from guesswork into reasoning.",
     how:
       "The browser resolves the domain to an IP address with DNS, opens a TCP (or QUIC) connection secured with TLS, and sends an HTTP request. The server responds with a status code, headers, and a body. The browser parses HTML into the DOM, CSS into the CSSOM, combines them into a render tree, computes layout, paints, and composites layers onto the screen. JavaScript can pause parsing and can change the DOM later, which may trigger layout and paint again.",
+    prerequisites: [],
     roadmap: [
       "Clients, servers, URLs, and HTTP methods",
       "DNS and HTTPS at a high level",
@@ -52,6 +53,13 @@ Cache-Control: max-age=3600
         ],
       },
     ],
+    advanced: [
+      "HTTP/2 and HTTP/3 multiplex many requests over one connection; HTTP/3 runs on QUIC over UDP so one lost packet no longer stalls every response.",
+      "The preload scanner parses ahead of the main parser, so assets referenced in early HTML are discovered sooner than assets injected by scripts.",
+      "Cross-origin fetches are gated by the same-origin policy and CORS: the browser sends an Origin header and, for non-simple requests, a preflight OPTIONS before the real call.",
+      "Speculative loading (preconnect, dns-prefetch, prefetch) and the back/forward cache trade bandwidth for latency; a page restored from bfcache runs no network code at all.",
+      "A service worker is a scriptable proxy between the page and the network, which is what makes offline support and custom caching strategies possible.",
+    ],
     bestPractices: [
       "Serve everything over HTTPS.",
       "Give static assets long cache lifetimes and fingerprinted file names.",
@@ -65,6 +73,12 @@ Cache-Control: max-age=3600
     performance: [
       "Fewer round trips matter more than fewer bytes on high-latency connections.",
       "Changing layout properties (width, top) is costlier than changing transform or opacity, which can skip layout and paint.",
+    ],
+    useCases: [
+      "Diagnosing a slow first paint by reading the DevTools Network waterfall for render-blocking requests.",
+      "Designing a cache-header and CDN strategy for a site with users on several continents.",
+      "Explaining to stakeholders why a client-rendered dashboard feels slower than a statically served page.",
+      "Tracking down a CORS failure that only appears in the browser and never in curl.",
     ],
     interview: [
       {
@@ -163,6 +177,13 @@ Cache-Control: max-age=3600
         ],
       },
     ],
+    advanced: [
+      "The HTML parser is error-tolerant: it inserts implied elements (html, body, tbody), closes tags it thinks are unclosed, and builds a DOM that can differ from the source you wrote.",
+      "Scripts without async or defer block the parser because they may call document.write; the preload scanner can still fetch later assets while the main parser waits.",
+      "Shadow DOM and custom elements add encapsulation and lifecycle hooks without changing the meaning of the outer document.",
+      "The accessibility tree is derived from HTML: role, name, state, and value come from native semantics, and ARIA only overrides what HTML cannot express.",
+      "<dialog>, <template>, and <slot> move behaviour that used to need libraries — focus trapping, inert backgrounds, the top layer — into the platform.",
+    ],
     bestPractices: [
       "Use the element that matches the meaning: <button> for actions, <a> for navigation.",
       "One <h1> per page and no skipped heading levels.",
@@ -174,6 +195,12 @@ Cache-Control: max-age=3600
       "Choosing headings for their size instead of their level.",
       "Placeholder text used as the only label.",
       "Tables for page layout.",
+    ],
+    performance: [
+      "Keep render-critical markup early in the document; the preload scanner only discovers assets as HTML streams in, so late CSS and JS delay first paint.",
+      "Add loading=\"lazy\" and decoding=\"async\" to below-the-fold images, but keep the LCP image eager with fetchpriority=\"high\".",
+      "Avoid embedding large SVGs or base64 data URIs in the initial HTML — they inflate the document and block parsing of everything after them.",
+      "Changing attributes and text is cheap; replacing a large HTML subtree forces style recalculation, layout, and paint.",
     ],
     useCases: ["Every website and web app", "Email templates", "Documentation and content sites"],
     interview: [
@@ -262,6 +289,13 @@ Cache-Control: max-age=3600
         ],
       },
     ],
+    advanced: [
+      "display:none, visibility:hidden, and aria-hidden=\"true\" all remove a node from the accessibility tree; opacity:0 does not — its content is still announced and still focusable.",
+      "Single-page apps must manage focus on route change: move focus to the new <h1> or <main> and announce the navigation in a polite live region, or screen reader users never learn the page changed.",
+      "aria-live=\"polite\" queues announcements while \"assertive\" interrupts; mounting an always-present live region and updating its text is more reliable than creating one on demand.",
+      "The inert attribute and native <dialog> give real modal semantics — background content is unfocusable and hidden from assistive tech without a hand-written focus trap.",
+      "forced-colors and prefers-contrast modes override author colours, so components that rely on background images or custom focus rings need explicit testing in Windows High Contrast.",
+    ],
     bestPractices: [
       "Use native elements first; reach for ARIA only when HTML cannot express it.",
       "Never remove focus outlines without providing a better visible focus style.",
@@ -273,6 +307,18 @@ Cache-Control: max-age=3600
       "aria-label that contradicts the visible text.",
       "Icon-only buttons with no accessible name.",
       "Relying on automated checkers alone — they catch around a third of issues.",
+    ],
+    performance: [
+      "Prefer native HTML and CSS for behaviour (details/summary, dialog, :focus-visible) over JavaScript focus traps and custom widgets — less code on the main thread.",
+      "Keep live regions small and mounted only while needed; a large region that re-renders can re-announce the same text repeatedly.",
+      "Run axe as a unit or component test, not on every production render — auditing tools add measurable CPU cost.",
+      "Give reduced-motion users a CSS-only fallback instead of shipping a second animation library.",
+    ],
+    useCases: [
+      "Public-sector and regulated products that must meet WCAG 2.2 AA.",
+      "Design systems where every component ships with correct roles, names, and keyboard behaviour.",
+      "Checkout and onboarding flows that must be completable by keyboard and screen reader alone.",
+      "Enterprise dashboards and data tables read by assistive technology.",
     ],
     interview: [
       {
@@ -381,6 +427,13 @@ Cache-Control: max-age=3600
         ],
       },
     ],
+    advanced: [
+      "@layer orders whole stylesheets (base, components, utilities) before specificity is considered, so utilities can win without !important.",
+      "@property registers a typed custom property with a syntax, initial value, and inheritance rule, which makes it animatable and prevents invalid values from silently falling back.",
+      "Containment (contain: layout paint, content-visibility: auto) lets the browser skip layout and paint for off-screen subtrees.",
+      "subgrid lets a nested grid adopt its parent's tracks, so cards in different columns align to the same row lines.",
+      "Logical properties (margin-inline, padding-block, inset-inline-start) make a layout follow writing-mode and RTL direction with no extra overrides.",
+    ],
     bestPractices: [
       "Set box-sizing: border-box globally.",
       "Prefer rem for type and spacing so user font settings are respected.",
@@ -398,6 +451,12 @@ Cache-Control: max-age=3600
       "Animate only transform and opacity for smooth 60 fps motion.",
       "Avoid huge, deeply nested selectors in very large DOMs.",
       "Inline critical CSS for the first viewport on content sites.",
+    ],
+    useCases: [
+      "Design systems built on custom-property tokens and themes.",
+      "Marketing sites that need fast first paint without a component library.",
+      "Dashboards with dense Grid layouts and resizable panels.",
+      "Print stylesheets and downloadable documents rendered from HTML.",
     ],
     interview: [
       {
@@ -441,6 +500,13 @@ Cache-Control: max-age=3600
     how:
       "Fluid units (%, fr, rem, clamp()) let boxes scale; intrinsic layout (auto-fit grids, flex-wrap) reflows content; media queries change rules at viewport breakpoints; container queries change components based on the space their parent gives them; srcset and sizes let the browser pick the right image.",
     prerequisites: ["css"],
+    roadmap: [
+      "Mobile-first layout with fluid units and min-width queries",
+      "Intrinsic components: flex-wrap, auto-fit grids, clamp() type",
+      "Container queries so components adapt to their slot, not the viewport",
+      "Responsive images with srcset, sizes, and picture",
+      "Test at 320px, at 200% zoom, and with reduced motion",
+    ],
     concepts: [
       "Mobile-first min-width queries",
       "Fluid type with clamp()",
@@ -474,6 +540,13 @@ h2 { font-size: clamp(1.25rem, 1rem + 2vw, 2rem); }`,
         ],
       },
     ],
+    advanced: [
+      "Container query length units (cqw, cqi, cqmin) size type and spacing to the container, so a card typography scale works in both a sidebar and a full-width hero.",
+      "The dynamic viewport units dvh, svh, and lvh describe the viewport as mobile browser chrome shows and hides; 100vh keeps the largest size and causes clipped layouts.",
+      "For srcset, the browser picks a candidate from sizes, device pixel ratio, and Save-Data — art direction (different crops) needs <picture> with media attributes instead.",
+      "Fluid type from clamp() plus a modular scale removes most breakpoint-specific font sizes and keeps the ratio intact between them.",
+      ":has() and style queries let a component change layout based on its content or an ancestor state, replacing resize-observer JavaScript.",
+    ],
     bestPractices: [
       "Let content decide breakpoints, not device names.",
       "Test at 320px wide and at 200% zoom.",
@@ -484,11 +557,30 @@ h2 { font-size: clamp(1.25rem, 1rem + 2vw, 2rem); }`,
       "Hiding important content on mobile instead of reorganising it.",
       "Shipping desktop-sized images to phones.",
     ],
+    performance: [
+      "srcset and sizes cut image bytes on small screens; preload the LCP image instead of lazy-loading it.",
+      "Prefer CSS media and container queries to window.resize listeners, which fire on every frame and force layout reads.",
+      "Render one responsive layout and reflow it with CSS rather than shipping separate hidden desktop and mobile trees.",
+      "content-visibility: auto on far-below-the-fold sections skips their rendering work until they approach the viewport.",
+    ],
+    useCases: [
+      "Marketing sites that must look right from a 320px phone to an ultrawide monitor.",
+      "Dashboards with user-resizable panels of unknown width.",
+      "Embeddable widgets dropped into host pages with unpredictable containers.",
+      "Email-adjacent and print layouts that must survive narrow clients.",
+    ],
     interview: [
       {
         q: "Media queries vs container queries?",
         a: "Media queries respond to the viewport; container queries respond to the size of an ancestor container, which makes components reusable in any layout slot.",
       },
+    ],
+    exercises: [
+      "Rebuild a three-column desktop layout as a mobile-first single column, then add exactly one min-width query where the content actually becomes cramped.",
+      "Convert a card's viewport media query into a container query, then place the same card in a narrow sidebar and a wide main column.",
+      "Add srcset and sizes to a hero image and verify in DevTools that a simulated phone downloads the smaller candidate.",
+      "Test your page at 320px wide and at 200% zoom; remove every horizontal scrollbar.",
+      "Replace one window.resize JavaScript handler with a CSS container query and delete the listener.",
     ],
     docs: [
       { label: "web.dev — Learn Responsive Design", href: "https://web.dev/learn/design" },
@@ -509,6 +601,17 @@ h2 { font-size: clamp(1.25rem, 1rem + 2vw, 2rem); }`,
       "Search engine optimisation on the frontend is making pages crawlable, understandable, and fast: semantic markup, metadata, structured data, and server-rendered content.",
     why:
       "If crawlers cannot fetch or understand content, it will not rank. Many SEO problems are rendering problems — content that only appears after client-side JavaScript runs.",
+    how:
+      "A crawler fetches a URL, parses the returned HTML, extracts text and links, and queues the <a href> targets it finds. Pages whose content only appears after JavaScript get a second rendering pass, which is slower and may be truncated by a render budget. Ranking then blends relevance (does the page answer the query), authority (links and reputation), and page-experience signals such as Core Web Vitals.",
+    prerequisites: ["html", "how-the-web-works"],
+    roadmap: [
+      "Crawlability: robots.txt, XML sitemaps, and real <a href> links",
+      "On-page basics: unique title, meta description, one h1, descriptive headings",
+      "Semantic HTML plus JSON-LD structured data that matches visible content",
+      "Rendering strategy: SSR or static HTML for primary content",
+      "Core Web Vitals, image and font optimisation",
+      "Measurement with Search Console and analytics",
+    ],
     concepts: [
       "Title and meta description",
       "Canonical URLs and sitemaps",
@@ -516,6 +619,88 @@ h2 { font-size: clamp(1.25rem, 1rem + 2vw, 2rem); }`,
       "Structured data (JSON-LD)",
       "Core Web Vitals as ranking signals",
       "Server rendering vs client rendering",
+    ],
+    examples: [
+      {
+        title: "An SEO-ready document head with structured data",
+        language: "html",
+        code: `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Espresso Basics — A Practical Guide | Brew School</title>
+  <meta
+    name="description"
+    content="Learn espresso dose, grind, and timing in ten minutes, with a troubleshooting table for sour and bitter shots."
+  />
+  <link rel="canonical" href="https://example.com/guides/espresso-basics" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="Espresso Basics — A Practical Guide" />
+  <meta property="og:description" content="Dose, grind, and timing explained with a troubleshooting table." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "Espresso Basics — A Practical Guide",
+      "author": { "@type": "Person", "name": "Sam Rivera" },
+      "datePublished": "2026-01-14"
+    }
+  </script>
+</head>
+<body>
+  <main>
+    <h1>Espresso basics</h1>
+    <p>Espresso pushes hot water through finely ground coffee at roughly nine bar.</p>
+    <h2>Dial in the grind</h2>
+    <p>Start at 18 g in, 36 g out, in 25 to 30 seconds.</p>
+  </main>
+</body>
+</html>`,
+        explanation: [
+          "The title names the topic and the brand, and stays unique to this page.",
+          "The meta description is a readable summary, not a keyword list.",
+          "rel=canonical tells crawlers which URL is the original when variants exist.",
+          "Open Graph and Twitter tags control the card shown when the link is shared.",
+          "The Article JSON-LD repeats facts that are already visible on the page.",
+          "The main content is plain HTML in the first response, so it is indexable without executing JavaScript.",
+        ],
+      },
+      {
+        title: "Per-page metadata with the Next.js Metadata API",
+        language: "ts",
+        code: `import type { Metadata } from "next";
+
+export async function generateMetadata({ params }): Promise<Metadata> {
+  const post = await getPost(params.slug);
+
+  return {
+    title: \`\${post.title} | Brew School\`,
+    description: post.excerpt,
+    alternates: { canonical: \`/guides/\${post.slug}\` },
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      type: "article",
+      publishedTime: post.publishedAt,
+    },
+  };
+}`,
+        explanation: [
+          "generateMetadata runs on the server and returns tags rendered into the initial HTML.",
+          "title and description are derived from the record, so every page is unique.",
+          "alternates.canonical emits a single canonical URL for the page.",
+          "Server-rendered metadata reaches crawlers and social scrapers without executing client JavaScript.",
+        ],
+      },
+    ],
+    advanced: [
+      "Googlebot renders JavaScript on a queue with a limited budget; a hydration error or a client-only route can leave a page indexed with an empty body.",
+      "Canonical, hreflang, and sitemap signals must agree. When they conflict, search engines pick the strongest cluster and may ignore the others entirely.",
+      "Structured data only earns rich results when it matches visible content; mismatched or invalid JSON-LD can trigger manual actions rather than a feature.",
+      "INP replaced FID as a Core Web Vital, so interaction latency now depends on long tasks, main-thread yielding, and third-party script cost.",
+      "Crawl stats and log files reveal budget wasted on faceted URLs, redirect chains, and soft 404s that no dashboard reports.",
     ],
     bestPractices: [
       "Unique, descriptive <title> per page.",
@@ -525,12 +710,36 @@ h2 { font-size: clamp(1.25rem, 1rem + 2vw, 2rem); }`,
     mistakes: [
       "Navigation implemented with onClick handlers instead of links.",
       "Duplicate pages without canonical tags.",
+      "Publishing one thin page per keyword variant instead of consolidating into a single strong page.",
+    ],
+    performance: [
+      "Server-render or statically generate primary content so it arrives in the first HTML response.",
+      "Keep the LCP element — usually the hero image or h1 — discoverable in the initial HTML, preloaded and not lazy-loaded.",
+      "Cut third-party scripts; they are the most common cause of poor INP and total blocking time.",
+      "Self-host fonts with font-display: swap and preload only the face used above the fold.",
+    ],
+    useCases: [
+      "Content sites and blogs that depend on organic search traffic.",
+      "E-commerce product and category pages with Product and Breadcrumb structured data.",
+      "SaaS marketing sites competing for high-intent comparison keywords.",
+      "Documentation sites where developers search for exact error messages.",
     ],
     interview: [
       {
         q: "How does client-side rendering affect SEO?",
         a: "Crawlers must execute JavaScript to see content, which is slower and less reliable. Server rendering or static generation delivers content in the initial HTML.",
       },
+      {
+        q: "How do you handle duplicate or parameterised URLs?",
+        a: "Choose one canonical URL, 301 old paths to it, add rel=canonical to surviving variants, and keep them out of the sitemap. Conflicting signals are ignored, so canonical tags, internal links, and the sitemap must agree.",
+      },
+    ],
+    exercises: [
+      "Write a unique title and meta description for three pages of your site, then check their lengths in a SERP preview tool.",
+      "Add Article or Product JSON-LD to a page and validate it with the Rich Results Test.",
+      "Disable JavaScript, reload your site, and confirm the primary content is still in the HTML.",
+      "Run Lighthouse and fix the LCP image discovery warning it reports.",
+      "Generate an XML sitemap for your routes and verify every URL returns 200 without a redirect.",
     ],
     docs: [
       { label: "Google Search Central — SEO starter guide", href: "https://developers.google.com/search/docs/fundamentals/seo-starter-guide" },

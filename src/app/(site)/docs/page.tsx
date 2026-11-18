@@ -77,10 +77,10 @@ export default function DocsIndexPage() {
         </p>
         <h1 className="section-title">Guide Library</h1>
         <p className="mt-3 text-lg" style={{ color: "var(--text-muted)" }}>
-          {learningDocs.length + referenceDocs.length} in-depth guides plus two
-          complete references: {htmlDocs.length} HTML5 chapters and{" "}
-          {cssDocs.length} CSS chapters, with live previews for every
-          example.
+          {learningDocs.length + referenceDocs.length} in-depth guides plus
+          three complete references: {htmlDocs.length} HTML,{" "}
+          {cssDocs.length} CSS, and {jsDocs.length} JavaScript chapters, with
+          live previews for every example.
         </p>
       </header>
 
