@@ -103,6 +103,23 @@ Exercises · Projects · Lessons · Official documentation.
 - Type: Space Grotesk (headings), Geist (body), Geist Mono (code/eyebrows). Measure capped at 70ch.
 - Principles: one accent colour, hairline borders, flat rows instead of cards, motion limited to
   hover/focus and honouring `prefers-reduced-motion`.
+- React Bits layer (home page only, added 2026-11): `FaultyTerminal` CRT backdrop behind the hero,
+  `DecryptedText` headline decode on load, `CountUp` hero stats, `StarBorder` on the single primary
+  CTA, `SpotlightCard` on the ten-domain grid. Components live in `src/components/react-bits/`
+  (installed with `npx shadcn@latest add @react-bits/<Name>-TS-TW`); page wrappers live in
+  `src/components/home/`. All are client-only, decorative canvases are `aria-hidden`, they pause off
+  screen and freeze under `prefers-reduced-motion`. Each upstream file carries one
+  `react-hooks/refs` lint exception on its `settingsRef.current = settings` line; re-apply it if a
+  component is regenerated. Keep the rest of the site content-first.
+- `VariableProximity` page titles on `/ai` and `/learn` only (`proximity` prop on `PageHeader` →
+  `src/components/proximity-title.tsx`). Local patch in `react-bits/VariableProximity.tsx`: the upstream
+  Google Fonts `@import` is removed and Roboto Flex is self-hosted via `next/font` (`--font-roboto-flex`,
+  `opsz` axis, `src/app/layout.tsx`). Re-apply if the component is regenerated. Use on one or two
+  showcase pages; plain `<h1>` everywhere else.
+- Site chrome (every `(site)` page): `GradualBlur` under the sticky header (hidden at the top of the
+  page, `src/components/header-blur.tsx`), a gradient glow line on the header edge, and a closing
+  footer band (`src/components/footer-wordmark.tsx`) with a `LetterGlitch` code-glyph field behind a
+  `DecryptedText` "FrontEndFusion" wordmark. Both are `aria-hidden` and hidden in print.
 - Accessibility: skip link, landmarks, visible focus, `aria-expanded` disclosure menus, combobox/listbox
   palette with `aria-activedescendant`, labelled controls, `role="log"` for console and chat output.
 

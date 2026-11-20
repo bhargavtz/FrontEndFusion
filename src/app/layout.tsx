@@ -3,6 +3,7 @@ import {
   Geist,
   Geist_Mono,
   Instrument_Serif,
+  Roboto_Flex,
   Space_Grotesk,
 } from "next/font/google";
 import "./globals.css";
@@ -29,6 +30,14 @@ const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
   weight: "400",
   style: ["normal", "italic"],
+  display: "swap",
+});
+
+// Variable font with a weight and an optical-size axis, used by the VariableProximity effect.
+const robotoFlex = Roboto_Flex({
+  variable: "--font-roboto-flex",
+  subsets: ["latin"],
+  axes: ["opsz"],
   display: "swap",
 });
 
@@ -70,7 +79,7 @@ export default function RootLayout({
       data-theme="dark"
       data-scroll-behavior="smooth"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} ${instrumentSerif.variable}`}
+      className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} ${instrumentSerif.variable} ${robotoFlex.variable}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />

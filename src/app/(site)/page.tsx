@@ -3,6 +3,11 @@ import { HeroSearch } from "@/components/search-palette";
 import { Playground } from "@/components/playground/playground";
 import { OpenAssistantButton } from "@/components/assistant/open-assistant-button";
 import { LevelPill } from "@/components/level-pill";
+import { HeroBackdrop } from "@/components/home/hero-backdrop";
+import { HeroTitle } from "@/components/home/hero-title";
+import { HeroStats } from "@/components/home/hero-stats";
+import { StartLearningButton } from "@/components/home/start-learning-button";
+import { DomainGrid } from "@/components/home/domain-grid";
 import { domains } from "@/data/curriculum";
 import { docs } from "@/data/docs";
 import { projectBriefs } from "@/data/project-briefs";
@@ -63,12 +68,11 @@ export default function HomePage() {
   return (
     <main id="main-content">
       {/* ── Hero ───────────────────────────────────────────── */}
-      <section className="hero" aria-labelledby="hero-title">
+      <section className="hero hero--terminal" aria-labelledby="hero-title">
+        <HeroBackdrop />
         <div className="wrap hero__inner">
           <p className="eyebrow">Free · Open source · No account needed</p>
-          <h1 id="hero-title">
-            Learn frontend. <span className="hero__em">Understand the code.</span> Preview the result. Build real projects.
-          </h1>
+          <HeroTitle />
           <p className="hero__lead">
             One place for everything frontend — HTML, CSS, JavaScript, TypeScript, React, Next.js, UI libraries, tooling, architecture, and AI-powered development. Every concept comes with code you can run and change.
           </p>
@@ -76,32 +80,20 @@ export default function HomePage() {
           <HeroSearch />
 
           <div className="hero__cta">
-            <Link href="/roadmaps/frontend" className="btn btn--primary">
-              Start learning
-            </Link>
+            <StartLearningButton href="/roadmaps/frontend" label="Start learning" />
             <Link href="/learn" className="btn btn--ghost">
               Browse the curriculum
             </Link>
           </div>
 
-          <dl className="stats">
-            <div>
-              <dt>Technologies</dt>
-              <dd>{technologies.length}</dd>
-            </div>
-            <div>
-              <dt>In-depth lessons</dt>
-              <dd>{docs.length}</dd>
-            </div>
-            <div>
-              <dt>Runnable examples</dt>
-              <dd>{exampleCount}</dd>
-            </div>
-            <div>
-              <dt>Project briefs</dt>
-              <dd>{projectBriefs.length}</dd>
-            </div>
-          </dl>
+          <HeroStats
+            stats={[
+              { label: "Technologies", value: technologies.length },
+              { label: "In-depth lessons", value: docs.length },
+              { label: "Runnable examples", value: exampleCount },
+              { label: "Project briefs", value: projectBriefs.length },
+            ]}
+          />
         </div>
       </section>
 
@@ -144,21 +136,9 @@ export default function HomePage() {
           <h2 id="curriculum-h">Ten domains, one consistent structure</h2>
           <p>Every technology page answers the same questions: what it is, why it exists, how it works — then shows runnable code, common mistakes, and interview questions.</p>
         </div>
-        <ol className="domains">
-          {domains.map((d) => (
-            <li key={d.id}>
-              <Link href={d.href}>
-                <span className="domains__letter" aria-hidden="true">
-                  {d.letter}
-                </span>
-                <span>
-                  <span className="domains__title">{d.title}</span>
-                  <span className="domains__desc">{d.tagline}</span>
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ol>
+        <DomainGrid
+          domains={domains.map(({ id, letter, title, tagline, href }) => ({ id, letter, title, tagline, href }))}
+        />
       </section>
 
       {/* ── Popular technologies ───────────────────────────── */}

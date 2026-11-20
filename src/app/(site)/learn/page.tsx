@@ -20,6 +20,7 @@ export default function LearnPage() {
     <main id="main-content" className="wrap page">
       <PageHeader
         eyebrow="Curriculum"
+        proximity
         title="Learn frontend, in order"
         description="Ten domains, from how the web works to AI-powered engineering. Each technology page follows the same shape: what it is, why it exists, how it works, runnable examples, mistakes, interview questions, and exercises."
       />

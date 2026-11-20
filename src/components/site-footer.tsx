@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { domains } from "@/data/curriculum";
+import { FooterWordmark } from "./footer-wordmark";
 
 const columns = [
   {
@@ -80,6 +81,7 @@ export function SiteFooter() {
         </p>
         <p className="site-footer__legal">© 2024–2026 FrontEndFusion · MIT License · Open source.</p>
       </div>
+      <FooterWordmark />
     </footer>
   );
 }

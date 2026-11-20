@@ -22,6 +22,7 @@ export default function AIPage() {
     <main id="main-content" className="wrap page">
       <PageHeader
         eyebrow="AI development"
+        proximity
         title="Use AI without losing the fundamentals"
         description="AI tools make strong developers faster, and make weak understanding expensive. This track covers professional workflows — and the review habits that keep you in control of the code."
       />

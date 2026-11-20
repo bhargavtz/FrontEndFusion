@@ -1,5 +1,6 @@
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { HeaderBlur } from "@/components/header-blur";
 import { AssistantPanel } from "@/components/assistant/assistant-panel";
 
 export default function SiteLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -9,6 +10,7 @@ export default function SiteLayout({ children }: Readonly<{ children: React.Reac
         Skip to content
       </a>
       <SiteHeader />
+      <HeaderBlur />
       <div className="flex-1">{children}</div>
       <SiteFooter />
       <AssistantPanel />
